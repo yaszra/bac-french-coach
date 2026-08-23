@@ -70,7 +70,10 @@ describe("recommendation", () => {
   });
 
   it("proposes one step up — flagged as extrapolation — after a near-perfect run", () => {
-    const result = recommendChunkSize(attempts(3, [true, true, true, true, true, true]), NOW);
+    const result = recommendChunkSize(
+      attempts(3, [true, true, true, true, true, true, true, true]),
+      NOW,
+    );
     expect(result.status).toBe("recommended");
     if (result.status !== "recommended") return;
     expect(result.chunkSize).toBe(4);

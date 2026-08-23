@@ -143,3 +143,73 @@
 .nav[data-collapsed="true"] .link {
   justify-content: center;
 }
+
+/* ── Responsive: one navigation element, bar on the phone, rail from 700px ─
+   The learner and the family get a single <nav> landmark, never two. */
+.nav[data-variant="responsive"] {
+  border-block-start: 1px solid var(--border);
+  padding-block-end: env(safe-area-inset-bottom);
+}
+.nav[data-variant="responsive"] .list {
+  justify-content: space-around;
+  padding: var(--space-1) var(--space-2);
+}
+.nav[data-variant="responsive"] .item {
+  flex: 1 1 0;
+}
+.nav[data-variant="responsive"] .link {
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: var(--tap-comfortable);
+}
+
+@media (min-width: 700px) {
+  .nav[data-variant="responsive"] {
+    block-size: 100%;
+    overflow-y: auto;
+    border-block-start: 0;
+    border-inline-end: 1px solid var(--border);
+    padding-block-end: 0;
+  }
+  .nav[data-variant="responsive"] .list {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-3);
+  }
+  .nav[data-variant="responsive"] .item {
+    flex: none;
+  }
+  .nav[data-variant="responsive"] .link {
+    flex: none;
+    inline-size: 76px;
+  }
+}
+
+/* The teacher's sidebar has to survive a phone: below 700px it lies down as a
+   bar. Desktop-first does not mean desktop-only. */
+@media (max-width: 699px) {
+  .nav[data-variant="sidebar"] {
+    block-size: auto;
+    border-inline-end: 0;
+    border-block-start: 1px solid var(--border);
+    padding-block-end: env(safe-area-inset-bottom);
+  }
+  .nav[data-variant="sidebar"] .list {
+    flex-direction: row;
+    justify-content: space-around;
+    padding: var(--space-1) var(--space-2);
+  }
+  .nav[data-variant="sidebar"] .item {
+    flex: 1 1 0;
+  }
+  .nav[data-variant="sidebar"] .link {
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-1);
+    padding-inline: var(--space-1);
+    font-size: var(--text-2xs);
+    text-align: center;
+  }
+}

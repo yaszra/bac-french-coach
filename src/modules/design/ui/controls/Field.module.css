@@ -6,10 +6,13 @@
   font-family: var(--font-ui);
 }
 
-.label {
+.labelRow {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+}
+
+.label {
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--text);

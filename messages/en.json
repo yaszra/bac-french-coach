@@ -20,18 +20,8 @@
     "settings": "Settings"
   },
   "action": {
-    "continue": "Continue",
-    "start": "Start",
-    "listen": "Listen",
-    "sayIt": "Say it",
-    "build": "Build",
-    "next": "Next",
-    "back": "Back",
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "retry": "Try again",
-    "askGrownUp": "Ask a grown-up"
+    "practiseJoin": "Hear the āyah before it, then ask for the next one",
+    "listenTogether": "Listen to it together once, then let them try"
   },
   "state": {
     "loading": "Loading",
@@ -88,5 +78,9 @@
     "needsPrompt": "Connect the chain without a prompt",
     "wordLevel": "Fill the missing words",
     "articulation": "Listen and imitate"
+  },
+  "struggle": {
+    "weakJoin": "The join to the next āyah is not holding",
+    "repeatedLapse": "This āyah slipped more than once"
   }
 }

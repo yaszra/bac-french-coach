@@ -63,14 +63,18 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
 
   return (
     <div ref={ref} className={cx(styles.root, className)} {...rest}>
-      <label className={cx(styles.label, hideLabel && shared.visuallyHidden)} htmlFor={id}>
-        {label}
+      {/* The required mark sits beside the <label>, never inside it, so the
+          label's text is exactly the label. */}
+      <span className={cx(styles.labelRow, hideLabel && shared.visuallyHidden)}>
+        <label className={styles.label} htmlFor={id}>
+          {label}
+        </label>
         {required === true ? (
           <span className={styles.required} aria-hidden="true">
             *
           </span>
         ) : null}
-      </label>
+      </span>
       {description === undefined ? null : (
         <p className={styles.description} id={descriptionId}>
           {description}
