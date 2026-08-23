@@ -323,7 +323,16 @@ export function nextConfidence(
     MIN_CONFIDENCE_HALF_LIFE_DAYS,
   );
   const decayed = clamp01(previousConfidence) * Math.pow(0.5, Math.max(elapsed, 0) / halfLife);
-  return clamp01(decayed + (1 - decayed) * clamp01(evidenceWeight));
+  const accumulated = decayed + (1 - decayed) * clamp01(evidenceWeight);
+
+  // Confidence is capped by the STRENGTH of the evidence, not just accumulated
+  // from its quantity. Without this cap, thirty listens converge on the same
+  // confidence as one clean recitation — and listening is not evidence of
+  // recall at all, however often it is repeated. Weak evidence may hold
+  // confidence where it is, and may raise it up to its own strength, but it can
+  // never carry it past that. Only stronger evidence moves the ceiling.
+  const ceiling = Math.max(decayed, clamp01(evidenceWeight));
+  return clamp01(Math.min(accumulated, ceiling));
 }
 
 /**

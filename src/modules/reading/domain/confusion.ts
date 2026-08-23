@@ -373,8 +373,20 @@ export function confusionScore(a: ConceptId, b: ConceptId): ConfusionResult {
     b,
     score: clamp01(score),
     components: { shape, makhraj, misconception, vowel: 0 },
-    reasons,
+    reasons: dedupeReasons(reasons),
   };
+}
+
+/** One reason per key: a curated pair and a component may name the same thing. */
+function dedupeReasons(reasons: readonly Reason[]): readonly Reason[] {
+  const seen = new Set<string>();
+  const out: Reason[] = [];
+  for (const item of reasons) {
+    if (seen.has(item.key)) continue;
+    seen.add(item.key);
+    out.push(item);
+  }
+  return out;
 }
 
 /* --------------------------------------------------------------- distractors */

@@ -103,6 +103,22 @@ export const SMART_SCORE_DEFAULTS = {
 
 const MS_PER_DAY = 86_400_000;
 
+/**
+ * Lowest score a concept with evidence can show. Zero already means "nothing here",
+ * and that meaning is taken.
+ */
+export const MIN_SCORE = 1;
+
+/**
+ * Highest score any concept can ever show.
+ *
+ * A hundred is a claim of certainty, and no finite number of observations earns one —
+ * the same principle that keeps BKT's probabilities strictly inside (0, 1). The score
+ * saturates just below it, and the denominator beside it says what that saturation
+ * rests on.
+ */
+export const MAX_SCORE = 99;
+
 const EMPTY_MIX: Readonly<Record<EvidenceKind, number>> = Object.freeze({
   machine_checked: 0,
   teacher_observed: 0,
@@ -216,10 +232,15 @@ export function smartScore(
     (total, observation) => total + EVIDENCE_WEIGHTS[observation.evidenceKind],
     0,
   );
+  // Variety and spread *accelerate* confidence rather than capping it: a hundred
+  // recognition taps do eventually add up, and two kinds of evidence get there
+  // sooner. Nothing here can reach certainty, which is the point.
   const confidence = clamp01(
-    (1 - Math.exp(-weightedAttempts / BKT_CONFIDENCE_OBSERVATIONS)) *
-      evidenceVarietyFactor(ordered) *
-      sessionSpreadFactor(sessions),
+    1 -
+      Math.exp(
+        -(weightedAttempts * evidenceVarietyFactor(ordered) * sessionSpreadFactor(sessions)) /
+          BKT_CONFIDENCE_OBSERVATIONS,
+      ),
   );
 
   if (scored.length === 0) {
@@ -278,9 +299,10 @@ export function smartScore(
     options.recencyFloor ?? SMART_SCORE_DEFAULTS.recencyFloor,
   );
 
-  // Floored at 1: with real evidence on the record, a score of 0 would read as
-  // "nothing here", which is a different and already-taken meaning.
-  const score = Math.max(1, Math.round(100 * pKnown * recency));
+  // Floored at 1 and capped at 99: with real evidence on the record, 0 would read as
+  // "nothing here" — a different and already-taken meaning — and 100 would claim a
+  // certainty no run of observations can buy.
+  const score = Math.min(MAX_SCORE, Math.max(MIN_SCORE, Math.round(100 * pKnown * recency)));
 
   const secureScore = options.secureScore ?? SMART_SCORE_DEFAULTS.secureScore;
   const secureConfidence = options.secureConfidence ?? SMART_SCORE_DEFAULTS.secureConfidence;

@@ -20,7 +20,7 @@
  */
 
 import type { UnitId } from "@/modules/memory/domain/types";
-import { evidenceStrength, exerciseRank, type HifzExercise } from "./exercises";
+import { exerciseRank, type HifzExercise } from "./exercises";
 import type { GradeResult } from "./grading";
 
 /* -------------------------------------------------------------------- states */
@@ -279,15 +279,13 @@ export function summariseVerificationEvidence(
     if (event.result.grade === "again") continue;
     passes += 1;
     const strength = event.result.evidenceStrength;
-    if (
+    const better =
+      strongestExercise === null ||
       strength > strongestEvidence ||
+      // Same strength, higher rung: the harder retrieval is the better evidence.
       (strength === strongestEvidence &&
-        strongestExercise !== null &&
-        exerciseRank(event.exercise) > exerciseRank(strongestExercise))
-    ) {
-      strongestEvidence = strength;
-      strongestExercise = event.exercise;
-    } else if (strongestExercise === null) {
+        exerciseRank(event.exercise) > exerciseRank(strongestExercise));
+    if (better) {
       strongestEvidence = strength;
       strongestExercise = event.exercise;
     }
@@ -316,9 +314,4 @@ export function canRequestVerification(
     missing.push("hifz.verification.evidence_strength");
   }
   return missing.length === 0 ? { allowed: true, evidence } : { allowed: false, missing, evidence };
-}
-
-/** The ladder strength a rung would contribute to the verification bar. */
-export function verificationContribution(exercise: HifzExercise): number {
-  return evidenceStrength(exercise);
 }

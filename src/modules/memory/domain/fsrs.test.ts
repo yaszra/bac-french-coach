@@ -338,3 +338,36 @@ describe("applyFuzz", () => {
     expect(high).toBeGreaterThan(50);
   });
 });
+
+describe("confidence is bounded by the strength of the evidence", () => {
+  const listenWeight = DEFAULT_SCHEDULING_POLICY.evidenceWeights.listen;
+  const oralWeight = DEFAULT_SCHEDULING_POLICY.evidenceWeights.oral_recitation;
+
+  it("never lets repeated listening approach the confidence of real recall", () => {
+    let state = emptyState("b:78:1", "ayah_body");
+    for (let day = 0; day < 60; day++) {
+      state = nextState(state, "good", new Date(Date.UTC(2026, 0, 1 + day)), DEFAULT_SCHEDULING_POLICY, "listen");
+    }
+    // Sixty listens are sixty pieces of weak evidence, not one strong one.
+    expect(state.confidence).toBeLessThanOrEqual(listenWeight + 1e-9);
+  });
+
+  it("lets strong evidence raise confidence to its own strength", () => {
+    let state = emptyState("b:78:2", "ayah_body");
+    state = nextState(state, "good", new Date(Date.UTC(2026, 0, 1)), DEFAULT_SCHEDULING_POLICY, "listen");
+    const afterListening = state.confidence;
+    state = nextState(state, "good", new Date(Date.UTC(2026, 0, 2)), DEFAULT_SCHEDULING_POLICY, "oral_recitation");
+
+    expect(state.confidence).toBeGreaterThan(afterListening);
+    expect(state.confidence).toBeLessThanOrEqual(oralWeight + 1e-9);
+  });
+
+  it("does not let weak evidence erode confidence that stronger evidence earned", () => {
+    let state = emptyState("b:78:3", "ayah_body");
+    state = nextState(state, "good", new Date(Date.UTC(2026, 0, 1)), DEFAULT_SCHEDULING_POLICY, "oral_recitation");
+    const earned = state.confidence;
+    state = nextState(state, "good", new Date(Date.UTC(2026, 0, 1)), DEFAULT_SCHEDULING_POLICY, "listen");
+
+    expect(state.confidence).toBeCloseTo(earned, 6);
+  });
+});

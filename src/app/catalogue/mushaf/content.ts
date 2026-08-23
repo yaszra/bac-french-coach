@@ -25,8 +25,23 @@ const WORDS_PER_LINE = 7;
 const DEPTH_CYCLE: readonly InkDepth[] = [5, 5, 4, 5, 3, 5, 4, 5, 2, 5, 5, 1, 4, 5, 0, 5];
 
 export type RepresentativePage = {
+  readonly page: number;
   readonly surah: number;
+  readonly ayahFrom: number;
+  readonly ayahTo: number;
+  readonly juz: number;
   readonly lines: readonly MushafLine[];
+  /** True when the layout package still records its line breaks as unknown. */
+  readonly linesArePacked: boolean;
+};
+
+/** What the layout file says belongs on a page. */
+type PageRange = {
+  readonly surah: number;
+  readonly ayahFrom: number;
+  readonly ayahTo: number;
+  readonly juz: number;
+  readonly linesRecorded: boolean;
 };
 
 type AyahText = { readonly ayah: number; readonly text: string };
@@ -37,10 +52,36 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * Accept the shapes a Qurʾān corpus is plausibly stored in, and refuse
- * everything else rather than guessing.
+ * everything else rather than guessing. An unrecognised file yields nothing,
+ * and nothing is exactly what the page then shows.
  */
 function readSurah(corpus: unknown, surah: number): readonly AyahText[] {
-  /* { "1": { "1": "…" } } or { "1": ["…", "…"] } */
+  /* A flat list: [{ sura | surah | chapter, ayah | verse, text }] */
+  const list = Array.isArray(corpus)
+    ? corpus
+    : isRecord(corpus) && Array.isArray(corpus.verses)
+      ? corpus.verses
+      : isRecord(corpus) && Array.isArray(corpus.ayahs)
+        ? corpus.ayahs
+        : null;
+
+  if (list) {
+    return list
+      .filter(isRecord)
+      .map((entry) => ({
+        surah: Number(entry.sura ?? entry.surah ?? entry.chapter),
+        ayah: Number(entry.ayah ?? entry.verse ?? entry.aya ?? entry.number),
+        text: entry.text ?? entry.arabic,
+      }))
+      .filter(
+        (entry): entry is { surah: number; ayah: number; text: string } =>
+          entry.surah === surah && Number.isFinite(entry.ayah) && typeof entry.text === "string",
+      )
+      .sort((a, b) => a.ayah - b.ayah)
+      .map(({ ayah, text }) => ({ ayah, text }));
+  }
+
+  /* Keyed by sūrah: { "1": { "1": "…" } } or { "1": ["…", "…"] } */
   if (isRecord(corpus)) {
     const direct = corpus[String(surah)];
     if (Array.isArray(direct)) {
@@ -51,35 +92,54 @@ function readSurah(corpus: unknown, surah: number): readonly AyahText[] {
     if (isRecord(direct)) {
       return Object.entries(direct)
         .map(([ayah, text]) => ({ ayah: Number(ayah), text }))
-        .filter((entry): entry is AyahText => typeof entry.text === "string" && Number.isFinite(entry.ayah))
+        .filter(
+          (entry): entry is AyahText =>
+            typeof entry.text === "string" && Number.isFinite(entry.ayah),
+        )
         .sort((a, b) => a.ayah - b.ayah);
     }
   }
 
-  /* [{ surah, ayah, text }] or { verses: [{ chapter, verse, text }] } */
-  const list = Array.isArray(corpus)
-    ? corpus
-    : isRecord(corpus) && Array.isArray(corpus.verses)
-      ? corpus.verses
-      : isRecord(corpus) && Array.isArray(corpus.ayahs)
-        ? corpus.ayahs
-        : null;
+  return [];
+}
 
-  if (!list) return [];
+/**
+ * Ask the layout package what page 1 carries. The layout file holds references
+ * only — never Arabic — and honestly records `lines: "not_yet_recorded"` while
+ * its line breaks are unknown, which is why the words below are packed rather
+ * than justified.
+ */
+async function readLayout(page: number): Promise<PageRange | null> {
+  try {
+    const file = path.join(process.cwd(), "content", "mushaf", "madani-15.json");
+    const layout: unknown = JSON.parse(await readFile(file, "utf8"));
+    if (!isRecord(layout) || !Array.isArray(layout.pages)) return null;
 
-  return list
-    .filter(isRecord)
-    .map((entry) => ({
-      surah: Number(entry.surah ?? entry.chapter ?? entry.sura),
-      ayah: Number(entry.ayah ?? entry.verse ?? entry.aya ?? entry.number),
-      text: entry.text ?? entry.arabic,
-    }))
-    .filter(
-      (entry): entry is { surah: number; ayah: number; text: string } =>
-        entry.surah === surah && Number.isFinite(entry.ayah) && typeof entry.text === "string",
-    )
-    .sort((a, b) => a.ayah - b.ayah)
-    .map(({ ayah, text }) => ({ ayah, text }));
+    const entry = layout.pages.filter(isRecord).find((candidate) => candidate.page === page);
+    if (!entry || !Array.isArray(entry.ranges)) return null;
+    const range = entry.ranges.filter(isRecord)[0];
+    if (!range) return null;
+
+    const surah = Number(range.sura ?? range.surah);
+    const ayahFrom = Number(range.ayahFrom);
+    const ayahTo = Number(range.ayahTo);
+    if (!Number.isFinite(surah) || !Number.isFinite(ayahFrom) || !Number.isFinite(ayahTo)) {
+      return null;
+    }
+
+    const ayahId = Number(entry.firstAyahId);
+    const juzEntries = Array.isArray(layout.juz) ? layout.juz.filter(isRecord) : [];
+    const juz = juzEntries.reduce((current, candidate) => {
+      const startsAt = Number(candidate.ayahId);
+      const number = Number(candidate.juz);
+      if (!Number.isFinite(startsAt) || !Number.isFinite(number)) return current;
+      return startsAt <= ayahId && number > current ? number : current;
+    }, 1);
+
+    return { surah, ayahFrom, ayahTo, juz, linesRecorded: Array.isArray(entry.lines) };
+  } catch {
+    return null;
+  }
 }
 
 function toLines(ayahs: readonly AyahText[]): readonly MushafLine[] {
@@ -107,15 +167,35 @@ function toLines(ayahs: readonly AyahText[]): readonly MushafLine[] {
 
 let cached: Promise<RepresentativePage | null> | null = null;
 
-export function loadRepresentativePage(surah = 1): Promise<RepresentativePage | null> {
+export function loadRepresentativePage(page = 1): Promise<RepresentativePage | null> {
   cached ??= (async () => {
     try {
       /* Statically scoped so the bundler does not trace the whole project. */
       const file = path.join(process.cwd(), "content", "quran", "quran-uthmani.json");
       const raw = await readFile(file, "utf8");
-      const ayahs = readSurah(JSON.parse(raw), surah);
+
+      const layout = (await readLayout(page)) ?? {
+        surah: 1,
+        ayahFrom: 1,
+        ayahTo: Number.POSITIVE_INFINITY,
+        juz: 1,
+        linesRecorded: false,
+      };
+
+      const ayahs = readSurah(JSON.parse(raw), layout.surah).filter(
+        (entry) => entry.ayah >= layout.ayahFrom && entry.ayah <= layout.ayahTo,
+      );
       if (ayahs.length === 0) return null;
-      return { surah, lines: toLines(ayahs) };
+
+      return {
+        page,
+        surah: layout.surah,
+        ayahFrom: layout.ayahFrom,
+        ayahTo: ayahs[ayahs.length - 1]?.ayah ?? layout.ayahFrom,
+        juz: layout.juz,
+        lines: toLines(ayahs),
+        linesArePacked: !layout.linesRecorded,
+      };
     } catch {
       /* No corpus in this checkout: the page reports that, and invents nothing. */
       return null;

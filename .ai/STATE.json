@@ -4,14 +4,23 @@
   "updatedAt": "2026-08-23",
   "note": "AI-ENGINEERING-OS scripts (~/.ai-engineering-os) were not available in the build environment; .ai/ memory is maintained by hand to the same contract.",
   "currentBranch": "claude/itqan-platform-build-79fqtx",
-  "done": [],
+  "done": [
+    "repo + CI + module skeleton",
+    "platform: RLS tenancy, append-only events, authz, sessions, jobs, storage, flags, offline queue",
+    "identity: session resolution and sign-in",
+    "assessment: correction taxonomy and verdict engine",
+    "analytics: honest denominators and daily report",
+    "content package: corpus, layout, four gates, loader",
+    "memory engine (pure domain)",
+    "design system: tokens and control/display primitives"
+  ],
   "next": [
-    "content package + gates",
-    "marginalia design system",
-    "identity/tenancy + platform services",
-    "memory engine",
-    "learner core",
-    "teacher/family/school/studio",
+    "memory repo + projections",
+    "learner core UI",
+    "reading UI",
+    "teacher console",
+    "family + school",
+    "studio",
     "release hardening"
   ]
 }

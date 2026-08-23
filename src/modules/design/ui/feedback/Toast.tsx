@@ -29,6 +29,10 @@ export const TOAST_DEFAULT_DURATION_MS = 6000;
 /**
  * One notice. It counts down on its own and pauses while a pointer is over it
  * or focus is inside it, so it can never vanish mid-read.
+ *
+ * A toast is for the INTERFACE — saved, offline, syncing. Never for anything
+ * sacred: no āyah, no verdict on a recitation, no claim about memory. Those
+ * belong on the page or in a task, where they persist and can be checked.
  */
 export function Toast({
   id,

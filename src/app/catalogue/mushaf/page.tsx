@@ -30,14 +30,11 @@ export default async function CatalogueMushafPage() {
       <main className={styles.body}>
         <div data-testid="mushaf-sheet">
           <PageFrame
-            page={1}
+            page={page?.page ?? 1}
             /* The sūrah NAME comes from the content package's index when it
                lands; until then the band carries the sūrah's number only. */
             header={page === null ? undefined : <span>{formatMushafNumeral(page.surah)}</span>}
-            markers={[
-              { kind: "juz", number: 1 },
-              { kind: "hizb", number: 1 },
-            ]}
+            markers={page === null ? undefined : [{ kind: "juz", number: page.juz }]}
           >
             {page === null ? <MushafFallback /> : <MushafPage lines={page.lines} />}
           </PageFrame>

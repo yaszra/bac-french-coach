@@ -262,9 +262,18 @@ export function reciteDiff(
   };
 }
 
-/** True when a value is an advisory comparison. There is no non-advisory variant. */
-export function isAdvisory(value: AdvisoryDiffResult): value is AdvisoryDiffResult {
-  return value.advisory === true;
+/**
+ * True when a stored or deserialised value is an advisory comparison.
+ *
+ * There is no non-advisory variant to check against: the guard exists so a payload
+ * read back out of storage can be *proved* advisory before anything looks at it.
+ */
+export function isAdvisory(value: unknown): value is AdvisoryDiffResult {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { readonly advisory?: unknown }).advisory === true
+  );
 }
 
 /**

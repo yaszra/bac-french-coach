@@ -28,16 +28,12 @@ describe("job queue", () => {
   }, 30_000);
 
   it("collapses duplicates through a singleton key", async () => {
-    const first = await enqueue(
-      JOBS.memoryRecompute,
-      { learnerId: "u_jobs_2" },
-      { singletonKey: "u_jobs_2:2026-08-23" },
-    );
-    const second = await enqueue(
-      JOBS.memoryRecompute,
-      { learnerId: "u_jobs_2" },
-      { singletonKey: "u_jobs_2:2026-08-23" },
-    );
+    // A fresh key per run: the queue's whole purpose is that a key already in
+    // flight refuses the second job, so a fixed key would fail on the second
+    // run of the suite rather than on a real defect.
+    const key = `u_jobs_2:${process.pid}:${Math.random().toString(36).slice(2)}`;
+    const first = await enqueue(JOBS.memoryRecompute, { learnerId: "u_jobs_2" }, { singletonKey: key });
+    const second = await enqueue(JOBS.memoryRecompute, { learnerId: "u_jobs_2" }, { singletonKey: key });
     expect(first).toBeTruthy();
     expect(second).toBeNull();
   }, 30_000);
