@@ -1,0 +1,151 @@
+/* The button family: Button, IconButton and LinkButton all wear these clothes. */
+
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  /* Never smaller than the tap floor — 44px adult, 56px kids. */
+  min-block-size: var(--tap-min);
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  appearance: none;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+}
+
+.root:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.sm {
+  padding-inline: var(--space-3);
+  font-size: var(--text-sm);
+}
+.md {
+  padding-inline: var(--space-5);
+  font-size: var(--text-base);
+}
+.lg {
+  min-block-size: var(--tap-comfortable);
+  padding-inline: var(--space-8);
+  font-size: var(--text-md);
+}
+
+.fullWidth {
+  display: flex;
+  inline-size: 100%;
+}
+
+/* ── Primary: lapis fill. The one accent, used once per screen. ─────────── */
+.primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
+}
+.primary:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.primary:active:not(:disabled):not([aria-disabled="true"]) {
+  background-color: color-mix(in oklab, var(--accent-hover) 86%, var(--text));
+  border-color: color-mix(in oklab, var(--accent-hover) 86%, var(--text));
+}
+
+/* ── Secondary: ink outline on paper. ───────────────────────────────────── */
+.secondary {
+  background-color: var(--surface-raised);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.secondary:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--accent-quiet);
+  border-color: var(--accent-border);
+}
+.secondary:active:not(:disabled):not([aria-disabled="true"]) {
+  background-color: color-mix(in oklab, var(--accent-quiet) 84%, var(--text));
+}
+
+/* ── Quiet: text only, with a hover ground. ─────────────────────────────── */
+.quiet {
+  color: var(--text);
+}
+.quiet:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--surface-sunken);
+}
+.quiet:active:not(:disabled):not([aria-disabled="true"]) {
+  background-color: color-mix(in oklab, var(--surface-sunken) 88%, var(--text));
+}
+
+/* ── Danger: clay. A tinted outline, not a shout — and it keeps its contrast
+      in the dark theme, where a clay fill would not. ─────────────────────── */
+.danger {
+  background-color: var(--danger-quiet);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.danger:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: color-mix(in oklab, var(--danger-quiet) 86%, var(--danger));
+}
+.danger:active:not(:disabled):not([aria-disabled="true"]) {
+  background-color: color-mix(in oklab, var(--danger-quiet) 74%, var(--danger));
+}
+
+/* ── Disabled: legible, still in the accessibility tree, never aria-hidden.
+      A loading button is busy, not disabled, so it keeps its own colours. ── */
+.root:disabled,
+.root[aria-disabled="true"]:not([data-loading="true"]) {
+  cursor: not-allowed;
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.quiet:disabled,
+.quiet[aria-disabled="true"]:not([data-loading="true"]) {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+/* ── Loading: the label keeps its place so the button never changes width. ─ */
+.root[data-loading="true"] {
+  cursor: progress;
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.root[data-loading="true"] .content {
+  visibility: hidden;
+}
+
+.busy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,88 @@
+/* Tile — the rebuild-exercise word tile.
+   THE ONE PLACE --ease-tile-spring IS LICENSED. Nothing else in Itqān bounces,
+   and the spring never touches the muṣḥaf page. */
+
+.slot {
+  display: contents;
+}
+
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap-min);
+  min-inline-size: var(--tap-min);
+  padding-inline: var(--space-4);
+  padding-block: var(--space-2);
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: var(--elevation-1);
+  font-family: var(--font-mushaf);
+  font-size: var(--text-lg);
+  line-height: var(--leading-arabic);
+  cursor: grab;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform var(--motion-base) var(--ease-tile-spring),
+    box-shadow var(--motion-base) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+/* Latin placeholders (catalogue only) never borrow the muṣḥaf face. */
+.tile[lang="en"] {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.tile:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Picked up — aria-pressed carries the same fact to assistive technology. */
+.tile[data-picked="true"] {
+  cursor: grabbing;
+  border-color: var(--accent);
+  box-shadow: var(--elevation-3);
+  transform: translateY(-3px) scale(1.04);
+}
+
+.tile[data-state="placed"] {
+  background: var(--accent-quiet);
+  border-color: var(--accent-border);
+  cursor: default;
+}
+
+.tile[data-state="wrong"] {
+  background: var(--danger-quiet);
+  border-color: var(--danger);
+}
+
+.tile:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+  cursor: default;
+}
+
+.srOnly {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: none;
+  }
+}

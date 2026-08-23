@@ -1,0 +1,88 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  inline-size: 100%;
+  padding-block: var(--space-2);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--surface-raised);
+  color: var(--text);
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+.shell:hover:not(.disabled) {
+  border-color: var(--text-muted);
+}
+
+.shell:focus-within {
+  border-color: var(--accent);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.field {
+  inline-size: 100%;
+  min-block-size: calc(var(--tap-min) * 2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  appearance: none;
+  resize: vertical;
+  color: inherit;
+  font: inherit;
+  font-family: var(--font-ui);
+  line-height: var(--leading-normal);
+}
+
+.field:focus,
+.field:focus-visible {
+  outline: none;
+}
+
+.field::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.sm {
+  font-size: var(--text-sm);
+}
+.md {
+  font-size: var(--text-base);
+}
+.lg {
+  font-size: var(--text-md);
+}
+
+/* Decorative: the field's own maxlength is what assistive tech reads. */
+.counter {
+  align-self: flex-end;
+  margin-block-start: var(--space-1);
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.counterOver {
+  color: var(--danger);
+}
+
+.invalid {
+  border-color: var(--danger);
+  background-color: var(--danger-quiet);
+}
+
+.disabled {
+  cursor: not-allowed;
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.disabled .field {
+  cursor: not-allowed;
+}

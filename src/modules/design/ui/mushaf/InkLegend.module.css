@@ -1,0 +1,61 @@
+/* InkLegend — the honest explanation of the ink language.
+   Shown once, in onboarding. NEVER on the page itself: the page explains
+   nothing, it is recited from. */
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* A chip of real paper: the ink can only be judged on the paper it sits on,
+   so the swatch carries the fixed page tokens even in dark chrome. */
+.chip {
+  flex: none;
+  /* The sample reads first; the DOM keeps term-before-description. */
+  order: -1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 72px;
+  block-size: 34px;
+  background: var(--mushaf-paper);
+  border: 1px solid var(--mushaf-rule);
+}
+
+.bar {
+  position: relative;
+  inline-size: 44px;
+  block-size: 6px;
+  background: color-mix(in srgb, var(--mushaf-ink) calc(var(--ink-strength) * 100%), transparent);
+}
+
+.row[data-depth="5"] .bar { --ink-strength: var(--ink-depth-5); }
+.row[data-depth="2"] .bar { --ink-strength: var(--ink-depth-2); }
+.row[data-depth="0"] .bar { --ink-strength: var(--ink-depth-0); }
+
+/* Depth 0 is a blank waiting to be filled — the same rule the page draws. */
+.row[data-depth="0"] .bar::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  block-size: 1px;
+  background: var(--mushaf-ink);
+  opacity: 0.18;
+}
+
+.term {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text);
+}

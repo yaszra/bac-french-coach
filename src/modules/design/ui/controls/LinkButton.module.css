@@ -1,0 +1,20 @@
+.root {
+  /* An anchor is not a button: it inherits nothing, so say it all. */
+  box-sizing: border-box;
+}
+
+/* The outward mark is direction-bearing, so it mirrors in RTL. */
+.externalMark {
+  flex: none;
+  inline-size: var(--space-3);
+  block-size: var(--space-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[dir="rtl"] .externalMark {
+  transform: scaleX(-1);
+}

@@ -1,0 +1,76 @@
+/* The only ornament in Marginalia. Its form is borrowed from the āyah rosette
+   on the muṣḥaf page — a ring with eight radial notches. Geometric, never
+   filigreed, never animated beyond the arc settling into place. */
+
+.root {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  color: var(--accent);
+}
+
+.milestone {
+  color: var(--milestone);
+}
+
+.svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  fill: none;
+  overflow: visible;
+}
+
+.track {
+  stroke: var(--border);
+  stroke-width: 3px;
+}
+
+.arc {
+  stroke: currentColor;
+  stroke-width: 3px;
+  stroke-linecap: butt;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset var(--motion-base) var(--ease-standard);
+}
+
+.notch {
+  stroke: var(--border-strong);
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+
+.notchEarned {
+  stroke: currentColor;
+}
+
+.center {
+  position: absolute;
+  font-family: var(--font-ui);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-tight);
+  color: var(--text);
+}
+
+.sm {
+  inline-size: var(--space-6);
+  block-size: var(--space-6);
+}
+.md {
+  inline-size: var(--space-10);
+  block-size: var(--space-10);
+}
+.lg {
+  inline-size: var(--space-16);
+  block-size: var(--space-16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc {
+    transition: none;
+  }
+}
