@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import en from "../../../../messages/en.json";
-import ar from "../../../../messages/ar.json";
+import { EN as en, AR as ar, NAMESPACE_FILES } from "../../../../messages";
+import { existsSync } from "node:fs";
 import { translate } from "./translate";
 
 type Node = Record<string, unknown>;
@@ -21,6 +21,13 @@ function flatten(node: Node, prefix = ""): string[] {
 }
 
 describe("message bundles", () => {
+  it("has every namespace file in both languages", () => {
+    for (const namespace of NAMESPACE_FILES) {
+      expect(existsSync(`messages/en/${namespace}.json`), `messages/en/${namespace}.json`).toBe(true);
+      expect(existsSync(`messages/ar/${namespace}.json`), `messages/ar/${namespace}.json`).toBe(true);
+    }
+  });
+
   it("has the same keys in English and Arabic", () => {
     const enKeys = flatten(en as Node).sort();
     const arKeys = flatten(ar as Node).sort();

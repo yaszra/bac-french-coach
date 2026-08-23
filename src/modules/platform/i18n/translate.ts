@@ -1,9 +1,8 @@
 import { type Locale, type MessageParams, type PluralCategory, DEFAULT_LOCALE } from "./types";
-import en from "../../../../messages/en.json";
-import ar from "../../../../messages/ar.json";
+import { EN, AR } from "../../../../messages";
 
 type Bundle = Record<string, unknown>;
-const BUNDLES: Record<Locale, Bundle> = { en: en as Bundle, ar: ar as Bundle };
+const BUNDLES: Record<Locale, Bundle> = { en: EN as Bundle, ar: AR as Bundle };
 
 function lookup(bundle: Bundle, key: string): unknown {
   return key.split(".").reduce<unknown>((node, part) => {

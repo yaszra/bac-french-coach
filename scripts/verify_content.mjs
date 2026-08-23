@@ -61,8 +61,12 @@ function skeleton(text) {
  * the length heuristic is simply meaningless for them.
  */
 const ARABIC_PROSE_ALLOWED = [
-  path.join("messages", "ar.json"),
+  // Every Arabic message namespace: these files exist to hold Arabic interface
+  // copy. They are still checked against the corpus — only the length
+  // heuristic, which is meaningless for prose, is lifted.
+  path.join("messages", "ar") + path.sep,
   path.join("content", "qaidah", "lexicon.json"),
+  path.join("content", "qaidah", "narration") + path.sep,
 ];
 
 const failures = [];
@@ -208,7 +212,9 @@ async function checkTripwire(verses) {
       if (!ARABIC.test(text)) continue;
 
       const relative = path.relative(ROOT, file);
-      const prosePermitted = ARABIC_PROSE_ALLOWED.some((allowed) => relative.endsWith(allowed));
+      const prosePermitted = ARABIC_PROSE_ALLOWED.some(
+        (allowed) => relative.endsWith(allowed) || relative.includes(allowed),
+      );
 
       // THE REAL CHECK: does any window of this file's Arabic match the corpus,
       // compared on the skeleton so re-diacritised or re-encoded copies are
