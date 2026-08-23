@@ -19,8 +19,14 @@ beforeAll(async () => {
   sandbox = await mkdtemp(path.join(tmpdir(), "itqan-gate-"));
   await cp(path.join(ROOT, "scripts"), path.join(sandbox, "scripts"), { recursive: true });
   await cp(path.join(ROOT, "content"), path.join(sandbox, "content"), { recursive: true });
-  for (const dir of ["src", "messages", "e2e"]) await mkdir(path.join(sandbox, dir), { recursive: true });
-  await writeFile(path.join(sandbox, "messages", "ar.json"), JSON.stringify({ app: { name: "إتقان" } }), "utf8");
+  for (const dir of ["src", "messages/en", "messages/ar", "e2e"]) {
+    await mkdir(path.join(sandbox, dir), { recursive: true });
+  }
+  await writeFile(
+    path.join(sandbox, "messages", "ar", "core.json"),
+    JSON.stringify({ app: { name: "إتقان" } }),
+    "utf8",
+  );
 }, 120_000);
 
 afterAll(async () => {
@@ -127,7 +133,7 @@ describe("the verbatim-Qurʾān tripwire", () => {
   it("catches a passage pasted into the Arabic message bundle", async () => {
     const passage = await passageFromCorpus(112, 1);
     const bundle = JSON.stringify({ app: { name: "إتقان" }, planted: `${passage}` });
-    const messagesPath = path.join(sandbox, "messages", "ar.json");
+    const messagesPath = path.join(sandbox, "messages", "ar", "core.json");
     const original = await readFile(messagesPath, "utf8");
     await writeFile(messagesPath, bundle, "utf8");
     try {
@@ -161,7 +167,7 @@ describe("the verbatim-Qurʾān tripwire", () => {
   }, 60_000);
 
   it("allows ordinary Arabic interface copy in the message bundle", async () => {
-    const messagesPath = path.join(sandbox, "messages", "ar.json");
+    const messagesPath = path.join(sandbox, "messages", "ar", "core.json");
     const original = await readFile(messagesPath, "utf8");
     await writeFile(
       messagesPath,

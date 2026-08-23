@@ -56,15 +56,16 @@ export type LearnerCodeResult =
   | { readonly ok: true; readonly code: string }
   | { readonly ok: false; readonly reasonKey: "family.link.error.tooShort" | "family.link.error.badCharacters" };
 
-const CODE_SHAPE = /^[A-Z0-9]{6,12}$/;
+const CODE_SHAPE = /^[A-Z0-9]{3,16}$/;
 
 /**
- * Codes are read off paper and typed by a tired adult: spaces, dashes and case
- * are forgiven, anything else is refused loudly rather than silently mangled.
+ * The code is the learner's handle, issued by the adult who set the account up.
+ * It is read off paper and typed by a tired parent: spaces, dashes and case are
+ * forgiven, anything else is refused loudly rather than silently mangled.
  */
 export function normalizeLearnerCode(raw: string): LearnerCodeResult {
   const stripped = raw.trim().replace(/[\s-]+/g, "").toUpperCase();
-  if (stripped.length < 6) return { ok: false, reasonKey: "family.link.error.tooShort" };
+  if (stripped.length < 3) return { ok: false, reasonKey: "family.link.error.tooShort" };
   if (!CODE_SHAPE.test(stripped)) return { ok: false, reasonKey: "family.link.error.badCharacters" };
   return { ok: true, code: stripped };
 }

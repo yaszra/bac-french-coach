@@ -1,0 +1,151 @@
+/* The workspace.
+
+   The document does not scroll here — PaneLayout bounds every pane — so the
+   page a learner is reciting from cannot slide away under their thumb. */
+
+.shell {
+  block-size: 100%;
+  min-block-size: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-block-end: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.barText {
+  display: grid;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.barTitle {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+}
+
+.barMeta {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.tray {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.instruction {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-3);
+  border-inline-start: 2px solid var(--caution);
+  background: var(--caution-quiet);
+  border-radius: var(--radius-control);
+  font-size: var(--text-sm);
+}
+
+.quietNotice {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.placedLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-block-size: var(--tap-min);
+  padding: var(--space-3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+
+.placedWord {
+  font-family: var(--font-mushaf);
+  font-size: var(--text-lg);
+  color: var(--text);
+}
+
+.choices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.blankPage {
+  display: grid;
+  place-content: center;
+  gap: var(--space-3);
+  text-align: center;
+  min-block-size: 12rem;
+  padding: var(--space-6);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-card);
+  color: var(--text-muted);
+}
+
+.countRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.wordSlot {
+  display: inline-block;
+  min-inline-size: 3.5rem;
+  border-block-end: 1px solid var(--rule);
+  block-size: 1.5rem;
+}
+
+.result {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+
+.resultTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+}
+
+.resultBody {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  inline-size: 100%;
+  max-inline-size: 32rem;
+}

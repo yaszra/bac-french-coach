@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_TRIAGE_CONFIG,
-  REASON_WEIGHT,
+  REASON_CEILING,
+  REASON_FLOOR,
   TRIAGE_REASONS,
   noSignals,
   rankTriage,
@@ -67,7 +68,8 @@ describe("triage · a pending oral request", () => {
       NOW,
     );
     expect(ancient[0]!.intensity).toBe(1);
-    expect(ancient[0]!.score).toBe(REASON_WEIGHT.verification_waiting);
+    expect(ancient[0]!.score).toBe(1);
+    expect(REASON_CEILING.verification_waiting).toBe(1);
   });
 
   it("carries the wait in whole hours as a parameter, not as a sentence", () => {
@@ -200,7 +202,8 @@ describe("triage · recommendations", () => {
       NOW,
     );
     expect(reason!.kind).toBe("recommendation_acted");
-    expect(reason!.score).toBeLessThan(REASON_WEIGHT.recommendation_unacted * 0.4);
+    // The quietest band there is: below every score an unacted one can reach.
+    expect(reason!.score).toBeLessThanOrEqual(REASON_FLOOR.recommendation_unacted);
   });
 
   it("forgets an acted recommendation once it is no longer news", () => {
@@ -239,23 +242,27 @@ describe("triage · combining reasons", () => {
     expect(inbox.items[0]!.leadReason.kind).toBe("guardian_claim_waiting");
   });
 
-  it("gives several mild situations a small, bounded nudge", () => {
-    const one = scoreItem(reasonsFor(signals({ learnerUserId: "u1", lapsesInWindow: 2 }), NOW));
-    const several = scoreItem(
-      reasonsFor(
-        signals({
-          learnerUserId: "u1",
-          lapsesInWindow: 2,
-          overdueReviews: 2,
-          trackedUnits: 40,
-          oldestDueAt: daysAgo(1),
-          lastActivityAt: daysAgo(5),
-        }),
-        NOW,
-      ),
+  it("breaks a tie towards the learner carrying more situations, without changing the score", () => {
+    const one = signals({ learnerUserId: "one", lapsesInWindow: 2 });
+    const several = signals({
+      learnerUserId: "several",
+      lapsesInWindow: 2,
+      overdueReviews: 2,
+      trackedUnits: 40,
+      oldestDueAt: daysAgo(1),
+      lastActivityAt: daysAgo(5),
+    });
+    const inbox = rankTriage([one, several], NOW);
+    expect(inbox.items.map((i) => i.learnerUserId)).toEqual(["several", "one"]);
+    expect(inbox.items[0]!.score).toBe(inbox.items[1]!.score);
+  });
+
+  it("keeps a row's score identical to its strongest reason's", () => {
+    const reasons = reasonsFor(
+      signals({ learnerUserId: "u1", lapsesInWindow: 4, lastActivityAt: daysAgo(9) }),
+      NOW,
     );
-    expect(several).toBeGreaterThan(one);
-    expect(several - one).toBeLessThanOrEqual(0.08 + 1e-9);
+    expect(scoreItem(reasons)).toBe(reasons[0]!.score);
   });
 
   it("never lets co-occurrence overtake a genuinely blocked learner", () => {
@@ -382,6 +389,14 @@ describe("triage · the contract the console relies on", () => {
     }
   });
 
+  it("gives each kind its own non-overlapping band, so no backlog outweighs a person waiting", () => {
+    for (let index = 1; index < TRIAGE_REASONS.length; index++) {
+      const stronger = TRIAGE_REASONS[index - 1]!;
+      const weaker = TRIAGE_REASONS[index]!;
+      expect(REASON_CEILING[weaker]).toBeLessThanOrEqual(REASON_FLOOR[stronger] + 1e-9);
+    }
+  });
+
   it("keeps every score inside 0..1", () => {
     const reasons = reasonsFor(
       signals({
@@ -400,7 +415,7 @@ describe("triage · the contract the console relies on", () => {
       expect(reason.score).toBeLessThanOrEqual(1);
       expect(reason.intensity).toBeLessThanOrEqual(1);
     }
-    expect(scoreItem(reasons)).toBeLessThanOrEqual(1.08);
+    expect(scoreItem(reasons)).toBe(1);
   });
 
   it("is pure: the same signals at the same moment rank identically", () => {

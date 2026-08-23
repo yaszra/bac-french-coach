@@ -62,14 +62,23 @@ const REASON_RANK: Readonly<Record<TriageReasonKind, number>> = Object.fromEntri
 /** Width of one band. Seven kinds, seven equal slices of the 0..1 range. */
 const BAND = 1 / TRIAGE_REASONS.length;
 
+/**
+ * Bounds are rounded to the same four decimals every score is, so that
+ * "this kind's ceiling is that kind's floor" is exactly true in arithmetic and
+ * not merely nearly true — a boundary comparison must never turn on a float.
+ */
+function round(value: number): number {
+  return Math.round(value * 10_000) / 10_000;
+}
+
 /** The floor of a kind's band — the score it scores at intensity zero. */
 export const REASON_FLOOR: Readonly<Record<TriageReasonKind, number>> = Object.fromEntries(
-  TRIAGE_REASONS.map((kind, index) => [kind, (TRIAGE_REASONS.length - 1 - index) * BAND]),
+  TRIAGE_REASONS.map((kind, index) => [kind, round((TRIAGE_REASONS.length - 1 - index) * BAND)]),
 ) as Record<TriageReasonKind, number>;
 
 /** The ceiling of a kind's band — the score it scores at full intensity. */
 export const REASON_CEILING: Readonly<Record<TriageReasonKind, number>> = Object.fromEntries(
-  TRIAGE_REASONS.map((kind) => [kind, REASON_FLOOR[kind] + BAND]),
+  TRIAGE_REASONS.map((kind, index) => [kind, round((TRIAGE_REASONS.length - index) * BAND)]),
 ) as Record<TriageReasonKind, number>;
 
 /**
@@ -194,10 +203,6 @@ function clamp01(value: number): number {
   return value;
 }
 
-function round(value: number): number {
-  return Math.round(value * 10_000) / 10_000;
-}
-
 function hoursBetween(from: Date, to: Date): number {
   return (to.getTime() - from.getTime()) / MS_PER_HOUR;
 }
@@ -208,7 +213,11 @@ function daysBetween(from: Date, to: Date): number {
 
 /** A kind's band floor, plus intensity's share of the band's width. */
 function scoreOf(kind: TriageReasonKind, intensity: number): number {
-  return round(REASON_FLOOR[kind] + BAND * clamp01(intensity));
+  const bounded = clamp01(intensity);
+  // Pin the ends to the published bounds so a full-intensity reason scores its
+  // ceiling exactly, and the band below it scores that ceiling as its floor.
+  if (bounded >= 1) return REASON_CEILING[kind];
+  return round(REASON_FLOOR[kind] + BAND * bounded);
 }
 
 function makeReason(

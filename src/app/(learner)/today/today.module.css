@@ -1,0 +1,208 @@
+/* Today.
+
+   One card carries the whole screen. Everything else on the page is quieter
+   than it by design: the five-second test is not "can they find the action",
+   it is "is there anything else competing with it". */
+
+.page {
+  block-size: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.inner {
+  inline-size: min(46rem, 100%);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) var(--space-10);
+  display: grid;
+  gap: var(--space-5);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.greeting {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+/* The one card. */
+.primary {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-2);
+}
+
+.primaryLabel {
+  margin: 0;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.primaryTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.primaryMeta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.why {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  border-inline-start: 2px solid var(--rule);
+  padding-inline-start: var(--space-3);
+}
+
+.after {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* Quiet supporting rows. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.streams {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-3);
+}
+
+.stream {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface-raised);
+  color: inherit;
+  text-decoration: none;
+  min-block-size: var(--tap-min);
+}
+
+.stream[data-empty="true"] {
+  opacity: 0.6;
+}
+
+.streamCount {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+}
+
+.streamName {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* Kids: three doors, each one big enough to hit without looking. */
+.kids {
+  display: grid;
+  gap: var(--space-5);
+  justify-items: center;
+  text-align: center;
+}
+
+.kidsLantern {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+
+.kidsSteps {
+  inline-size: 100%;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.kidsStep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-block-size: 5.5rem;
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  border: 2px solid var(--border);
+  background: var(--surface-raised);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.kidsStep[data-active="true"] {
+  border-color: var(--accent);
+  background: var(--accent-quiet);
+  box-shadow: var(--elevation-2);
+}
+
+.kidsStep[data-active="false"] {
+  opacity: 0.45;
+}
+
+.kidsIndex {
+  display: grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  font-size: var(--text-lg);
+}

@@ -1,0 +1,178 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(20rem, 2fr);
+  gap: var(--space-5);
+  align-items: start;
+  padding: var(--space-5);
+  max-inline-size: 90rem;
+  margin-inline: auto;
+}
+
+/* Tablet: the page goes on top, the tray below. The page is never cropped. */
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-inline-size: 0;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.who {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  margin: 0;
+  color: var(--text);
+}
+
+.scope {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.tray {
+  background: var(--surface-raised);
+  border: var(--hairline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--elevation-1);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.trayTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  margin: 0;
+  color: var(--text);
+}
+
+.help {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+  max-inline-size: 46ch;
+}
+
+.position {
+  font-size: var(--text-sm);
+  color: var(--text);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+  font-variant-numeric: tabular-nums;
+}
+
+.positionEmpty {
+  color: var(--text-muted);
+}
+
+.familyLabel {
+  font-size: var(--text-2xs);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+}
+
+.marks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  color: var(--text);
+  padding-block: var(--space-2);
+  border-block-end: var(--hairline);
+}
+
+.markText {
+  min-inline-size: 0;
+}
+
+.markWhere {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.verdictRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.once {
+  border-inline-start: 2px solid var(--accent-border);
+  padding-inline-start: var(--space-3);
+  margin: 0;
+}
+
+.onceTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  margin: 0;
+}
+
+.onceBody {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: var(--space-1) 0 0;
+  max-inline-size: 46ch;
+}
+
+.error {
+  font-size: var(--text-sm);
+  color: var(--danger);
+  margin: 0;
+}
+
+.wentTo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.wentToField {
+  inline-size: 7rem;
+}

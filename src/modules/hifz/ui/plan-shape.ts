@@ -208,16 +208,21 @@ export function streakOf(
   const restingToday = !practised.has(today);
   let graceUsed = 0;
   let days = 0;
+  // Gaps are only spent from the allowance once the run is proven to continue
+  // past them. A run that simply ends has no missed day to forgive.
+  let pendingGap = 0;
   for (let offset = 0; offset <= config.windowDays; offset += 1) {
     const day = today - offset;
     if (practised.has(day)) {
       days += 1;
+      graceUsed += pendingGap;
+      pendingGap = 0;
       continue;
     }
     // Today is not yet spent: not practising *yet* is not a missed day at all.
     if (offset === 0) continue;
-    if (graceUsed < config.graceDays) {
-      graceUsed += 1;
+    if (graceUsed + pendingGap < config.graceDays) {
+      pendingGap += 1;
       continue;
     }
     break;

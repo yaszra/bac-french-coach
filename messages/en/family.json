@@ -1,1 +1,203 @@
-{}
+{
+  "family": {
+    "signedOut": {
+      "title": "Sign in to see your family",
+      "description": "Itqān shows a child's work only to the adults that child's teacher has approved."
+    },
+    "children": {
+      "title": "Children",
+      "subtitle": "Who you are linked to, and what each link lets you see.",
+      "none": "No children linked yet",
+      "noneDescription": "Ask your child's teacher for their code, then add them here.",
+      "add": "Add a child",
+      "approved": "Approved",
+      "pending": "Waiting for the teacher",
+      "canTutor": "You may set work and hear this child",
+      "cannotTutor": "You can follow along; the teacher hears the recitation",
+      "inClassroom": "In {classroom}",
+      "noClassroom": "Not in a classroom",
+      "openTonight": "Tonight's report"
+    },
+    "link": {
+      "title": "Add a child",
+      "intro": "Enter the code the teacher gave you. Adding a child asks for access; it does not grant it.",
+      "codeLabel": "Child's code",
+      "codeHelp": "Six characters or so, from the teacher. Spaces and dashes do not matter.",
+      "submit": "Ask to be linked",
+      "error": {
+        "tooShort": "That code is too short",
+        "badCharacters": "That code has characters we do not recognise",
+        "unknownCode": "No child has that code in this school",
+        "alreadyLinked": "You are already linked to that child",
+        "notAllowed": "Only a guardian can add a child"
+      }
+    },
+    "claim": {
+      "waitingForTeacher": "Your request is with {child}'s teacher. Until they approve it you cannot see {child}'s work.",
+      "approvedImmediately": "{child} has no teacher yet, so there was nobody to ask — the link is active now.",
+      "pendingTitle": "Waiting for approval",
+      "canSee": "While you wait, you can see",
+      "cannotSee": "You cannot see",
+      "visible": {
+        "childName": "Your child's name",
+        "classroomName": "The classroom they are in",
+        "requestState": "Whether your request has been approved"
+      },
+      "hidden": {
+        "progress": "What they have memorised, or how they are doing",
+        "recordings": "Any recording of their voice",
+        "teacherNotes": "The teacher's notes and corrections",
+        "reports": "Tonight's report and the weekly summary"
+      }
+    },
+    "approver": {
+      "teacher": "their teacher",
+      "guardianTutor": "you, as their guardian"
+    },
+    "tonight": {
+      "title": "Tonight",
+      "headline": "{child} practised for {minutes} minutes today.",
+      "quietDay": "Nothing was recorded for {child} today.",
+      "quietDayHelp": "A quiet day is a quiet day. There is nothing to fix.",
+      "reviews": "{done} of {due} reviews done",
+      "recall": "Recalled without help in {numerator} of {denominator} attempts ({percent}%)",
+      "recallNotYet": "Not enough attempts today to say how recall is going — {needed} more would tell us.",
+      "wordsHeld": "{count} words held",
+      "wordsHeldNoComparison": "{count} words held. There is no previous week to compare with yet.",
+      "wordsHeldMore": "{count} words held — {delta} more than last week.",
+      "wordsHeldFewer": "{count} words held — {delta} fewer than last week.",
+      "wordsHeldSame": "{count} words held — the same as last week.",
+      "oneThing": "One thing tonight",
+      "approvedBy": "{count} passages approved by {name} ({role}).",
+      "noReport": "Tonight's report has not been built yet",
+      "noReportHelp": "It is written each evening, at your own local time.",
+      "reportFailed": "We could not build tonight's report",
+      "reportFailedHelp": "This is a fault on our side, and it is being retried."
+    },
+    "task": {
+      "heading": "Do this together",
+      "minutes": "About {minutes} minutes",
+      "withAdult": "An adult needs to be in the room",
+      "done": "We did this",
+      "recorded": "Noted — thank you",
+      "notEvidence": "Doing this together is not marked as progress. Only a teacher listening counts for that.",
+      "listenTogether": {
+        "label": "Listen together",
+        "description": "Play it once, both of you listening, and say nothing after."
+      },
+      "reciteToMe": {
+        "label": "Let them recite to you",
+        "description": "Sit and listen. Do not correct; just listen to the end."
+      },
+      "practiseJoin": {
+        "label": "Practise the join",
+        "description": "Hear the āyah before it, then let them find the next one."
+      },
+      "quietReview": {
+        "label": "Quiet review",
+        "description": "They read it through on their own, unhurried."
+      }
+    },
+    "tutoring": {
+      "title": "Work you set",
+      "none": "You have not set any work",
+      "assign": "Set work",
+      "approve": "Approve this recitation",
+      "onlyYours": "You may hear work you set yourself. Work the teacher set, the teacher hears."
+    },
+    "settings": {
+      "title": "Settings",
+      "consentHeading": "Recording {child}'s voice",
+      "consentDescription": "Off unless you turn it on. A recording lets a teacher listen when they are not in the room.",
+      "consentLabel": "Allow recording",
+      "retention": "Recordings are deleted after {days} days.",
+      "purgeOn": "Anything recorded today would be deleted on {date}.",
+      "neverRecorded": "Nothing has been recorded.",
+      "withdrawn": "Recording is off. Anything already recorded is being deleted.",
+      "commsHeading": "How we reach you",
+      "consentEmail": "Email",
+      "consentWhatsapp": "WhatsApp",
+      "dataHeading": "{child}'s data",
+      "export": "Ask for a copy",
+      "erase": "Ask for erasure",
+      "eraseWarning": "Erasure removes the record of what {child} did. It cannot be undone.",
+      "requests": "Requests",
+      "noRequests": "No requests made",
+      "requestState": {
+        "received": "Received",
+        "running": "In progress",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "requestedOn": "Asked for on {date}",
+      "completedOn": "Finished on {date}",
+      "failedBecause": "It failed: {reason}"
+    },
+    "channel": {
+      "heading": "Sending this message",
+      "sending": "Will be sent by {channel}",
+      "manual": "We cannot send this for you",
+      "copy": "Copy the message",
+      "channelName": {
+        "in_app": "in the app",
+        "push": "a notification",
+        "email": "email",
+        "whatsapp": "WhatsApp"
+      },
+      "refused": {
+        "noPushDevice": "No device is set up for notifications",
+        "noEmailAddress": "We have no email address for you",
+        "noEmailConsent": "You have not agreed to email",
+        "noWhatsappNumber": "We have no WhatsApp number for you",
+        "noWhatsappConsent": "You have not agreed to WhatsApp"
+      },
+      "fallback": {
+        "windowClosed": "WhatsApp only lets us reply within 24 hours of your last message, and that window has closed.",
+        "templatePending": "The WhatsApp template for this message is still waiting for approval.",
+        "templateRejected": "The WhatsApp template for this message was rejected."
+      }
+    },
+    "error": {
+      "invalid": "That did not look right",
+      "notAllowed": "You are not allowed to do that",
+      "claimPending": "The teacher has not approved your link yet",
+      "notTutoring": "The teacher has not asked you to tutor this child",
+      "notYourAssignment": "You can only approve work you set yourself"
+    }
+  },
+  "school": {
+    "title": "School",
+    "subtitle": "Aggregates for {days} days to {date}.",
+    "signedOut": "Sign in with a school account to see this.",
+    "notAllowed": "This view is for school administrators.",
+    "figure": {
+      "enrolment": "{count} of {denominator} learners are enrolled in a classroom.",
+      "active": "{count} of {denominator} enrolled learners did something in the last {days} days.",
+      "teacherUsage": "{count} of {denominator} teachers heard a recitation in the last {days} days.",
+      "notYetRecorded": "Not enough to say yet — {denominator} so far."
+    },
+    "latency": {
+      "heading": "How long a learner waits for an ear",
+      "measured": "Half of the {answered} recitations heard were answered within {median} minutes; nine in ten within {p90}.",
+      "notYetRecorded": "Only {answered} recitations have been heard — {needed} more before we can say.",
+      "waiting": "{count} learners are waiting now; the longest has waited {hours} hours.",
+      "noneWaiting": "Nobody is waiting to be heard."
+    },
+    "coverage": {
+      "heading": "Least covered",
+      "surah": "Sūrah {label}",
+      "row": "{count} of {denominator} learners hold something here.",
+      "none": "Nothing verified yet."
+    },
+    "intervention": {
+      "heading": "Waiting longest",
+      "waitingHours": "{hours} hours",
+      "none": "Nobody is waiting."
+    },
+    "requests": {
+      "heading": "Data requests",
+      "line": "{received} received · {running} running · {completed} completed · {failed} failed"
+    },
+    "privacy": "An administrator sees totals. Nobody browses a child's recitation from here."
+  }
+}

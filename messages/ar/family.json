@@ -1,1 +1,203 @@
-{}
+{
+  "family": {
+    "signedOut": {
+      "title": "سجّل الدخول لترى أبناءك",
+      "description": "لا يُظهر إتقان عمل الطفل إلا للبالغين الذين وافق عليهم معلّمه."
+    },
+    "children": {
+      "title": "الأبناء",
+      "subtitle": "من ترتبط بهم، وما الذي يتيحه لك كل ارتباط.",
+      "none": "لا يوجد أبناء مرتبطون بعد",
+      "noneDescription": "اطلب من معلّم ابنك رمزه، ثم أضفه هنا.",
+      "add": "إضافة ابن",
+      "approved": "معتمد",
+      "pending": "بانتظار المعلّم",
+      "canTutor": "يمكنك تكليفه بالعمل والاستماع إليه",
+      "cannotTutor": "يمكنك المتابعة، والمعلّم هو من يستمع إلى التلاوة",
+      "inClassroom": "في حلقة {classroom}",
+      "noClassroom": "ليس في حلقة",
+      "openTonight": "تقرير الليلة"
+    },
+    "link": {
+      "title": "إضافة ابن",
+      "intro": "أدخل الرمز الذي أعطاك إياه المعلّم. إضافة ابن طلبٌ للوصول، لا منحٌ له.",
+      "codeLabel": "رمز الابن",
+      "codeHelp": "ستة أحرف تقريبًا من المعلّم. لا تهمّ المسافات ولا الشرطات.",
+      "submit": "اطلب الارتباط",
+      "error": {
+        "tooShort": "هذا الرمز قصير جدًا",
+        "badCharacters": "في هذا الرمز حروف لا نعرفها",
+        "unknownCode": "لا يوجد في هذه المدرسة ابن بهذا الرمز",
+        "alreadyLinked": "أنت مرتبط بهذا الابن بالفعل",
+        "notAllowed": "لا يضيف الابن إلا وليّ الأمر"
+      }
+    },
+    "claim": {
+      "waitingForTeacher": "طلبك عند معلّم {child}. ولن ترى عمله حتى يوافق المعلّم.",
+      "approvedImmediately": "ليس لـ{child} معلّم بعد، فلم يكن هناك من يُستأذن — والارتباط قائم الآن.",
+      "pendingTitle": "بانتظار الموافقة",
+      "canSee": "في أثناء الانتظار، ترى",
+      "cannotSee": "لا ترى",
+      "visible": {
+        "childName": "اسم ابنك",
+        "classroomName": "الحلقة التي هو فيها",
+        "requestState": "هل تمت الموافقة على طلبك"
+      },
+      "hidden": {
+        "progress": "ما حفظه، وكيف يسير معه الحفظ",
+        "recordings": "أيّ تسجيل لصوته",
+        "teacherNotes": "ملاحظات المعلّم وتصويباته",
+        "reports": "تقرير الليلة والملخّص الأسبوعي"
+      }
+    },
+    "approver": {
+      "teacher": "معلّمه",
+      "guardianTutor": "أنت، بصفتك وليّ أمره"
+    },
+    "tonight": {
+      "title": "الليلة",
+      "headline": "تدرّب {child} اليوم {minutes} دقيقة.",
+      "quietDay": "لم يُسجَّل شيء لـ{child} اليوم.",
+      "quietDayHelp": "اليوم الهادئ يوم هادئ. ليس فيه ما يُصلَح.",
+      "reviews": "أُنجزت {done} مراجعة من {due}",
+      "recall": "استرجع بلا مساعدة في {numerator} من {denominator} محاولة ({percent}٪)",
+      "recallNotYet": "المحاولات اليوم أقلّ من أن نحكم على الاسترجاع — {needed} محاولات أخرى تكفي.",
+      "wordsHeld": "{count} كلمة محفوظة",
+      "wordsHeldNoComparison": "{count} كلمة محفوظة. ولا يوجد أسبوع سابق للمقارنة بعد.",
+      "wordsHeldMore": "{count} كلمة محفوظة — أكثر من الأسبوع الماضي بـ{delta}.",
+      "wordsHeldFewer": "{count} كلمة محفوظة — أقلّ من الأسبوع الماضي بـ{delta}.",
+      "wordsHeldSame": "{count} كلمة محفوظة — كما كانت الأسبوع الماضي.",
+      "oneThing": "شيء واحد الليلة",
+      "approvedBy": "اعتمد {name} ({role}) {count} مقاطع.",
+      "noReport": "لم يُبنَ تقرير الليلة بعد",
+      "noReportHelp": "يُكتب كل مساء، بتوقيتك المحلّي.",
+      "reportFailed": "تعذّر علينا بناء تقرير الليلة",
+      "reportFailedHelp": "هذا خلل عندنا، وتجري إعادة المحاولة."
+    },
+    "task": {
+      "heading": "افعلا هذا معًا",
+      "minutes": "نحو {minutes} دقائق",
+      "withAdult": "يلزم وجود بالغ في الغرفة",
+      "done": "فعلنا هذا",
+      "recorded": "سُجِّلت الملاحظة — شكرًا لك",
+      "notEvidence": "ما تفعلانه معًا لا يُحتسب تقدّمًا. لا يُحتسب إلا استماع المعلّم.",
+      "listenTogether": {
+        "label": "استمعا معًا",
+        "description": "شغّلها مرة واحدة، تستمعان معًا، ثم لا تعلّقا بعدها."
+      },
+      "reciteToMe": {
+        "label": "دعه يتلو عليك",
+        "description": "اجلس واستمع. لا تصحّح؛ استمع إلى النهاية فحسب."
+      },
+      "practiseJoin": {
+        "label": "تدرّبا على الوصل",
+        "description": "أسمِعه الآية التي قبلها، ثم دعه يهتدي إلى التي بعدها."
+      },
+      "quietReview": {
+        "label": "مراجعة هادئة",
+        "description": "يقرؤها بنفسه على مهل."
+      }
+    },
+    "tutoring": {
+      "title": "العمل الذي كلّفته به",
+      "none": "لم تكلّفه بعمل",
+      "assign": "كلّفه بعمل",
+      "approve": "اعتمد هذه التلاوة",
+      "onlyYours": "لك أن تستمع إلى ما كلّفته به أنت. وما كلّفه به المعلّم يستمع إليه المعلّم."
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "consentHeading": "تسجيل صوت {child}",
+      "consentDescription": "مغلق حتى تفتحه أنت. التسجيل يتيح للمعلّم أن يستمع وهو ليس في الغرفة.",
+      "consentLabel": "السماح بالتسجيل",
+      "retention": "تُحذف التسجيلات بعد {days} يومًا.",
+      "purgeOn": "ما يُسجَّل اليوم يُحذف في {date}.",
+      "neverRecorded": "لم يُسجَّل شيء.",
+      "withdrawn": "التسجيل مغلق. وما سُجِّل من قبل يجري حذفه.",
+      "commsHeading": "كيف نصل إليك",
+      "consentEmail": "البريد الإلكتروني",
+      "consentWhatsapp": "واتساب",
+      "dataHeading": "بيانات {child}",
+      "export": "اطلب نسخة",
+      "erase": "اطلب المحو",
+      "eraseWarning": "المحو يزيل سجلّ ما فعله {child}. ولا يمكن التراجع عنه.",
+      "requests": "الطلبات",
+      "noRequests": "لا توجد طلبات",
+      "requestState": {
+        "received": "وصل الطلب",
+        "running": "قيد التنفيذ",
+        "completed": "اكتمل",
+        "failed": "أخفق"
+      },
+      "requestedOn": "طُلب في {date}",
+      "completedOn": "انتهى في {date}",
+      "failedBecause": "أخفق: {reason}"
+    },
+    "channel": {
+      "heading": "إرسال هذه الرسالة",
+      "sending": "سترسَل عبر {channel}",
+      "manual": "لا نستطيع إرسالها عنك",
+      "copy": "انسخ الرسالة",
+      "channelName": {
+        "in_app": "داخل التطبيق",
+        "push": "إشعار",
+        "email": "البريد الإلكتروني",
+        "whatsapp": "واتساب"
+      },
+      "refused": {
+        "noPushDevice": "لا يوجد جهاز مهيّأ للإشعارات",
+        "noEmailAddress": "ليس لدينا بريد إلكتروني لك",
+        "noEmailConsent": "لم توافق على البريد الإلكتروني",
+        "noWhatsappNumber": "ليس لدينا رقم واتساب لك",
+        "noWhatsappConsent": "لم توافق على واتساب"
+      },
+      "fallback": {
+        "windowClosed": "لا يسمح واتساب بالردّ إلا خلال أربع وعشرين ساعة من آخر رسالة منك، وقد انقضت.",
+        "templatePending": "قالب واتساب لهذه الرسالة ما زال بانتظار الموافقة.",
+        "templateRejected": "رُفض قالب واتساب لهذه الرسالة."
+      }
+    },
+    "error": {
+      "invalid": "لم يبدُ هذا صحيحًا",
+      "notAllowed": "لا يُسمح لك بذلك",
+      "claimPending": "لم يوافق المعلّم على ارتباطك بعد",
+      "notTutoring": "لم يطلب منك المعلّم تعليم هذا الابن",
+      "notYourAssignment": "لا تعتمد إلا العمل الذي كلّفته به أنت"
+    }
+  },
+  "school": {
+    "title": "المدرسة",
+    "subtitle": "إجماليات {days} أيام حتى {date}.",
+    "signedOut": "سجّل الدخول بحساب مدرسي لترى هذا.",
+    "notAllowed": "هذه الصفحة لإداريّي المدرسة.",
+    "figure": {
+      "enrolment": "{count} من {denominator} متعلّمًا مسجّلون في حلقة.",
+      "active": "{count} من {denominator} متعلّمًا مسجّلًا فعلوا شيئًا في {days} أيام.",
+      "teacherUsage": "{count} من {denominator} معلّمًا استمعوا إلى تلاوة في {days} أيام.",
+      "notYetRecorded": "لا يكفي للحكم بعد — {denominator} حتى الآن."
+    },
+    "latency": {
+      "heading": "كم ينتظر المتعلّم أذنًا تسمعه",
+      "measured": "نصف التلاوات المسموعة وعددها {answered} أُجيبت خلال {median} دقيقة، وتسع من كل عشر خلال {p90}.",
+      "notYetRecorded": "لم يُستمع إلا إلى {answered} تلاوات — نحتاج {needed} أخرى قبل الحكم.",
+      "waiting": "ينتظر الآن {count} متعلّمًا، وأطولهم انتظارًا {hours} ساعة.",
+      "noneWaiting": "لا أحد ينتظر أن يُسمع."
+    },
+    "coverage": {
+      "heading": "الأقلّ تغطية",
+      "surah": "سورة {label}",
+      "row": "{count} من {denominator} متعلّمًا يحفظون شيئًا هنا.",
+      "none": "لم يُعتمد شيء بعد."
+    },
+    "intervention": {
+      "heading": "الأطول انتظارًا",
+      "waitingHours": "{hours} ساعة",
+      "none": "لا أحد ينتظر."
+    },
+    "requests": {
+      "heading": "طلبات البيانات",
+      "line": "{received} وصلت · {running} قيد التنفيذ · {completed} اكتملت · {failed} أخفقت"
+    },
+    "privacy": "يرى الإداريّ الإجماليات. ولا أحد يتصفّح تلاوة طفل من هنا."
+  }
+}
