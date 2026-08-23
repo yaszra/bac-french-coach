@@ -197,3 +197,38 @@ Format: D-nnn · date · decision · provenance.
   convention: `ActivityEvaluation.penalty` has type `null` and `PracticeGuarantees` is four literal
   `false`s, validated at the boundary by `practiceGuaranteesSchema`. A wrong answer returns a
   `correction` message key describing what to notice. [specified:T0 premium rule]
+
+- **D-027** · 2026-08-23 · Fonts are self-hosted and imported before anything that
+  uses them. They were installed as packages but never imported, so no
+  `@font-face` rule existed and the muṣḥaf rendered in a system serif lacking
+  Quranic marks — empty boxes inside scripture, with all 741 tests passing.
+  `scripts/check_mushaf_glyphs.mjs` now proves in a real browser that every
+  corpus codepoint has a glyph, by comparing rendered ink against a bare carrier
+  letter (combining marks have no advance width, so measuring width proves
+  nothing). [discovered:looking at the product]
+- **D-028** · 2026-08-23 · CSP uses a nonce, not `unsafe-inline`, and therefore
+  every route renders per request. `strict-dynamic` is deliberately absent: it
+  makes a browser ignore `'self'`, which refused all ten of Next's chunk
+  scripts. The policy must also be set on the REQUEST headers or Next never
+  stamps the nonce — the first attempt set perfect headers and produced a dead
+  HTML shell that curl reported as healthy. Forcing dynamic rendering costs
+  nothing: no page in Itqān has HTML that is the same for two people.
+  [discovered:browser testing]
+- **D-029** · 2026-08-23 · The application role holds no write privilege on
+  `erasure_log`, and `ALTER DEFAULT PRIVILEGES` is removed entirely. A red-team
+  test found the app could delete the record of erasures — so an attacker able
+  to erase a child's data could erase the evidence of it. Default privileges had
+  silently made a table writable that nobody granted. Grants are now explicit
+  per table; `learning_event` is INSERT and SELECT only. [discovered:red team]
+- **D-030** · 2026-08-23 · Message bundles are split one file per product surface
+  (`messages/{en,ar}/<surface>.json`) so parallel work on the learner, teacher
+  and family apps never collides, and a missing translation is a missing file.
+  [inferred:parallel build]
+- **D-031** · 2026-08-23 · Studio refuses three things by construction: re-asking
+  about an approved asset, a rejection with no reason, and approving synthesis
+  without naming who heard it. Lesson edits are overlays on a versioned base and
+  a learner stays on the version they started until they finish.
+  [specified:T0 + inferred]
+- **D-032** · 2026-08-23 · `main` was created at this branch's root commit so a
+  pull request could have a merge base; the repository previously held three
+  unrelated histories and no trunk. [inferred:repo state]

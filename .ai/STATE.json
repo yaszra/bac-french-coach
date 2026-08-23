@@ -1,6 +1,6 @@
 {
   "project": "itqan",
-  "phase": "foundation",
+  "phase": "product surfaces",
   "updatedAt": "2026-08-23",
   "note": "AI-ENGINEERING-OS scripts (~/.ai-engineering-os) were not available in the build environment; .ai/ memory is maintained by hand to the same contract.",
   "currentBranch": "claude/itqan-platform-build-79fqtx",
@@ -12,15 +12,19 @@
     "analytics: honest denominators and daily report",
     "content package: corpus, layout, four gates, loader",
     "memory engine (pure domain)",
-    "design system: tokens and control/display primitives"
+    "design system: tokens and control/display primitives",
+    "studio review pipeline",
+    "release infrastructure: health, restore drill, load test, budgets",
+    "red-team pass (one real hole found and fixed)",
+    "evidence-chain integration proof",
+    "a11y and resilience e2e"
   ],
   "next": [
-    "memory repo + projections",
-    "learner core UI",
+    "learner core (agent)",
+    "teacher console (agent)",
+    "family + school (agent)",
     "reading UI",
-    "teacher console",
-    "family + school",
-    "studio",
-    "release hardening"
+    "e2e journeys green",
+    "final review"
   ]
 }
