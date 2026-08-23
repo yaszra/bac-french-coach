@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { createElement as h, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderSurface, type SurfaceOptions } from "../display/renderSurface";
+import { h, renderSurface, type SurfaceOptions } from "../display/testing";
 import { Tab, TabList, TabPanel, Tabs, type TabsActivation } from "./Tabs";
 
 afterEach(cleanup);
@@ -34,7 +34,7 @@ function renderTabs(surface: SurfaceOptions = {}, options: Parameters<typeof bui
 }
 
 const tabNames = ["Ḥifẓ", "Reading", "Practice"] as const;
-const tabAt = (index: number) => screen.getByRole("tab", { name: tabNames[index] });
+const tabAt = (index: number) => screen.getByRole("tab", { name: tabNames[index] ?? "" });
 
 describe("Tabs", () => {
   it("wires roles, ids and the panel relationship", () => {

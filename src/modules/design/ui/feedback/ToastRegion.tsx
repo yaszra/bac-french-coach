@@ -4,13 +4,13 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { useIsClient } from "../overlays/useIsClient";
 import { Toast, type ToastInput, type ToastRecord } from "./Toast";
 import styles from "./Toast.module.css";
 
@@ -35,10 +35,8 @@ const ToastContext = createContext<ToastApi | null>(null);
  */
 export function ToastRegion({ children }: { readonly children?: ReactNode }) {
   const [toasts, setToasts] = useState<readonly ToastRecord[]>([]);
-  const [mounted, setMounted] = useState(false);
   const nextId = useRef(0);
-
-  useEffect(() => setMounted(true), []);
+  const isClient = useIsClient();
 
   const dismiss = useCallback((id: string) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
@@ -71,7 +69,7 @@ export function ToastRegion({ children }: { readonly children?: ReactNode }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      {mounted ? createPortal(region, document.body) : null}
+      {isClient ? createPortal(region, document.body) : null}
     </ToastContext.Provider>
   );
 }

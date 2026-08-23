@@ -58,7 +58,12 @@ export function PageFrame({
 }: PageFrameProps) {
   return (
     <section className={styles.frame}>
-      <div className={styles.sheet} data-dense={dense ? "true" : undefined} dir="rtl">
+      <div
+        className={styles.sheet}
+        data-mushaf-sheet="true"
+        data-dense={dense ? "true" : undefined}
+        dir="rtl"
+      >
         {header === undefined ? null : <div className={styles.headerBand}>{header}</div>}
 
         <div className={styles.body}>

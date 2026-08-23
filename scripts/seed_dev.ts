@@ -11,6 +11,7 @@ import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
 
 const url = process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL;
+if (!url) throw new Error("DATABASE_URL or DIRECT_DATABASE_URL is required to seed");
 const prisma = new PrismaClient({ datasources: { db: { url } } });
 
 const ORG_ID = "org_seed_madrasah";

@@ -141,7 +141,7 @@ export function Menu({
 
     /* Typeahead: printable single characters only. */
     if (event.key.length !== 1 || event.altKey || event.ctrlKey || event.metaKey) return;
-    const now = Date.now();
+    const now = event.timeStamp;
     const state = typeahead.current;
     state.buffer = now - state.at > TYPEAHEAD_RESET_MS ? event.key.toLowerCase() : state.buffer + event.key.toLowerCase();
     state.at = now;

@@ -1,0 +1,30 @@
+{
+  "id": "narration.letters.group1",
+  "lessonId": "letters.group1",
+  "voice": "neural_tts",
+  "voiceNote": "English prose is synthesized; it is explanation, not recitation. Every Arabic term spoken here is drawn from content/qaidah/lexicon.json and is a term, never a passage.",
+  "segments": [
+    {
+      "id": "intro",
+      "en": "These are the first seven letters. Listen for where each one is made in the mouth.",
+      "terms": [
+        "حَرْف",
+        "مَخْرَج"
+      ]
+    },
+    {
+      "id": "alif",
+      "en": "The first letter is alif. It is made deep in the throat.",
+      "terms": [
+        "حَلْق"
+      ]
+    },
+    {
+      "id": "baa",
+      "en": "Baa is made with the two lips, gently together.",
+      "terms": [
+        "شَفَتَان"
+      ]
+    }
+  ]
+}

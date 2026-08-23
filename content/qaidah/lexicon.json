@@ -1,0 +1,149 @@
+{
+  "note": "Terms narration may speak in Arabic. Single words and technical terms only — never a phrase of scripture. The narration gate checks every Arabic string in a narration manifest against this list.",
+  "terms": [
+    {
+      "id": "fathah",
+      "ar": "فَتْحَة",
+      "translit": "fatḥah",
+      "gloss": "the short 'a' vowel"
+    },
+    {
+      "id": "kasrah",
+      "ar": "كَسْرَة",
+      "translit": "kasrah",
+      "gloss": "the short 'i' vowel"
+    },
+    {
+      "id": "dammah",
+      "ar": "ضَمَّة",
+      "translit": "ḍammah",
+      "gloss": "the short 'u' vowel"
+    },
+    {
+      "id": "sukun",
+      "ar": "سُكُون",
+      "translit": "sukūn",
+      "gloss": "absence of a vowel"
+    },
+    {
+      "id": "shaddah",
+      "ar": "شَدَّة",
+      "translit": "shaddah",
+      "gloss": "doubling of a letter"
+    },
+    {
+      "id": "tanwin",
+      "ar": "تَنْوِين",
+      "translit": "tanwīn",
+      "gloss": "the doubled ending vowels"
+    },
+    {
+      "id": "madd",
+      "ar": "مَدّ",
+      "translit": "madd",
+      "gloss": "lengthening of a vowel"
+    },
+    {
+      "id": "makhraj",
+      "ar": "مَخْرَج",
+      "translit": "makhraj",
+      "gloss": "the point a letter is articulated from"
+    },
+    {
+      "id": "sifah",
+      "ar": "صِفَة",
+      "translit": "ṣifah",
+      "gloss": "a quality of a letter"
+    },
+    {
+      "id": "harf",
+      "ar": "حَرْف",
+      "translit": "ḥarf",
+      "gloss": "a letter"
+    },
+    {
+      "id": "harakah",
+      "ar": "حَرَكَة",
+      "translit": "ḥarakah",
+      "gloss": "a short vowel mark"
+    },
+    {
+      "id": "halq",
+      "ar": "حَلْق",
+      "translit": "ḥalq",
+      "gloss": "the throat"
+    },
+    {
+      "id": "lisan",
+      "ar": "لِسَان",
+      "translit": "lisān",
+      "gloss": "the tongue"
+    },
+    {
+      "id": "shafatan",
+      "ar": "شَفَتَان",
+      "translit": "shafatān",
+      "gloss": "the two lips"
+    },
+    {
+      "id": "khayshum",
+      "ar": "خَيْشُوم",
+      "translit": "khayshūm",
+      "gloss": "the nasal cavity"
+    },
+    {
+      "id": "ghunnah",
+      "ar": "غُنَّة",
+      "translit": "ghunnah",
+      "gloss": "nasalisation"
+    },
+    {
+      "id": "idgham",
+      "ar": "إِدْغَام",
+      "translit": "idghām",
+      "gloss": "assimilation of one letter into the next"
+    },
+    {
+      "id": "izhar",
+      "ar": "إِظْهَار",
+      "translit": "iẓhār",
+      "gloss": "clear pronunciation"
+    },
+    {
+      "id": "iqlab",
+      "ar": "إِقْلَاب",
+      "translit": "iqlāb",
+      "gloss": "conversion of a letter's sound"
+    },
+    {
+      "id": "ikhfa",
+      "ar": "إِخْفَاء",
+      "translit": "ikhfāʾ",
+      "gloss": "partial concealment of a sound"
+    },
+    {
+      "id": "qalqalah",
+      "ar": "قَلْقَلَة",
+      "translit": "qalqalah",
+      "gloss": "the echoing of certain letters"
+    },
+    {
+      "id": "waqf",
+      "ar": "وَقْف",
+      "translit": "waqf",
+      "gloss": "a pause"
+    },
+    {
+      "id": "qaidah",
+      "ar": "قَاعِدَة",
+      "translit": "qāʿidah",
+      "gloss": "the foundational reading primer"
+    },
+    {
+      "id": "tajwid",
+      "ar": "تَجْوِيد",
+      "translit": "tajwīd",
+      "gloss": "the rules of correct recitation"
+    }
+  ]
+}

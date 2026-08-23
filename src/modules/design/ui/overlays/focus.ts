@@ -31,7 +31,12 @@ export function focusableWithin(container: HTMLElement): HTMLElement[] {
 
 export type FocusTrapOptions = {
   readonly active: boolean;
-  readonly containerRef: RefObject<HTMLElement | null>;
+  /**
+   * The overlay element itself — an element, not a ref, because an overlay
+   * rendered through a portal arrives one commit late. Pass a state setter as
+   * its `ref` and the trap engages the moment the element exists.
+   */
+  readonly container: HTMLElement | null;
   readonly initialFocusRef?: RefObject<HTMLElement | null> | undefined;
   readonly onEscape?: (() => void) | undefined;
 };
@@ -42,29 +47,37 @@ export type FocusTrapOptions = {
  * Tab and Shift+Tab cycle within the container; Escape asks the overlay to
  * close; when the overlay goes away the element that opened it is focused
  * again, so a keyboard user never loses their place.
+ *
+ * Focus is placed once, when the overlay opens — a re-render of the page
+ * behind it never yanks the cursor back to the top.
  */
-export function useFocusTrap({ active, containerRef, initialFocusRef, onEscape }: FocusTrapOptions) {
+export function useFocusTrap({ active, container, initialFocusRef, onEscape }: FocusTrapOptions) {
+  const escape = useRef(onEscape);
+  const initial = useRef(initialFocusRef);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (!active) return;
-    const container = containerRef.current;
-    if (!container) return;
+    escape.current = onEscape;
+    initial.current = initialFocusRef;
+  }, [onEscape, initialFocusRef]);
+
+  useEffect(() => {
+    if (!active || !container) return;
 
     const doc = container.ownerDocument;
     previouslyFocused.current =
       doc.activeElement instanceof HTMLElement ? doc.activeElement : null;
 
-    const initial = initialFocusRef?.current ?? focusableWithin(container)[0] ?? container;
-    if (initial === container && !container.hasAttribute("tabindex")) {
+    const target = initial.current?.current ?? focusableWithin(container)[0] ?? container;
+    if (target === container && !container.hasAttribute("tabindex")) {
       container.setAttribute("tabindex", "-1");
     }
-    initial.focus();
+    target.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.stopPropagation();
-        onEscape?.();
+        escape.current?.();
         return;
       }
       if (event.key !== "Tab") return;
@@ -103,7 +116,7 @@ export function useFocusTrap({ active, containerRef, initialFocusRef, onEscape }
       doc.removeEventListener("focusin", onFocusIn);
       previouslyFocused.current?.focus();
     };
-  }, [active, containerRef, initialFocusRef, onEscape]);
+  }, [active, container]);
 }
 
 /** Stop the page behind an overlay from scrolling, and restore it exactly. */
@@ -125,14 +138,19 @@ export function useOutsidePointerDown(
   containerRef: RefObject<HTMLElement | null>,
   onOutside: () => void,
 ) {
+  const handler = useRef(onOutside);
+  useEffect(() => {
+    handler.current = onOutside;
+  }, [onOutside]);
+
   useEffect(() => {
     if (!active) return;
-    const handler = (event: Event) => {
+    const listener = (event: Event) => {
       const container = containerRef.current;
       if (!container) return;
-      if (event.target instanceof Node && !container.contains(event.target)) onOutside();
+      if (event.target instanceof Node && !container.contains(event.target)) handler.current();
     };
-    document.addEventListener("pointerdown", handler, true);
-    return () => document.removeEventListener("pointerdown", handler, true);
-  }, [active, containerRef, onOutside]);
+    document.addEventListener("pointerdown", listener, true);
+    return () => document.removeEventListener("pointerdown", listener, true);
+  }, [active, containerRef]);
 }

@@ -24,6 +24,11 @@
   transition: color var(--motion-base) var(--ease-standard);
 }
 
+/* Latin placeholders (catalogue only) never wear the muṣḥaf face. */
+.word[lang="en"] {
+  font-family: var(--font-ui);
+}
+
 /* Depth 0…5 → the alpha ladder. Nothing else may set --ink-strength. */
 .word[data-depth="0"] { --ink-strength: var(--ink-depth-0); }
 .word[data-depth="1"] { --ink-strength: var(--ink-depth-1); }

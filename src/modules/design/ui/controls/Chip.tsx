@@ -42,6 +42,8 @@ const CROSS = (
  */
 export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(props, ref) {
   const { tone = "neutral", selected, className, onClick, disabled, children, ...allRest } = props;
+  /* Pulled out so they never reach the DOM. They are read back off `props`
+     below, where TypeScript can still narrow the removable union. */
   const { onRemove: _onRemove, removeLabel: _removeLabel, ...rest } = allRest;
   const interactive = onClick !== undefined || selected !== undefined;
   const toneClass = selected === true ? styles.selected : styles[tone];

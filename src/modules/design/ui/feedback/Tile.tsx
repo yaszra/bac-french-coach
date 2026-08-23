@@ -32,6 +32,11 @@ export type TileProps = {
   readonly onMove?: ((direction: TileDirection) => void) | undefined;
   /** Pointer tap. Keyboard uses the pick-up / place flow instead. */
   readonly onSelect?: (() => void) | undefined;
+  /**
+   * Message key announced when the server marks this tile wrong. The exercise
+   * owns that copy, so the tile never invents it.
+   */
+  readonly wrongMessageKey?: string | undefined;
   /** Mirror of every announcement, for a shared live region. */
   readonly onAnnounce?: ((message: string) => void) | undefined;
   readonly onDragStart?: ((event: DragEvent<HTMLButtonElement>) => void) | undefined;
@@ -62,13 +67,13 @@ export function Tile({
   onCancel,
   onMove,
   onSelect,
+  wrongMessageKey,
   onAnnounce,
   onDragStart,
   ref,
 }: TileProps) {
   const { t, dir } = useSurface();
   const [internalPicked, setInternalPicked] = useState(false);
-  const [announcement, setAnnouncement] = useState("");
   const picked = pickedProp ?? internalPicked;
   const disabled = state === "disabled";
 
@@ -77,13 +82,28 @@ export function Tile({
     ? t("a11y.wordInAyah", { index: slot, ayah })
     : text;
 
-  const announce = useCallback(
-    (message: string) => {
-      setAnnouncement(message);
-      onAnnounce?.(message);
-    },
-    [onAnnounce],
-  );
+  /**
+   * What the live region says right now.
+   *
+   * Held → where the tile is (and it says it again each time it moves).
+   * Marked wrong → the exercise's own words, if it supplied any.
+   * Otherwise silent: putting a tile down and cancelling are both carried by
+   * `aria-pressed`, which the screen reader announces on its own.
+   */
+  const announcement =
+    state === "wrong" && wrongMessageKey !== undefined
+      ? t(wrongMessageKey)
+      : picked
+        ? position
+        : "";
+
+  /* Mirror every announcement into a shared region when the caller wants one. */
+  const previousAnnouncement = useRef("");
+  useEffect(() => {
+    if (previousAnnouncement.current === announcement) return;
+    previousAnnouncement.current = announcement;
+    if (announcement !== "") onAnnounce?.(announcement);
+  }, [announcement, onAnnounce]);
 
   const setPicked = useCallback(
     (next: boolean) => {
@@ -91,22 +111,6 @@ export function Tile({
     },
     [pickedProp],
   );
-
-  /* A tile that moved while held says where it landed. */
-  const previousSlot = useRef(slot);
-  useEffect(() => {
-    if (previousSlot.current === slot) return;
-    previousSlot.current = slot;
-    if (picked) announce(position);
-  }, [slot, picked, position, announce]);
-
-  /* A tile the server marked wrong invites another try — it never scolds. */
-  const previousState = useRef(state);
-  useEffect(() => {
-    if (previousState.current === state) return;
-    previousState.current = state;
-    if (state === "wrong") announce(t("action.retry"));
-  }, [state, announce, t]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) return;
@@ -120,15 +124,14 @@ export function Tile({
         setPicked(true);
         onPickUp?.();
       }
-      announce(position);
       return;
     }
 
+    /* Escape puts the tile back where it was. */
     if (event.key === "Escape" && picked) {
       event.preventDefault();
       setPicked(false);
       onCancel?.();
-      announce(t("action.cancel"));
       return;
     }
 

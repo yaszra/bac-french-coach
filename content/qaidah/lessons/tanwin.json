@@ -1,0 +1,42 @@
+{
+  "id": "tanwin",
+  "order": 11,
+  "kind": "tanwin",
+  "titleKey": "lesson.tanwin",
+  "prerequisites": [
+    "shaddah"
+  ],
+  "elements": [
+    {
+      "conceptId": "tanwin.fath",
+      "mark": "ً",
+      "codepoint": "U+064B"
+    },
+    {
+      "conceptId": "tanwin.kasr",
+      "mark": "ٍ",
+      "codepoint": "U+064D"
+    },
+    {
+      "conceptId": "tanwin.damm",
+      "mark": "ٌ",
+      "codepoint": "U+064C"
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.tanwin"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

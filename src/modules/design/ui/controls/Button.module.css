@@ -131,8 +131,10 @@
   gap: var(--space-2);
 }
 
+/* opacity, not visibility: a hidden label is removed from the accessibility
+   tree, and a busy button must keep its name. */
 .root[data-loading="true"] .content {
-  visibility: hidden;
+  opacity: 0;
 }
 
 .busy {

@@ -1,0 +1,32 @@
+{
+  "id": "shaddah",
+  "order": 10,
+  "kind": "shaddah",
+  "titleKey": "lesson.shaddah",
+  "prerequisites": [
+    "sukun"
+  ],
+  "elements": [
+    {
+      "conceptId": "shaddah",
+      "mark": "ّ",
+      "codepoint": "U+0651"
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.shaddah"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

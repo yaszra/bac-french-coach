@@ -1,0 +1,96 @@
+{
+  "id": "letters.forms",
+  "order": 5,
+  "kind": "letter_form",
+  "titleKey": "lesson.letters.forms",
+  "prerequisites": [
+    "letters.group4"
+  ],
+  "elements": [
+    {
+      "conceptId": "form.alif",
+      "letter": "ا",
+      "forms": [
+        "isolated",
+        "initial",
+        "medial",
+        "final"
+      ]
+    },
+    {
+      "conceptId": "form.baa",
+      "letter": "ب",
+      "forms": [
+        "isolated",
+        "initial",
+        "medial",
+        "final"
+      ]
+    },
+    {
+      "conceptId": "form.taa",
+      "letter": "ت",
+      "forms": [
+        "isolated",
+        "initial",
+        "medial",
+        "final"
+      ]
+    },
+    {
+      "conceptId": "form.thaa",
+      "letter": "ث",
+      "forms": [
+        "isolated",
+        "initial",
+        "medial",
+        "final"
+      ]
+    },
+    {
+      "conceptId": "form.jeem",
+      "letter": "ج",
+      "forms": [
+        "isolated",
+        "initial",
+        "medial",
+        "final"
+      ]
+    },
+    {
+      "conceptId": "form.haa_h",
+      "letter": "ح",
+      "forms": [
+        "isolated",
+        "initial",
+        "medial",
+        "final"
+      ]
+    },
+    {
+      "conceptId": "form.khaa",
+      "letter": "خ",
+      "forms": [
+        "isolated",
+        "initial",
+        "medial",
+        "final"
+      ]
+    }
+  ],
+  "activities": [
+    "recognition"
+  ],
+  "narration": {
+    "manifestId": "narration.letters.forms"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
-import { createElement as h } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderSurface } from "../display/renderSurface";
+import { h, renderSurface } from "../display/testing";
 import { Button, type ButtonVariant } from "./Button";
 import styles from "./Button.module.css";
 
@@ -72,7 +71,7 @@ describe("Button", () => {
   });
 
   it("hides decorative icons from assistive technology", () => {
-    renderSurface(h(Button, { iconStart: h("svg", { "data-testid": "glyph" }) }, "Listen"));
+    renderSurface(h(Button, { iconStart: h("svg", { viewBox: "0 0 12 12" }) }, "Listen"));
     const button = screen.getByRole("button", { name: "Listen" });
     const wrapper = button.querySelector(`.${styles.icon}`);
     expect(wrapper?.getAttribute("aria-hidden")).toBe("true");

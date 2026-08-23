@@ -79,7 +79,7 @@ export const LinkButton = forwardRef<HTMLAnchorElement, LinkButtonProps>(functio
       ...(external ? { target: "_blank", rel: "noopener noreferrer" } : {}),
       ...rest,
     },
-    <span className={buttonStyles.content} key="content">
+    <span className={buttonStyles.content}>
       {iconStart === undefined ? null : (
         <span className={buttonStyles.icon} aria-hidden="true">
           {iconStart}

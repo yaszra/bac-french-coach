@@ -1,0 +1,76 @@
+{
+  "id": "letters.group3",
+  "order": 3,
+  "kind": "letter",
+  "titleKey": "lesson.letters.group3",
+  "prerequisites": [
+    "letters.group2"
+  ],
+  "elements": [
+    {
+      "conceptId": "letter.daad",
+      "letter": "ض",
+      "codepoint": "U+0636",
+      "translit": "ḍād",
+      "makhraj": "lisan_edge"
+    },
+    {
+      "conceptId": "letter.taa_h",
+      "letter": "ط",
+      "codepoint": "U+0637",
+      "translit": "ṭāʾ",
+      "makhraj": "lisan_tip"
+    },
+    {
+      "conceptId": "letter.dhaa",
+      "letter": "ظ",
+      "codepoint": "U+0638",
+      "translit": "ẓāʾ",
+      "makhraj": "lisan_tip"
+    },
+    {
+      "conceptId": "letter.ayn",
+      "letter": "ع",
+      "codepoint": "U+0639",
+      "translit": "ʿayn",
+      "makhraj": "halq_wasat"
+    },
+    {
+      "conceptId": "letter.ghayn",
+      "letter": "غ",
+      "codepoint": "U+063A",
+      "translit": "ghayn",
+      "makhraj": "halq_adna"
+    },
+    {
+      "conceptId": "letter.faa",
+      "letter": "ف",
+      "codepoint": "U+0641",
+      "translit": "fāʾ",
+      "makhraj": "shafatan"
+    },
+    {
+      "conceptId": "letter.qaf",
+      "letter": "ق",
+      "codepoint": "U+0642",
+      "translit": "qāf",
+      "makhraj": "lisan_back"
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.letters.group3"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

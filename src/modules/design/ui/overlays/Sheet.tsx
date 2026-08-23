@@ -52,12 +52,13 @@ export function Sheet({
   dismissOnBackdrop = true,
 }: SheetProps) {
   const { t } = useSurface();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const titleId = useId();
   const dragStart = useRef<number | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
 
-  useFocusTrap({ active: open, containerRef, initialFocusRef, onEscape: onClose });
+  useFocusTrap({ active: open, container, initialFocusRef, onEscape: onClose });
   useScrollLock(open);
 
   if (!open) return null;
@@ -71,6 +72,7 @@ export function Sheet({
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!canDrag) return;
     dragStart.current = event.clientY;
+    setDragging(true);
     if (typeof event.currentTarget.setPointerCapture === "function") {
       event.currentTarget.setPointerCapture(event.pointerId);
     }
@@ -84,6 +86,7 @@ export function Sheet({
   const onPointerUp = () => {
     if (dragStart.current === null) return;
     dragStart.current = null;
+    setDragging(false);
     if (dragOffset > DISMISS_DISTANCE_PX) onClose();
     setDragOffset(0);
   };
@@ -92,10 +95,10 @@ export function Sheet({
     <Portal>
       <div className={styles.backdrop} data-variant={variant} onMouseDown={onBackdropMouseDown}>
         <div
-          ref={containerRef}
+          ref={setContainer}
           className={styles.sheet}
           data-variant={variant}
-          data-dragging={dragStart.current === null ? undefined : "true"}
+          data-dragging={dragging ? "true" : undefined}
           style={dragOffset > 0 ? { transform: `translateY(${dragOffset}px)` } : undefined}
           role="dialog"
           aria-modal="true"
@@ -121,7 +124,7 @@ export function Sheet({
             <button
               type="button"
               className={styles.close}
-              aria-label={t("action.close")}
+              aria-label={t("a11y.closeDialog")}
               onClick={onClose}
             >
               <svg className={styles.closeGlyph} viewBox="0 0 18 18" aria-hidden="true" focusable="false">

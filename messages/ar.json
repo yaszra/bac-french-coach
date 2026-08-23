@@ -43,7 +43,8 @@
     "closeDialog": "أغلق النافذة",
     "loading": "جارٍ التحميل",
     "wordInAyah": "الكلمة {index} من الآية {ayah}",
-    "inkDepth": "قوة الحفظ {depth} من ٥"
+    "inkDepth": "قوة الحفظ {depth} من ٥",
+    "opensInNewTab": "يُفتح في تبويب جديد"
   },
   "count": {
     "dueReviews": {

@@ -291,8 +291,21 @@ function insufficient(missing: readonly string[]): GradeResult {
   return { kind: "insufficient_evidence", missing };
 }
 
+/**
+ * A judge's finding: a base grade, the ceilings the observations impose, and the
+ * penalty steps they earn.
+ *
+ * Order matters, and it is fixed in `gradeAttempt`: **ceilings first, penalties
+ * after**. If a penalty were applied before a ceiling, the ceiling could silently
+ * absorb it — a rebuild with a dozen rescrambles would score the same as a clean
+ * one, because both would be pushed down to the rung's maximum anyway.
+ */
 interface Verdict {
-  readonly grade: Grade;
+  readonly base: Grade;
+  /** Ceilings imposed by what was observed (a revealed answer, for instance). */
+  readonly caps: readonly Grade[];
+  /** Penalty steps: each one lowers the grade by a rung, with `again` as the floor. */
+  readonly downgrades: number;
   readonly rationale: readonly string[];
   /** Accuracy-like factor in [0, 1] applied to the rung's evidence strength. */
   readonly quality: number;
@@ -336,19 +349,28 @@ export function gradeAttempt(
   const thresholds = context.thresholds ?? DEFAULT_GRADING_THRESHOLDS;
   const scaffold = context.scaffold;
   const verdict = judge(evidence, thresholds);
-  if (verdict === null || "missing" in verdict) {
-    return insufficient(verdict === null ? ["evidence"] : verdict.missing);
-  }
+  if ("missing" in verdict) return insufficient(verdict.missing);
 
   const rationale = [...verdict.rationale];
-  let grade = capGrade(verdict.grade, MAX_GRADE_BY_EXERCISE[evidence.exercise]);
-  if (grade !== verdict.grade) rationale.push(`hifz.grade.capped_by_exercise.${evidence.exercise}`);
+  let grade = verdict.base;
 
+  // 1. The rung's own ceiling: what this exercise can ever prove.
+  const exerciseCap = capGrade(grade, MAX_GRADE_BY_EXERCISE[evidence.exercise]);
+  if (exerciseCap !== grade) rationale.push(`hifz.grade.capped_by_exercise.${evidence.exercise}`);
+  grade = exerciseCap;
+
+  // 2. The support that was on screen: reading is not recalling.
   if (scaffold !== undefined) {
-    const capped = capGrade(grade, MAX_GRADE_BY_SCAFFOLD[scaffold]);
-    if (capped !== grade) rationale.push(`hifz.grade.capped_by_scaffold.${scaffold}`);
-    grade = capped;
+    const scaffoldCap = capGrade(grade, MAX_GRADE_BY_SCAFFOLD[scaffold]);
+    if (scaffoldCap !== grade) rationale.push(`hifz.grade.capped_by_scaffold.${scaffold}`);
+    grade = scaffoldCap;
   }
+
+  // 3. Ceilings the observations themselves impose.
+  for (const cap of verdict.caps) grade = capGrade(grade, cap);
+
+  // 4. Penalties, last, so they always bite.
+  grade = downgrade(grade, verdict.downgrades);
 
   return {
     kind: "graded",
@@ -363,7 +385,7 @@ type Judgement = Verdict | { readonly missing: readonly string[] };
 function judge(
   evidence: Exclude<AttemptEvidence, { exercise: "oral_recitation" }>,
   thresholds: GradingThresholds,
-): Judgement | null {
+): Judgement {
   switch (evidence.exercise) {
     case "listen":
       return judgeListen(evidence, thresholds);
@@ -394,15 +416,15 @@ function judgeListen(
   const rationale = ["hifz.grade.listen_is_exposure_not_recall"];
   if (coverage < thresholds.listen.minimumCoverage) {
     rationale.push("hifz.grade.listen_incomplete");
-    return { grade: "again", rationale, quality: coverage, penalty: 1 };
+    return { base: "again", caps: [], downgrades: 0, rationale, quality: coverage, penalty: 1 };
   }
   if (coverage < thresholds.listen.fullCoverage) rationale.push("hifz.grade.listen_partial");
   if (evidence.replays >= thresholds.listen.replayConcern) {
     rationale.push("hifz.grade.listen_many_replays");
   }
-  // Capped at `hard` downstream by MAX_GRADE_BY_EXERCISE; stated here as well so the
-  // ceiling is visible at the point the grade is proposed.
-  return { grade: "hard", rationale, quality: coverage, penalty: 1 };
+  // `hard` is proposed and `hard` is also the rung's ceiling: exposure is not
+  // retrieval, so no arrangement of observations can lift a listen above it.
+  return { base: "hard", caps: ["hard"], downgrades: 0, rationale, quality: coverage, penalty: 1 };
 }
 
 function judgeRecallFirst(
@@ -422,29 +444,32 @@ function judgeRecallFirst(
 
   const ratio = clamp01(evidence.producedWordCount / evidence.expectedWordCount);
   const rationale: string[] = [];
-  let grade: Grade;
-  if (ratio >= thresholds.recallFirst.complete) grade = "easy";
-  else if (ratio >= thresholds.recallFirst.good) grade = "good";
-  else if (ratio >= thresholds.recallFirst.hard) grade = "hard";
-  else grade = "again";
-
+  const caps: Grade[] = [];
+  let downgrades = 0;
   let penalty = 1;
+
+  let base: Grade;
+  if (ratio >= thresholds.recallFirst.complete) base = "easy";
+  else if (ratio >= thresholds.recallFirst.good) base = "good";
+  else if (ratio >= thresholds.recallFirst.hard) base = "hard";
+  else base = "again";
+
   if (evidence.revealedAfterMs !== null) {
     penalty *= REVEAL_STRENGTH_FACTOR;
     if (evidence.revealedAfterMs <= thresholds.recallFirst.gaveUpMs) {
       rationale.push("hifz.grade.revealed_immediately");
-      grade = "again";
+      base = "again";
     } else {
       rationale.push("hifz.grade.answer_revealed");
-      grade = capGrade(grade, "hard");
+      caps.push("hard");
     }
   }
   if (evidence.hintsUsed > 0) {
     rationale.push("hifz.grade.hints_used");
-    grade = downgrade(grade, evidence.hintsUsed);
+    downgrades += evidence.hintsUsed;
     penalty *= hintFactor(evidence.hintsUsed);
   }
-  return { grade, rationale, quality: ratio, penalty };
+  return { base, caps, downgrades, rationale, quality: ratio, penalty };
 }
 
 function judgeRebuild(
@@ -476,26 +501,27 @@ function judgeRebuild(
   const correct = evidence.placements.filter((placement) => placement.correct).length;
   const accuracy = correct / total;
   const rationale: string[] = [];
-  let grade: Grade;
-  if (accuracy >= 1) grade = "easy";
-  else if (accuracy >= thresholds.rebuild.good) grade = "good";
-  else if (accuracy >= thresholds.rebuild.hard) grade = "hard";
-  else grade = "again";
+  let downgrades = 0;
+  let penalty = 1;
+
+  let base: Grade;
+  if (accuracy >= 1) base = "easy";
+  else if (accuracy >= thresholds.rebuild.good) base = "good";
+  else if (accuracy >= thresholds.rebuild.hard) base = "hard";
+  else base = "again";
 
   const perPlacement = evidence.rescrambles / total;
-  let penalty = 1;
   if (perPlacement > thresholds.rebuild.rescramblesPerPlacement) {
-    const steps = Math.max(1, Math.floor(perPlacement));
     rationale.push("hifz.grade.rescramble_churn");
-    grade = downgrade(grade, steps);
+    downgrades += Math.max(1, Math.floor(perPlacement));
     penalty *= Math.max(MIN_HINT_FACTOR, 1 / (1 + perPlacement));
   }
   if (evidence.elapsedMs / total > thresholds.rebuild.msPerPlacement) {
     rationale.push("hifz.grade.rebuild_laboured");
-    grade = downgrade(grade, 1);
+    downgrades += 1;
     penalty *= 0.8;
   }
-  return { grade, rationale, quality: accuracy, penalty };
+  return { base, caps: [], downgrades, rationale, quality: accuracy, penalty };
 }
 
 function judgeGapFill(
@@ -521,19 +547,21 @@ function judgeGapFill(
   const attemptsPerGap = evidence.gaps.reduce((sum, gap) => sum + gap.attempts, 0) / total;
 
   const rationale: string[] = [];
-  let grade: Grade;
-  if (correct === total && firstTry === total) grade = "easy";
-  else if (accuracy >= thresholds.gapFill.good) grade = "good";
-  else if (accuracy >= thresholds.gapFill.hard) grade = "hard";
-  else grade = "again";
-
+  let downgrades = 0;
   let penalty = 1;
+
+  let base: Grade;
+  if (correct === total && firstTry === total) base = "easy";
+  else if (accuracy >= thresholds.gapFill.good) base = "good";
+  else if (accuracy >= thresholds.gapFill.hard) base = "hard";
+  else base = "again";
+
   if (attemptsPerGap > thresholds.gapFill.attemptsPerGap) {
     rationale.push("hifz.grade.gap_fill_repeated_attempts");
-    grade = downgrade(grade, 1);
+    downgrades += 1;
     penalty *= Math.max(MIN_HINT_FACTOR, 1 / attemptsPerGap);
   }
-  return { grade, rationale, quality: accuracy, penalty };
+  return { base, caps: [], downgrades, rationale, quality: accuracy, penalty };
 }
 
 function judgeCue(
@@ -551,7 +579,9 @@ function judgeCue(
 
   if (!evidence.producedFirstWords) {
     return {
-      grade: "again",
+      base: "again",
+      caps: [],
+      downgrades: 0,
       rationale: ["hifz.grade.cue_not_produced"],
       quality: 0,
       penalty: 1,
@@ -559,22 +589,24 @@ function judgeCue(
   }
 
   const rationale: string[] = [];
-  let grade: Grade;
-  if (evidence.latencyMs <= thresholds.cue.easyMs) grade = "easy";
-  else if (evidence.latencyMs <= thresholds.cue.goodMs) grade = "good";
-  else if (evidence.latencyMs <= thresholds.cue.hardMs) grade = "hard";
-  else grade = "again";
+  let downgrades = 0;
+  let penalty = 1;
+
+  let base: Grade;
+  if (evidence.latencyMs <= thresholds.cue.easyMs) base = "easy";
+  else if (evidence.latencyMs <= thresholds.cue.goodMs) base = "good";
+  else if (evidence.latencyMs <= thresholds.cue.hardMs) base = "hard";
+  else base = "again";
   if (evidence.latencyMs > thresholds.cue.easyMs) rationale.push("hifz.grade.cue_slow");
 
-  let penalty = 1;
   if (evidence.hintsUsed > 0) {
     rationale.push("hifz.grade.hints_used");
-    grade = downgrade(grade, evidence.hintsUsed);
+    downgrades += evidence.hintsUsed;
     penalty *= hintFactor(evidence.hintsUsed);
   }
   // Quality falls off with latency: a join that fires instantly proves more.
   const quality = clamp01(thresholds.cue.goodMs / Math.max(evidence.latencyMs, 1));
-  return { grade, rationale, quality, penalty };
+  return { base, caps: [], downgrades, rationale, quality, penalty };
 }
 
 function judgeChain(
@@ -586,10 +618,7 @@ function judgeChain(
     missing.push("ayahsRequested");
   }
   if (!isCount(evidence.ayahsProducedInOrder)) missing.push("ayahsProducedInOrder");
-  if (
-    missing.length === 0 &&
-    evidence.ayahsProducedInOrder > evidence.ayahsRequested
-  ) {
+  if (missing.length === 0 && evidence.ayahsProducedInOrder > evidence.ayahsRequested) {
     missing.push("ayahsProducedInOrder");
   }
   if (!Array.isArray(evidence.breaks)) missing.push("breaks");
@@ -606,19 +635,21 @@ function judgeChain(
   const ratio = clamp01(evidence.ayahsProducedInOrder / evidence.ayahsRequested);
   const breaks = evidence.breaks.length;
   const rationale: string[] = [];
-  let grade: Grade;
-  if (ratio >= 1 && breaks === 0) grade = "easy";
-  else if (ratio >= thresholds.chain.good) grade = "good";
-  else if (ratio >= thresholds.chain.hard) grade = "hard";
-  else grade = "again";
-
+  let downgrades = 0;
   let penalty = 1;
+
+  let base: Grade;
+  if (ratio >= 1 && breaks === 0) base = "easy";
+  else if (ratio >= thresholds.chain.good) base = "good";
+  else if (ratio >= thresholds.chain.hard) base = "hard";
+  else base = "again";
+
   if (breaks > 0) {
     rationale.push("hifz.grade.chain_broken");
-    grade = downgrade(grade, breaks >= 2 ? 2 : 1);
+    downgrades += breaks >= 2 ? 2 : 1;
     penalty *= Math.max(MIN_HINT_FACTOR, 1 / (1 + breaks));
   }
-  return { grade, rationale, quality: ratio, penalty };
+  return { base, caps: [], downgrades, rationale, quality: ratio, penalty };
 }
 
 /* -------------------------------------------------------------------- bridge */

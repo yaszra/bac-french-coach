@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, type MouseEvent, type ReactNode, type RefObject } from "react";
+import { useId, useState, type MouseEvent, type ReactNode, type RefObject } from "react";
 import { useSurface } from "../../theme/ThemeProvider";
 import { Portal } from "./Portal";
 import { useFocusTrap, useScrollLock } from "./focus";
@@ -37,11 +37,11 @@ export function Dialog({
   dismissOnBackdrop = true,
 }: DialogProps) {
   const { t } = useSurface();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
 
-  useFocusTrap({ active: open, containerRef, initialFocusRef, onEscape: onClose });
+  useFocusTrap({ active: open, container, initialFocusRef, onEscape: onClose });
   useScrollLock(open);
 
   if (!open) return null;
@@ -54,7 +54,7 @@ export function Dialog({
     <Portal>
       <div className={styles.backdrop} onMouseDown={onBackdropMouseDown}>
         <div
-          ref={containerRef}
+          ref={setContainer}
           className={styles.dialog}
           data-size={size}
           role="dialog"

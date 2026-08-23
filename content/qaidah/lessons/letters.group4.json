@@ -1,0 +1,76 @@
+{
+  "id": "letters.group4",
+  "order": 4,
+  "kind": "letter",
+  "titleKey": "lesson.letters.group4",
+  "prerequisites": [
+    "letters.group3"
+  ],
+  "elements": [
+    {
+      "conceptId": "letter.kaf",
+      "letter": "ك",
+      "codepoint": "U+0643",
+      "translit": "kāf",
+      "makhraj": "lisan_back"
+    },
+    {
+      "conceptId": "letter.lam",
+      "letter": "ل",
+      "codepoint": "U+0644",
+      "translit": "lām",
+      "makhraj": "lisan_edge"
+    },
+    {
+      "conceptId": "letter.meem",
+      "letter": "م",
+      "codepoint": "U+0645",
+      "translit": "mīm",
+      "makhraj": "shafatan"
+    },
+    {
+      "conceptId": "letter.noon",
+      "letter": "ن",
+      "codepoint": "U+0646",
+      "translit": "nūn",
+      "makhraj": "lisan_tip"
+    },
+    {
+      "conceptId": "letter.haa",
+      "letter": "ه",
+      "codepoint": "U+0647",
+      "translit": "hāʾ",
+      "makhraj": "halq_aqsa"
+    },
+    {
+      "conceptId": "letter.waw",
+      "letter": "و",
+      "codepoint": "U+0648",
+      "translit": "wāw",
+      "makhraj": "shafatan"
+    },
+    {
+      "conceptId": "letter.yaa",
+      "letter": "ي",
+      "codepoint": "U+064A",
+      "translit": "yāʾ",
+      "makhraj": "lisan_mid"
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.letters.group4"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

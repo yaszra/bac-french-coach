@@ -24,7 +24,7 @@ import {
   type RecommendedAction,
   type TierPolicy,
 } from "./policy";
-import { addDays } from "./time";
+import { addDays, daysBetween } from "./time";
 import {
   bodyUnitId,
   isSuccessGrade,
@@ -288,7 +288,9 @@ export function simulate(options: SimulationOptions): SimulationResult {
     candidates.map((candidate) => [candidate.unitId, candidate.kind]),
   );
   const states = new Map<UnitId, MemoryState>();
-  const lapses: RecentLapse[] = [];
+  // Only failures inside the repair window matter to the policy; older ones are
+  // dropped so a long run does not carry a growing tail of dead evidence.
+  let lapses: readonly RecentLapse[] = [];
   const events: SimulatedReview[] = [];
   const reviewsPerDayByDay: number[] = [];
 
@@ -320,7 +322,16 @@ export function simulate(options: SimulationOptions): SimulationResult {
         scheduling,
       );
       states.set(item.unitId, outcome.next);
-      if (outcome.lapsed) lapses.push({ unitId: item.unitId, occurredAt: now });
+      if (outcome.lapsed) {
+        lapses = [
+          ...lapses.filter(
+            (lapse) =>
+              daysBetween(lapse.occurredAt, now) <= tierPolicy.repairWindowDays &&
+              lapse.unitId !== item.unitId,
+          ),
+          { unitId: item.unitId, occurredAt: now },
+        ];
+      }
       events.push({
         dayIndex,
         at: now,

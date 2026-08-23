@@ -3,6 +3,7 @@
 import { forwardRef, useId, type HTMLAttributes, type ReactNode } from "react";
 import { useSurface } from "../../theme/ThemeProvider";
 import { cx } from "./cx";
+import shared from "./shared.module.css";
 import styles from "./Rosette.module.css";
 
 export type RosetteSize = "sm" | "md" | "lg";
@@ -67,7 +68,7 @@ export const Rosette = forwardRef<HTMLSpanElement, RosetteProps>(function Rosett
       {...rest}
     >
       {label === undefined ? null : (
-        <span id={labelId} hidden>
+        <span id={labelId} className={shared.visuallyHidden}>
           {label}
         </span>
       )}

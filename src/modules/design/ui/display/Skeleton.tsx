@@ -30,13 +30,15 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(function Skele
   };
 
   if (variant === "text" && lines > 1) {
+    const groupStyle: CSSProperties = { ...style, ...(width === undefined ? {} : { inlineSize: width }) };
+    const lineStyle: CSSProperties | undefined = height === undefined ? undefined : { blockSize: height };
     return (
-      <div ref={ref} className={cx(styles.group, className)} aria-hidden="true" {...rest}>
+      <div ref={ref} className={cx(styles.group, className)} style={groupStyle} aria-hidden="true" {...rest}>
         {Array.from({ length: lines }, (_unused, index) => (
           <div
             key={index}
             className={cx(styles.root, styles.text, index === lines - 1 && styles.lastLine)}
-            style={index === lines - 1 ? style : sizing}
+            style={lineStyle}
           />
         ))}
       </div>

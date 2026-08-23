@@ -9,7 +9,7 @@ export type ShellNavProps<Id extends string & ShellIconName> = {
   readonly destinations: readonly Id[];
   readonly active: Id;
   readonly items?: readonly ShellNavItem<Id>[] | undefined;
-  readonly variant: "bar" | "rail" | "sidebar";
+  readonly variant: "responsive" | "bar" | "rail" | "sidebar";
   readonly collapsed?: boolean | undefined;
 };
 

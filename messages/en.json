@@ -43,7 +43,8 @@
     "closeDialog": "Close dialogue",
     "loading": "Loading",
     "wordInAyah": "Word {index} of āyah {ayah}",
-    "inkDepth": "Memory strength {depth} of 5"
+    "inkDepth": "Memory strength {depth} of 5",
+    "opensInNewTab": "Opens in a new tab"
   },
   "count": {
     "dueReviews": {

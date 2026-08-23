@@ -24,13 +24,3 @@ export function elapsedDays(from: Date | null, to: Date): number {
 export function addDays(at: Date, days: number): Date {
   return new Date(at.getTime() + days * MS_PER_DAY);
 }
-
-/** Midnight UTC of the day containing `at`. Used to bucket a day's session load. */
-export function startOfUtcDay(at: Date): Date {
-  return new Date(Math.floor(at.getTime() / MS_PER_DAY) * MS_PER_DAY);
-}
-
-/** Whole-day index of `at` relative to `origin` (floor of the fractional difference). */
-export function dayIndex(origin: Date, at: Date): number {
-  return Math.floor(daysBetween(startOfUtcDay(origin), at));
-}

@@ -1,8 +1,7 @@
 // @vitest-environment jsdom
-import { createElement as h } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanup, screen } from "@testing-library/react";
-import { renderSurface } from "../display/renderSurface";
+import { h, renderSurface } from "../display/testing";
 import { Field, type FieldControlProps } from "./Field";
 import { Input } from "./Input";
 
@@ -19,9 +18,15 @@ describe("Field", () => {
   it("hands the wiring to a render prop", () => {
     let seen: FieldControlProps | null = null;
     renderSurface(
-      h(Field, { label: "Āyah", description: "From 1", error: "Out of range", required: true }, (control) => {
-        seen = control;
-        return h("input", { ...control });
+      h(Field, {
+        label: "Āyah",
+        description: "From 1",
+        error: "Out of range",
+        required: true,
+        children: (control) => {
+          seen = control;
+          return h("input", { ...control });
+        },
       }),
     );
 

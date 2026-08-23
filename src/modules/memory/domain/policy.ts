@@ -26,7 +26,7 @@
 
 import { DEFAULT_SCHEDULING_POLICY, daysOverdue, isDue, retrievability } from "./fsrs";
 import { stateMapOf } from "./graph";
-import { clamp } from "./numeric";
+import { clamp, roundTo } from "./numeric";
 import { daysBetween } from "./time";
 import {
   bodiesOfTransition,
@@ -328,7 +328,7 @@ export function planSession(input: PolicyInput): SessionPlan {
         state.unitId,
         reason("memory.reason.due_review", {
           unitId: state.unitId,
-          retrievability: Math.round(recall * 100) / 100,
+          retrievability: roundTo(recall, 2),
           overdueDays: Math.floor(overdue),
         }),
         99 * (1 - recall),
@@ -337,7 +337,9 @@ export function planSession(input: PolicyInput): SessionPlan {
     );
   }
 
-  // (d) weak joins — the seam is weaker than both āyāt it joins.
+  // (d) weak joins — the seam is weaker than both āyāt it joins. A join that is
+  // already due was claimed by the review band above; what is left here are joins
+  // that look fine on the schedule but are quietly lagging their own āyāt.
   let weakJoinCount = 0;
   for (const state of input.states) {
     if (claimed.has(state.unitId)) continue;
@@ -360,9 +362,9 @@ export function planSession(input: PolicyInput): SessionPlan {
         state.unitId,
         reason("memory.reason.weak_join", {
           unitId: state.unitId,
-          joinRetrievability: Math.round(joinRecall * 100) / 100,
-          bodyRetrievability: Math.round(bodyRecall * 100) / 100,
-          gap: Math.round(gap * 100) / 100,
+          joinRetrievability: roundTo(joinRecall, 2),
+          bodyRetrievability: roundTo(bodyRecall, 2),
+          gap: roundTo(gap, 2),
         }),
         99 * gap,
         tier,
@@ -385,8 +387,8 @@ export function planSession(input: PolicyInput): SessionPlan {
   let newWithheldReason: Reason | null = null;
   if (dueLoadMinutes >= newMaterialBudgetMinutes && newCandidates.length > 0) {
     newWithheldReason = reason("memory.reason.new_material_withheld_load", {
-      dueLoadMinutes: Math.round(dueLoadMinutes * 10) / 10,
-      newMaterialBudgetMinutes: Math.round(newMaterialBudgetMinutes * 10) / 10,
+      dueLoadMinutes: roundTo(dueLoadMinutes, 1),
+      newMaterialBudgetMinutes: roundTo(newMaterialBudgetMinutes, 1),
       dueReviewCount,
       repairCount,
     });
@@ -413,7 +415,7 @@ export function planSession(input: PolicyInput): SessionPlan {
           reason("memory.reason.new_material", {
             unitId: candidate.unitId,
             order: candidate.order,
-            dueLoadMinutes: Math.round(dueLoadMinutes * 10) / 10,
+            dueLoadMinutes: roundTo(dueLoadMinutes, 1),
             budgetMinutes: tier.sessionBudgetMinutes,
           }),
           99 - rank,

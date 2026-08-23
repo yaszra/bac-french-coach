@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
-import { createElement as h } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderSurface } from "../display/renderSurface";
+import { h, renderSurface } from "../display/testing";
 import { IconButton } from "./IconButton";
 import buttonStyles from "./Button.module.css";
 import styles from "./IconButton.module.css";

@@ -5,13 +5,22 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "src") },
   },
+  // The root tsconfig sets jsx: "preserve" because Next compiles JSX itself.
+  // Vitest has no Next compiler, so esbuild is told to transform JSX here, and
+  // tsconfigRaw stops it reading "preserve" back out of the tsconfig. This is
+  // what lets component tests live beside their components without each
+  // directory carrying its own tsconfig.
+  esbuild: {
+    jsx: "automatic",
+    tsconfigRaw: { compilerOptions: { jsx: "react-jsx", useDefineForClassFields: true } },
+  },
   test: {
     projects: [
       {
         extends: true,
         test: {
           name: "unit",
-          include: ["src/**/*.test.ts", "scripts/**/*.test.mjs"],
+          include: ["src/**/*.test.ts", "src/**/*.test.tsx", "scripts/**/*.test.mjs"],
           environment: "node",
         },
       },

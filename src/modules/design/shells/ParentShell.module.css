@@ -1,0 +1,66 @@
+/* ParentShell — phone-first, three destinations, room to breathe.
+   A parent reads this standing up, once a day. No dense tables live here:
+   content is stacked, generously spaced and readable at arm's length. */
+
+.shell {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "nav";
+  grid-template-rows: minmax(0, 1fr) auto;
+  block-size: var(--shell-block-size, 100dvh);
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--text);
+}
+
+@media (min-width: 700px) {
+  .shell {
+    grid-template-areas: "nav main";
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+.navArea {
+  grid-area: nav;
+  min-inline-size: 0;
+}
+
+.main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.header {
+  flex: none;
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.content {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: 0 var(--space-5) var(--space-8);
+}
+
+@media (min-width: 700px) {
+  .content {
+    max-inline-size: 44rem;
+    padding-inline: var(--space-6);
+  }
+  .header {
+    padding-inline: var(--space-6);
+  }
+}

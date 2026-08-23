@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { createElement as h } from "react";
+import type { AnchorHTMLAttributes, ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderSurface } from "../display/renderSurface";
+import { h, renderSurface } from "../display/testing";
 import { LinkButton } from "./LinkButton";
 import buttonStyles from "./Button.module.css";
 
@@ -37,8 +37,9 @@ describe("LinkButton", () => {
   });
 
   it("can render through a router-aware component", () => {
-    const Anchor = (props: Record<string, unknown>) => h("a", { ...props, "data-router": "true" });
+    const Anchor = (props: AnchorHTMLAttributes<HTMLAnchorElement>): ReactElement =>
+      h("a", { ...props, id: "router-anchor" });
     renderSurface(h(LinkButton, { href: "/today", as: Anchor }, "Today"));
-    expect(screen.getByRole("link", { name: "Today" }).getAttribute("data-router")).toBe("true");
+    expect(screen.getByRole("link", { name: "Today" }).id).toBe("router-anchor");
   });
 });

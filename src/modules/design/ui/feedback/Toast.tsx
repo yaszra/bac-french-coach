@@ -14,6 +14,8 @@ export type ToastInput = {
   readonly tone?: ToastTone | undefined;
   /** 0 keeps the toast until it is dismissed. */
   readonly durationMs?: number | undefined;
+  /** Accessible name for the dismiss control. Defaults to `a11y.closeDialog`. */
+  readonly closeLabel?: string | undefined;
 };
 
 export type ToastRecord = ToastInput & { readonly id: string };
@@ -34,6 +36,7 @@ export function Toast({
   params,
   tone = "neutral",
   durationMs = TOAST_DEFAULT_DURATION_MS,
+  closeLabel,
   onDismiss,
 }: ToastProps) {
   const { t } = useSurface();
@@ -77,7 +80,7 @@ export function Toast({
       <button
         type="button"
         className={styles.close}
-        aria-label={t("action.close")}
+        aria-label={closeLabel ?? t("a11y.closeDialog")}
         onClick={() => onDismiss(id)}
       >
         <svg className={styles.closeGlyph} viewBox="0 0 16 16" aria-hidden="true" focusable="false">
