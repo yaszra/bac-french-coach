@@ -1,0 +1,31 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   The four faces, self-hosted.
+
+   Nothing here reaches a third party. The files ship with the application, so
+   the muṣḥaf renders identically offline, on a school Chromebook, and behind a
+   strict content-security policy — and no child's device makes a request to a
+   font CDN in order to read the Qurʾān.
+
+   Order matters below: the muṣḥaf face is declared last so it wins the cascade
+   for its own family name.
+
+   A NOTE ON THE MUṢḤAF FACE. The tokens name KFGQPC Uthmanic Script HAFS first
+   and Amiri Quran second. KFGQPC is licensed and installed at deploy time; the
+   vendored fallback is what most environments will actually render. Both are
+   ʿUthmānī-faithful, but they are cut for different digital editions of the
+   text, and a mark the vendored face lacks renders as an empty box INSIDE
+   scripture. `pnpm exec tsx scripts/check_mushaf_glyphs.ts` proves every
+   codepoint in the vendored corpus has a glyph in the fallback face, and CI
+   runs it, so this can never regress silently.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Latin interface */
+@import "@fontsource-variable/instrument-sans/index.css";
+/* Display — titles only, never Arabic */
+@import "@fontsource-variable/newsreader/index.css";
+/* Arabic interface */
+@import "@fontsource/ibm-plex-sans-arabic/400.css";
+@import "@fontsource/ibm-plex-sans-arabic/500.css";
+@import "@fontsource/ibm-plex-sans-arabic/600.css";
+/* The muṣḥaf page */
+@import "@fontsource/amiri-quran/arabic-400.css";

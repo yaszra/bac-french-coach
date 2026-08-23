@@ -34,6 +34,8 @@ jobs:
       - run: pnpm test
       - run: pnpm db:generate && pnpm prisma migrate deploy
       - run: pnpm test:integration
+      - name: Install Chromium for the muṣḥaf glyph check
+        run: pnpm exec playwright install --with-deps chromium
       - name: Content gates
         run: pnpm gates
       - run: pnpm build

@@ -59,5 +59,9 @@ export type SurfaceOptions = {
  */
 export function renderSurface(ui: ReactNode, options: SurfaceOptions = {}): RenderResult {
   const { tier = "adult", theme = "light", locale = "en" } = options;
-  return render(createElement(SurfaceProvider, { tier, theme, locale, children: ui }));
+  return render(
+    <SurfaceProvider tier={tier} theme={theme} locale={locale}>
+      {ui}
+    </SurfaceProvider>,
+  );
 }

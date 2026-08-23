@@ -1,2 +1,6 @@
+/* Fonts first: an @font-face that arrives after the rules using it causes a
+   flash of fallback text, and on the muṣḥaf page a fallback face means missing
+   marks inside scripture rather than merely different letterforms. */
+@import "../modules/design/tokens/fonts.css";
 @import "tailwindcss";
 @import "../modules/design/tokens/marginalia.css";
