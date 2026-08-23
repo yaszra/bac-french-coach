@@ -9,6 +9,7 @@ import { getTodayPlan, todayHeadline, type TodayPlan } from "@/modules/memory/ac
 import { headlineOf, kidStepFor, KID_STEPS, type KidStep } from "@/modules/hifz/ui/plan-shape";
 import { inkDepthOf } from "@/modules/hifz/ui/ink-depth";
 import { practiceHref } from "../practice/href";
+import { LEARNER_NAV } from "../nav";
 import { PrimaryCard } from "./PrimaryCard";
 import { SyncBanner } from "../SyncBanner";
 import styles from "./today.module.css";
@@ -64,14 +65,6 @@ export default async function TodayPage() {
     </LearnerShell>
   );
 }
-
-const LEARNER_NAV = [
-  { id: "today" as const, href: "/today" },
-  { id: "quran" as const, href: "/quran" },
-  { id: "reading" as const, href: "/reading" },
-  { id: "practice" as const, href: "/practice" },
-  { id: "me" as const, href: "/me" },
-];
 
 /**
  * Nothing due.
@@ -192,7 +185,9 @@ function TeenRhythm({ plan, t }: { readonly plan: TodayPlan; readonly t: Transla
             ? t("learner.today.streak.none")
             : t("learner.today.streak.label", { count: plan.streak.days })}
         </span>
-        {plan.streak.restingToday ? <span>{t("learner.today.streak.resting")}</span> : null}
+        {plan.streak.restingToday && plan.streak.days > 0 ? (
+          <span>{t("learner.today.streak.resting")}</span>
+        ) : null}
       </div>
       {plan.streak.graceUsed > 0 ? <p className={styles.note}>{t("learner.today.streak.grace")}</p> : null}
 

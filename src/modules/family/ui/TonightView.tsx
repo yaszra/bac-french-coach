@@ -57,7 +57,11 @@ export function TonightView({
         ) : (
           <>
             <p className={styles.sentence}>
-              {t("family.tonight.reviews", { done: tonight.reviews.done, due: tonight.reviews.due })}
+              {/* "8 of 0" is not a sentence. With nothing due, we say what was
+                  actually done and claim no proportion at all. */}
+              {tonight.reviews.due > 0
+                ? t("family.tonight.reviews", { done: tonight.reviews.done, due: tonight.reviews.due })
+                : t("family.tonight.reviewsDoneOnly", { done: tonight.reviews.done })}
             </p>
             <p className={styles.sentence}>
               {recall.kind === "measured"

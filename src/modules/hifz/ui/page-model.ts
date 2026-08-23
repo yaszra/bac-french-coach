@@ -36,6 +36,15 @@ export interface PageModelInput {
   readonly wordStates?: ReadonlyMap<string, InkWordState> | undefined;
   /** `${ayah}:${index}` of words the scaffold reveals despite a depth of 0. */
   readonly revealed?: ReadonlySet<string> | undefined;
+  /**
+   * Reveal every word regardless of its depth.
+   *
+   * Ink depth and scaffold are different axes, and this is where they meet. A
+   * learner LISTENING to a new āyah must see it — a page of blank spaces teaches
+   * nothing — so the scaffold reveals what the depth has not yet earned. What was
+   * earned is untouched: `revealed` changes what is shown, never `depth`.
+   */
+  readonly revealAll?: boolean | undefined;
 }
 
 export interface PageModel {
@@ -60,7 +69,7 @@ export function buildPageModel(input: PageModelInput): PageModel {
       const index = position + 1;
       const key = `${ayah.ayah}:${index}`;
       const state = input.wordStates?.get(key);
-      const revealed = input.revealed?.has(key);
+      const revealed = input.revealAll === true || input.revealed?.has(key) === true;
       words.push({
         text,
         depth: ayah.depth,

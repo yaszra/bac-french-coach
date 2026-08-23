@@ -8,6 +8,7 @@ import { learnerSnapshot } from "@/modules/hifz/repo/learner-repo";
 import { ayahsOfUnit } from "@/modules/hifz/ui/passage";
 import { passageInkDepth } from "@/modules/hifz/ui/ink-depth";
 import { Lantern } from "@/modules/design/ui/feedback";
+import { LEARNER_NAV } from "../nav";
 import styles from "./quran.module.css";
 
 /**
@@ -53,7 +54,7 @@ export default async function QuranIndexPage({
   const ordered = [...pages.entries()].sort((left, right) => left[0] - right[0]);
 
   return (
-    <LearnerShell active="quran" items={[{ id: "today" as const, href: "/today" }, { id: "quran" as const, href: "/quran" }]}>
+    <LearnerShell active="quran" items={LEARNER_NAV}>
       <div className={styles.page}>
         <div className={styles.inner}>
           <h1 className={styles.title}>{t("learner.quran.title")}</h1>

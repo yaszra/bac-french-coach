@@ -20,13 +20,12 @@ export default async function VerifyQueuePage() {
     learners.map((learner) => learner.userId),
   );
 
-  const now = Date.now();
   const rows = waiting.map((request) => {
     const scope = parseUnitScope(request.unitScope);
     return {
       id: request.id,
       learnerName: request.learnerName,
-      hours: Math.max(0, Math.floor((now - request.requestedAt.getTime()) / 3_600_000)),
+      hours: request.waitingHours,
       sura: scope?.sura ?? null,
       ayahFrom: scope?.ayahFrom ?? null,
       ayahTo: scope?.ayahTo ?? null,

@@ -1,9 +1,9 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import { z } from "zod";
+// The boundary schema lives in schemas/: a "use server" module may only export
+// async functions, so a Zod object cannot be exported from this file.
+import { verdictInput } from "../schemas/verdict";
 import { applyVerdict } from "../domain/verdict";
-import { CORRECTIONS } from "../domain/taxonomy";
 import { appendEvent } from "../../platform/events/append";
 import { withTenant } from "../../platform/db/tenant";
 import { requireCaller } from "../../identity/actions/session-context";
@@ -18,24 +18,6 @@ import { logger } from "../../platform/observability/logger";
  * row is immutable at the database: correcting a verdict means recording a new
  * one, so the history of what a teacher actually said survives.
  */
-const correctionMark = z.strictObject({
-  category: z.enum(CORRECTIONS.map((c) => c.category) as [string, ...string[]]),
-  sura: z.number().int().min(1).max(114),
-  ayah: z.number().int().min(1),
-  wordIndex: z.number().int().nonnegative().optional(),
-  wentTo: z.strictObject({ sura: z.number().int().min(1).max(114), ayah: z.number().int().min(1) }).optional(),
-  note: z.string().max(500).optional(),
-});
-
-export const verdictInput = z.strictObject({
-  verificationRequestId: z.string().min(1),
-  learnerUserId: z.string().min(1),
-  verdict: z.enum(["passed", "needs_work", "not_attempted"]),
-  unitIds: z.array(z.string()).min(1),
-  corrections: z.array(correctionMark).default([]),
-  note: z.string().max(1000).optional(),
-});
-
 export type RecordVerdictResult =
   | { readonly ok: true; readonly eventId: string; readonly drills: number; readonly graphSignals: number }
   | { readonly ok: false; readonly error: "invalid" | "not_allowed" | "already_decided" };

@@ -4,6 +4,7 @@ import { getCaller } from "@/modules/identity/actions/session-context";
 import { THEMES, type Theme, type Tier } from "@/modules/design/theme/tier";
 import type { Locale } from "@/modules/platform/i18n/types";
 import { LearnerSurface } from "./LearnerSurface";
+import { RegisterServiceWorker } from "./RegisterServiceWorker";
 import styles from "./learner.module.css";
 
 export const metadata = { title: "Itqān" };
@@ -30,6 +31,7 @@ export default async function LearnerLayout({ children }: { readonly children: R
   return (
     <Suspense fallback={null}>
       <LearnerSurface tier={tier} theme={theme} locale={locale}>
+        <RegisterServiceWorker />
         <div className={styles.root}>{children}</div>
       </LearnerSurface>
     </Suspense>

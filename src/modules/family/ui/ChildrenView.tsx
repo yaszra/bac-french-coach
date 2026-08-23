@@ -79,7 +79,7 @@ export function PendingClaim({ childName }: { readonly childName: string }) {
   return (
     <div className={styles.stack}>
       <p className={styles.sentence}>{t("family.claim.waitingForTeacher", { child: childName })}</p>
-      <div>
+      <div className={styles.subBlock}>
         <p className={styles.eyebrow}>{t("family.claim.canSee")}</p>
         <ul className={styles.tickList}>
           {PENDING_CLAIM_VISIBILITY.visible.map((key) => (
@@ -87,7 +87,7 @@ export function PendingClaim({ childName }: { readonly childName: string }) {
           ))}
         </ul>
       </div>
-      <div>
+      <div className={styles.subBlock}>
         <p className={styles.eyebrow}>{t("family.claim.cannotSee")}</p>
         <ul className={styles.tickList}>
           {PENDING_CLAIM_VISIBILITY.hidden.map((key) => (

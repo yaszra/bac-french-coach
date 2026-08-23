@@ -18,12 +18,20 @@ export type PendingVerification = {
   /** References only: {sura, ayahFrom, ayahTo} or {lessonId}. Never Arabic. */
   readonly unitScope: unknown;
   readonly hasAudio: boolean;
+  /** Whole hours this person has been waiting, as of the read. */
+  readonly waitingHours: number;
 };
+
+/** How long someone has waited. Computed at the read, so no render needs a clock. */
+function waitingHoursSince(requestedAt: Date, now: Date): number {
+  return Math.max(0, Math.floor((now.getTime() - requestedAt.getTime()) / 3_600_000));
+}
 
 export async function pendingVerifications(
   organizationId: string,
   learnerUserIds: readonly string[],
   limit = 50,
+  now: Date = new Date(),
 ): Promise<readonly PendingVerification[]> {
   if (learnerUserIds.length === 0) return [];
   return withTenant(organizationId, async (tx) => {
@@ -57,6 +65,7 @@ export async function pendingVerifications(
       requestedAt: row.requestedAt,
       unitScope: row.unitScope,
       hasAudio: row.audioAssetId !== null,
+      waitingHours: waitingHoursSince(row.requestedAt, now),
     }));
   });
 }
@@ -64,6 +73,7 @@ export async function pendingVerifications(
 export async function pendingVerification(
   organizationId: string,
   requestId: string,
+  now: Date = new Date(),
 ): Promise<PendingVerification | null> {
   return withTenant(organizationId, async (tx) => {
     const row = await tx.verificationRequest.findUnique({
@@ -91,6 +101,7 @@ export async function pendingVerification(
       requestedAt: row.requestedAt,
       unitScope: row.unitScope,
       hasAudio: row.audioAssetId !== null,
+      waitingHours: waitingHoursSince(row.requestedAt, now),
     };
   });
 }

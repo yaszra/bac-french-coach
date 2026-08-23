@@ -83,3 +83,29 @@ describe("the page model", () => {
     expect(model.lines).toHaveLength(8);
   });
 });
+
+describe("revealing for a scaffold", () => {
+  it("reveals every word when the scaffold says so", () => {
+    const model = buildPageModel({ ayahs: [{ ayah: 1, words: ["a", "b"], depth: 0 }], revealAll: true });
+    expect(model.lines[0]?.words.every((w) => w.revealed === true)).toBe(true);
+  });
+
+  it("leaves what was earned alone while revealing it", () => {
+    const model = buildPageModel({ ayahs: [{ ayah: 1, words: ["a"], depth: 0 }], revealAll: true });
+    expect(model.lines[0]?.words[0]?.depth).toBe(0);
+  });
+
+  it("reveals nothing by default", () => {
+    const model = buildPageModel({ ayahs: [{ ayah: 1, words: ["a"], depth: 0 }] });
+    expect(model.lines[0]?.words[0]?.revealed).toBeUndefined();
+  });
+
+  it("still honours a named reveal when revealAll is off", () => {
+    const model = buildPageModel({
+      ayahs: [{ ayah: 1, words: ["a", "b"], depth: 0 }],
+      revealAll: false,
+      revealed: new Set(["1:2"]),
+    });
+    expect(model.lines[0]?.words[1]?.revealed).toBe(true);
+  });
+});

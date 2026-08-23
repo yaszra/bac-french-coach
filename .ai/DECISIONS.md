@@ -232,3 +232,28 @@ Format: D-nnn · date · decision · provenance.
 - **D-032** · 2026-08-23 · `main` was created at this branch's root commit so a
   pull request could have a merge base; the repository previously held three
   unrelated histories and no trunk. [inferred:repo state]
+
+## Family & School (2026-08-23)
+
+- **A claim is a row, not a permission.** `claimChild` writes `Relationship.state = "claimed"`
+  unless the learner has no approved teacher, in which case there is nobody to ask and it is
+  approved on the spot. The two outcomes carry different message keys so the UI cannot show one
+  reassuring sentence for both. Provenance: CLAUDE.md privacy rule + `can()`'s
+  `claim_not_yet_approved` branch.
+- **Home tasks cannot become evidence, structurally.** Family activity uses `FAMILY_EVENT_TYPES`,
+  which is disjoint from `EVENT_TYPES`; `appendEvent` validates against that enum, and the memory
+  projection folds only over the learning stream. A home task therefore has no path into memory
+  state, present or future. Proven by unit test. Provenance: evidence rule.
+- **A tutoring guardian goes through the teacher's verdict path.** `approveRecitation` checks that
+  the verification request names an assignment the guardian created, then delegates to
+  `recordVerdict`. No second, softer verdict path exists; reports name the approver's capacity via
+  `approverLabelKey`, and a guardian is never rendered as a teacher.
+- **WhatsApp is planned, never hoped.** `planChannel` resolves to send / manual_fallback / refused
+  at the moment of sending — the 24-hour window and template approval decide which. Nothing is
+  queued that cannot go, and `deliveryStateOf` has no "pending". Provenance: honesty rule.
+- **Reports are jobs.** `/tonight` reads the `ReportRun` written by `report.nightly_family`, which
+  fires at each family's local evening (`LearnerProfile.timezone`, hourly job + `isLocalEvening`).
+  A missing run says "not built yet"; a failed one says "failed".
+- **Erasure only through the audited path.** `runDataErasure` sets `app.erasure_request_id` inside
+  a maintenance transaction, so the database trigger records every removed row in `erasure_log`.
+  Integration test `tests/integration/privacy.test.ts` proves both the deletion and the log.

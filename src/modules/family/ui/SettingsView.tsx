@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useSurface } from "../../design/theme/ThemeProvider";
 import { Button, Switch } from "../../design/ui/controls";
-import { Badge, EmptyState } from "../../design/ui/display";
+import { Badge } from "../../design/ui/display";
 import type { ConsentSummary } from "../domain/consent";
 import { addDays } from "../domain/consent";
 import type { DataRequestRow } from "../repo/privacy-repo";
@@ -109,7 +109,7 @@ export function SettingsView({
         <hr className={styles.divider} />
         <p className={styles.eyebrow}>{t("family.settings.requests")}</p>
         {requests.length === 0 ? (
-          <EmptyState title={t("family.settings.noRequests")} headingLevel={3} />
+          <p className={styles.quiet}>{t("family.settings.noRequests")}</p>
         ) : (
           <ul className={styles.list}>
             {requests.map((request) => (

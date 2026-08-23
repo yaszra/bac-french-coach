@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSurface } from "@/modules/design/theme/ThemeProvider";
 import { PaneLayout } from "@/modules/design/shells";
@@ -66,6 +66,22 @@ export type WorkspaceProps = {
  * row, page beside the tray from 700px, a third pane from 1100px. The document
  * itself never scrolls while someone is reciting.
  */
+/**
+ * When this rung started, read only from an event handler.
+ *
+ * The clock is started in an effect rather than during render: a render is not
+ * an event, may happen more than once, and a start time captured there would
+ * drift with every re-render — which would quietly corrupt the one latency the
+ * server actually grades on.
+ */
+function useStartedAt(): () => number {
+  const at = useRef<number | null>(null);
+  useEffect(() => {
+    at.current = Date.now();
+  }, []);
+  return useCallback(() => at.current ?? Date.now(), []);
+}
+
 export function Workspace(props: WorkspaceProps) {
   const { t, tier } = useSurface();
   const router = useRouter();
@@ -75,7 +91,6 @@ export function Workspace(props: WorkspaceProps) {
   const [hints, setHints] = useState(0);
   const [result, setResult] = useState<SubmitResult | null>(null);
   const [busy, setBusy] = useState(false);
-  const startedAt = useRef(Date.now());
 
   const target = props.ayahs[props.ayahs.length - 1];
   const cue = props.ayahs.length > 1 ? props.ayahs[0] : undefined;
@@ -118,7 +133,12 @@ export function Workspace(props: WorkspaceProps) {
     });
   }, [props.ayahs, props.scaffold, hints]);
 
-  const model = useMemo(() => buildPageModel({ ayahs: shownAyahs }), [shownAyahs]);
+  // The page is being shown ON PURPOSE here — to listen along, or because a hint
+  // was taken — so the words are revealed whatever depth they have earned.
+  const model = useMemo(
+    () => buildPageModel({ ayahs: shownAyahs, revealAll: props.scaffold === "full_text" || hints > 0 }),
+    [shownAyahs, props.scaffold, hints],
+  );
   const pageHidden = (props.scaffold === "blank" && hints === 0) || !committed;
 
   const page = pageHidden ? (
@@ -173,7 +193,7 @@ export function Workspace(props: WorkspaceProps) {
           onSubmit={send}
         />
       ) : props.exercise === "rebuild" ? (
-        <RebuildRung words={target?.words ?? []} seed={props.seed} busy={busy} onSubmit={send} startedAt={startedAt.current} />
+        <RebuildRung words={target?.words ?? []} seed={props.seed} busy={busy} onSubmit={send} />
       ) : props.exercise === "gap_fill" ? (
         <GapFillRung words={target?.words ?? []} gaps={props.gaps} busy={busy} onSubmit={send} />
       ) : props.exercise === "next_ayah_cue" ? (
@@ -182,7 +202,7 @@ export function Workspace(props: WorkspaceProps) {
           unitLabel={props.unitLabel}
           hints={hints}
           busy={busy}
-          startedAt={startedAt.current}
+          
           onSubmit={send}
         />
       ) : props.exercise === "connect_chain" ? (
@@ -197,15 +217,30 @@ export function Workspace(props: WorkspaceProps) {
         <OralRecitationRung
           expectedWordCount={target?.words.length ?? 1}
           busy={busy}
-          startedAt={startedAt.current}
+          
           onSubmit={send}
         />
       )}
     </div>
   );
 
+  // A rung with no recitation in the package cannot be performed at all. Rather
+  // than leaving the learner at a dead end, the action row offers the next step —
+  // and nothing is recorded for the step that could not happen.
+  const blocked = props.exercise === "listen" && props.audio.kind === "not_yet_recorded";
+
   const actionRow = (
     <div className={styles.actions}>
+      {result === null && blocked && props.nextUnitId !== null ? (
+        <LinkButton
+          href={practiceHref({ unitId: props.nextUnitId, ...(props.mode === "test" ? { mode: "test" as const } : {}) })}
+          variant="secondary"
+          fullWidth
+          data-testid="practice-skip"
+        >
+          {t("learner.practice.next")}
+        </LinkButton>
+      ) : null}
       {result === null ? (
         <LinkButton href="/today" variant="quiet" fullWidth>
           {t("learner.practice.leave")}
@@ -335,7 +370,6 @@ function ListenRung({
   return (
     <div className={styles.tray}>
       {hasTimings ? null : <p className={styles.notice}>{t("learner.listen.noTimings")}</p>}
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- recitation, not speech content */}
       <audio
         ref={element}
         src={audio.src}
@@ -471,16 +505,15 @@ function RebuildRung({
   words,
   seed,
   busy,
-  startedAt,
   onSubmit,
 }: {
   readonly words: readonly string[];
   readonly seed: number;
   readonly busy: boolean;
-  readonly startedAt: number;
   readonly onSubmit: (evidence: AttemptEvidence) => void;
 }) {
   const { t } = useSurface();
+  const startedAt = useStartedAt();
   const [state, setState] = useState<RebuildState>(() => startRebuild(words.length, seed));
 
   const done = isComplete(state);
@@ -520,7 +553,7 @@ function RebuildRung({
         disabled={!done}
         loading={busy}
         data-testid="rebuild-submit"
-        onClick={() => onSubmit(rebuildEvidence(state, Date.now() - startedAt))}
+        onClick={() => onSubmit(rebuildEvidence(state, Date.now() - startedAt()))}
       >
         {t("learner.practice.submit")}
       </Button>
@@ -621,24 +654,23 @@ function NextAyahCueRung({
   unitLabel,
   hints,
   busy,
-  startedAt,
   onSubmit,
 }: {
   readonly cueLabel: string;
   readonly unitLabel: string;
   readonly hints: number;
   readonly busy: boolean;
-  readonly startedAt: number;
   readonly onSubmit: (evidence: AttemptEvidence) => void;
 }) {
   const { t } = useSurface();
+  const startedAt = useStartedAt();
   const submit = (producedFirstWords: boolean) =>
     onSubmit({
       exercise: "next_ayah_cue",
       // An ASCII reference. Scripture cannot ride in on an evidence payload.
       cueAyah: unitLabel.replace(/[^A-Za-z0-9:._>-]/g, ""),
       producedFirstWords,
-      latencyMs: Date.now() - startedAt,
+      latencyMs: Date.now() - startedAt(),
       hintsUsed: hints,
     });
 
@@ -729,15 +761,14 @@ function ConnectChainRung({
 function OralRecitationRung({
   expectedWordCount,
   busy,
-  startedAt,
   onSubmit,
 }: {
   readonly expectedWordCount: number;
   readonly busy: boolean;
-  readonly startedAt: number;
   readonly onSubmit: (evidence: AttemptEvidence) => void;
 }) {
   const { t } = useSurface();
+  const startedAt = useStartedAt();
   return (
     <div className={styles.tray}>
       <p className={styles.instruction}>{t("learner.oral.prompt")}</p>
@@ -749,7 +780,7 @@ function OralRecitationRung({
         onClick={() =>
           onSubmit({
             exercise: "oral_recitation",
-            recordedMs: Date.now() - startedAt,
+            recordedMs: Date.now() - startedAt(),
             expectedWordCount: Math.max(1, expectedWordCount),
             // Advisory only, and never read by the grader. Absent is honest.
             advisoryMatchRate: null,

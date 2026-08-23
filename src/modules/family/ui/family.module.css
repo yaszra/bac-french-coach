@@ -117,3 +117,9 @@
   color: var(--text-muted);
   margin: 0;
 }
+
+.subBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}

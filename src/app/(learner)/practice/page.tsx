@@ -4,7 +4,8 @@ import { LearnerShell } from "@/modules/design/shells";
 import { EmptyState } from "@/modules/design/ui/display";
 import { LinkButton } from "@/modules/design/ui/controls";
 import { translator } from "@/modules/platform/i18n/translate";
-import { getAyah, wordsOf, pageOf, contentState } from "@/modules/content/domain/loader";
+import { getAyah, pageOf, contentState } from "@/modules/content/domain/loader";
+import { segmentWords } from "@/modules/hifz/ui/words";
 import { getTodayPlan } from "@/modules/memory/actions/today-plan";
 import { decideScaffold } from "@/modules/hifz/ui/scaffold-select";
 import { ayahsOfUnit, unitReferenceLabel } from "@/modules/hifz/ui/passage";
@@ -14,6 +15,7 @@ import { streamOf, nextStepAfter, type Stream } from "@/modules/hifz/ui/plan-sha
 import { weakJoins, splitByKind } from "@/modules/hifz/domain/weakJoins";
 import { ayahAudio, ayahTimings } from "@/modules/hifz/ui/audio-availability";
 import { Workspace, type AudioPayload, type AyahPayload } from "./Workspace";
+import { LEARNER_NAV } from "../nav";
 import type { PlannedStep } from "@/modules/hifz/domain/sessionPlan";
 import type { PracticeMode } from "@/modules/hifz/ui/scaffold-select";
 
@@ -44,7 +46,7 @@ export default async function PracticePage({
   const plan = await getTodayPlan(actor.organizationId, actor.userId);
 
   const shell = (children: React.ReactNode) => (
-    <LearnerShell active="practice" items={[{ id: "today" as const, href: "/today" }]}>
+    <LearnerShell active="practice" items={LEARNER_NAV}>
       {children}
     </LearnerShell>
   );
@@ -93,7 +95,7 @@ export default async function PracticePage({
     return [
       {
         ayah: ref.ayah,
-        words: wordsOf(ref.surah, ref.ayah),
+        words: segmentWords(verse.text),
         depth: inkDepthOf(unitState, plan.now),
       },
     ];

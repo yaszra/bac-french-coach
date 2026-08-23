@@ -54,6 +54,7 @@ export function SchoolOverviewView({ overview }: { readonly overview: SchoolOver
 
       <section className={styles.columns}>
         <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>{t("school.figure.heading")}</h2>
           {[overview.enrolment, overview.activeLearners, overview.teacherUsage].map((figure) => (
             <p key={figure.key} className={styles.sentence}>
               <FigureSentence figure={figure} days={days} />
@@ -98,7 +99,10 @@ function FigureSentence({ figure, days }: { readonly figure: Figure; readonly da
   // A rate below the minimum is not shown as a smaller number; the sentence
   // says what is known instead, which is the count so far.
   if (!isMeasured(figure.measured)) {
-    return <>{t("school.figure.notYetRecorded", { denominator: figure.denominator })}</>;
+    // Which figure is unmeasured matters; three identical disclaimers in a row
+    // tell an administrator nothing.
+    const label = t(figure.key.replace("school.figure.", "school.figure.label."));
+    return <>{t("school.figure.notYetRecorded", { label, denominator: figure.denominator })}</>;
   }
   return <>{t(figure.key, { count: figure.count, denominator: figure.denominator, days })}</>;
 }

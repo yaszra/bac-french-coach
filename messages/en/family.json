@@ -22,7 +22,7 @@
       "title": "Add a child",
       "intro": "Enter the code the teacher gave you. Adding a child asks for access; it does not grant it.",
       "codeLabel": "Child's code",
-      "codeHelp": "Six characters or so, from the teacher. Spaces and dashes do not matter.",
+      "codeHelp": "The code the teacher gave you. Spaces, dashes and capitals do not matter.",
       "submit": "Ask to be linked",
       "error": {
         "tooShort": "That code is too short",
@@ -67,12 +67,13 @@
       "wordsHeldMore": "{count} words held — {delta} more than last week.",
       "wordsHeldFewer": "{count} words held — {delta} fewer than last week.",
       "wordsHeldSame": "{count} words held — the same as last week.",
-      "oneThing": "One thing tonight",
+      "oneThing": "What would help tonight",
       "approvedBy": "{count} passages approved by {name} ({role}).",
       "noReport": "Tonight's report has not been built yet",
       "noReportHelp": "It is written each evening, at your own local time.",
       "reportFailed": "We could not build tonight's report",
-      "reportFailedHelp": "This is a fault on our side, and it is being retried."
+      "reportFailedHelp": "This is a fault on our side, and it is being retried.",
+      "reviewsDoneOnly": "{done} reviews done"
     },
     "task": {
       "heading": "Do this together",
@@ -174,13 +175,22 @@
       "enrolment": "{count} of {denominator} learners are enrolled in a classroom.",
       "active": "{count} of {denominator} enrolled learners did something in the last {days} days.",
       "teacherUsage": "{count} of {denominator} teachers heard a recitation in the last {days} days.",
-      "notYetRecorded": "Not enough to say yet — {denominator} so far."
+      "notYetRecorded": "{label}: not enough to say yet — {denominator} so far.",
+      "label": {
+        "enrolment": "Enrolment",
+        "active": "Active learners",
+        "teacherUsage": "Teachers listening"
+      },
+      "heading": "This week"
     },
     "latency": {
       "heading": "How long a learner waits for an ear",
       "measured": "Half of the {answered} recitations heard were answered within {median} minutes; nine in ten within {p90}.",
       "notYetRecorded": "Only {answered} recitations have been heard — {needed} more before we can say.",
-      "waiting": "{count} learners are waiting now; the longest has waited {hours} hours.",
+      "waiting": {
+        "one": "One learner is waiting now; they have waited {hours} hours.",
+        "other": "{count} learners are waiting now; the longest has waited {hours} hours."
+      },
       "noneWaiting": "Nobody is waiting to be heard."
     },
     "coverage": {
