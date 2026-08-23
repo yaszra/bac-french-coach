@@ -48,7 +48,7 @@ src/server/   session signing, actor resolution, read-side queries
 app/          Next.js App Router routes and server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        341 tests, organized by the acceptance criteria they protect
+tests/        420 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -73,7 +73,7 @@ tests/        341 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # typecheck, 341 tests, 18 DB invariants, build, bundle budget
+npm run verify      # typecheck, 420 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 npm run build       # Next.js production build
@@ -133,6 +133,15 @@ interface locale and theme are doing.
 catalogue is typed as a complete record of the English keys, so omitting a
 string is a compile error rather than a silent fallback.
 
+**`src/core/memory-map.ts`** — a map of memory, not of completion. There is
+no status meaning "finished"; a page verified a year ago and not recalled
+since renders differently from one recalled last week, and every cell carries
+a distinct glyph so the map survives greyscale and print.
+
+**`src/application/notifications.ts`** — previews are chosen from a fixed set
+and never composed from data. A template with no interpolation cannot leak a
+value, which is a stronger guarantee than sanitising one.
+
 **`db/tests/invariants.sql`** — the rules that must hold below the application:
 append-only evidence, corpus immutability, `verifier_user_id <> learner_id`,
 pending claims that cannot carry capabilities, passage release that must be
@@ -163,6 +172,10 @@ attributable, and RLS tenant isolation.
 | Every drag has a keyboard equivalent | `TileTray` roving tabindex + Enter to place |
 | No screen shows a bare percentage | `HonestMetric` takes count and total, never a percent |
 | A half-translated screen cannot ship | Arabic catalogue typed as complete |
+| A pending claim carries no capability | enforced in code and by a DB `CHECK` |
+| Revocation needs no session to expire | grants read live at decision time |
+| No sacred text or detail in a preview | previews are fixed templates with no interpolation |
+| A page is never "complete forever" | no such status exists in the memory map |
 
 Each row has at least one test named after it.
 

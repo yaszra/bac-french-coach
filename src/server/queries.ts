@@ -16,6 +16,11 @@ import {
   type LearnerSnapshot,
 } from "../core/attention.js";
 import type { CorrectionCategory, LearnerId } from "../core/types.js";
+import {
+  buildMemoryMap,
+  type MemoryMap,
+  type PageTarget,
+} from "../core/memory-map.js";
 
 /**
  * Which learners this actor may see.
@@ -458,4 +463,64 @@ export async function loadChildReport(
       decision: String(verification["decision"]).replace(/_/g, " "),
     };
   return report;
+}
+
+/**
+ * The learner's memory map.
+ *
+ * Page numbers come from the layout of each target's passage. A target
+ * spanning two pages is counted on the page its passage starts on; the
+ * map is a summary, and splitting a target across cells would show a
+ * learner two half-facts instead of one whole one.
+ */
+export async function loadMemoryMap(
+  actor: Actor,
+  learnerId: LearnerId,
+  now: number,
+): Promise<MemoryMap> {
+  const { rows } = await getPool().query(
+    `SELECT ms.state, ms.stability_days, ms.difficulty, ms.last_reviewed_at,
+            ms.next_review_at, ms.algorithm_version,
+            (SELECT min(lt.page_number)
+               FROM layout_token lt
+               JOIN word w ON w.id = lt.word_id
+              WHERE w.ayah_id = p.start_ayah_id) AS page_number,
+            (SELECT count(*)::int FROM correction c
+              LEFT JOIN correction_resolution cr ON cr.correction_id = c.id
+             WHERE c.memory_target_id = ms.memory_target_id
+               AND cr.correction_id IS NULL) AS unresolved_corrections,
+            (SELECT max(v.decided_at) FROM oral_verification v
+              WHERE v.memory_target_id = ms.memory_target_id) AS last_verified_at,
+            t.kind
+       FROM memory_state ms
+       JOIN memory_target t ON t.id = ms.memory_target_id
+       JOIN assignment a ON a.id = ms.assignment_id
+       JOIN passage p ON p.id = a.passage_id
+      WHERE ms.learner_id = $1 AND ms.organization_id = $2`,
+    [learnerId, actor.organizationId],
+  );
+
+  const targets: PageTarget[] = rows
+    .filter((r) => r["page_number"] !== null)
+    .map((r) => {
+      const target: PageTarget = {
+        pageNumber: Number(r["page_number"]),
+        state: r["state"] as PageTarget["state"],
+        unresolvedCorrections: Number(r["unresolved_corrections"] ?? 0),
+        connectionWeaknesses: r["kind"] === "connection_boundary" ? 1 : 0,
+      };
+      if (r["stability_days"] !== null && r["last_reviewed_at"] !== null)
+        target.scheduling = {
+          stabilityDays: Number(r["stability_days"]),
+          difficulty: Number(r["difficulty"]),
+          lastReviewedAt: (r["last_reviewed_at"] as Date).getTime(),
+          nextReviewAt: (r["next_review_at"] as Date).getTime(),
+          algorithmVersion: String(r["algorithm_version"]),
+        };
+      if (r["last_verified_at"])
+        target.lastVerifiedAt = (r["last_verified_at"] as Date).getTime();
+      return target;
+    });
+
+  return buildMemoryMap(targets, now);
 }

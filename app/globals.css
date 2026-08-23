@@ -160,3 +160,57 @@ body {
 
 .athar-state--denied, .athar-state--error { color: var(--athar-error); }
 .athar-state--stale, .athar-state--offline { color: var(--athar-warning-text); }
+
+/* ---------------------------------------------------------------------- *
+ * The memory map. A calm grid: colour accents the glyph, never carries
+ * the meaning on its own.
+ * ---------------------------------------------------------------------- */
+
+.athar-map__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Dense enough to see the whole muṣḥaf, loose enough to hit a cell. */
+  grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
+  gap: var(--athar-space);
+}
+
+.athar-map__page {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--athar-space);
+  border: 1px solid var(--athar-border);
+  border-radius: calc(var(--athar-radius) / 2);
+  background: var(--athar-paper);
+  color: var(--athar-ink);
+  font-size: 0.75rem;
+}
+
+.athar-map__cell[data-status="unstarted"] .athar-map__page { opacity: 0.45; }
+.athar-map__cell[data-status="verified"] .athar-map__page { border-color: var(--athar-sage); }
+.athar-map__cell[data-status="established"] .athar-map__page,
+.athar-map__cell[data-status="durable"] .athar-map__page {
+  border-color: var(--athar-sage);
+  border-width: 2px;
+}
+.athar-map__cell[data-status="fragile"] .athar-map__page { border-color: var(--athar-warning); }
+.athar-map__cell[data-status="repairing"] .athar-map__page { border-color: var(--athar-copper); }
+
+.athar-map__legend {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--athar-space) * 3);
+  margin-block: calc(var(--athar-space) * 3);
+}
+
+.athar-map__legend li { display: flex; gap: var(--athar-space); align-items: center; }
+
+.athar-map__load { list-style: none; padding: 0; display: flex; flex-wrap: wrap;
+  gap: calc(var(--athar-space) * 3); }
