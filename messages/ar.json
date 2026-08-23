@@ -72,5 +72,29 @@
       "many": "{count} طالبًا يحتاجونك اليوم",
       "other": "{count} طالب يحتاجك اليوم"
     }
+  },
+  "correction": {
+    "hesitation": "تردّد",
+    "prompted": "احتاج تلقينًا",
+    "wrongWord": "كلمة مختلفة",
+    "skippedWord": "أسقط كلمة",
+    "skippedAyah": "أسقط آية",
+    "wrongJoin": "انتقل إلى آية متشابهة",
+    "repeated": "كرّر عبارة",
+    "makhraj": "مخرج الحرف",
+    "sifah": "صفة الحرف",
+    "maddLength": "مقدار المدّ",
+    "ghunnahIdgham": "الغنّة والإدغام"
+  },
+  "verdict": {
+    "notAttempted": "لم يُقرأ",
+    "needsWork": "يحتاج مزيدًا من العمل",
+    "passedClean": "قرأ بإتقان"
+  },
+  "drill": {
+    "wrongJoin": "تدرّب على الوصل إلى الآية التالية",
+    "needsPrompt": "صِلِ الآيات دون تلقين",
+    "wordLevel": "أكمل الكلمات الناقصة",
+    "articulation": "استمع وحاكِ"
   }
 }

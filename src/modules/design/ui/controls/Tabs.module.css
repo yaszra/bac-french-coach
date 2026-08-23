@@ -1,0 +1,83 @@
+.root {
+  display: block;
+}
+
+.list {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  border-block-end: 1px solid var(--rule);
+  overflow-x: auto;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-block-size: var(--tap-min);
+  margin: 0;
+  padding-inline: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  appearance: none;
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+
+.tab:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+/* Selection is carried by weight as well as by the underline and by
+   aria-selected — never by colour alone. */
+.tabSelected {
+  color: var(--text);
+  font-weight: var(--weight-semibold);
+}
+
+.tab:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.indicator {
+  position: absolute;
+  inset-block-end: 0;
+  block-size: 2px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent);
+  transition:
+    inset-inline-start var(--motion-base) var(--ease-standard),
+    inline-size var(--motion-base) var(--ease-standard);
+}
+
+/* The underline still marks the tab; only its travel goes away. */
+@media (prefers-reduced-motion: reduce) {
+  .indicator {
+    transition: none;
+  }
+}
+
+.panel {
+  padding-block-start: var(--space-4);
+}
+
+.panel:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

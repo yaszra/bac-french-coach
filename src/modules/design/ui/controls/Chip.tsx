@@ -40,13 +40,12 @@ const CROSS = (
  * A tag, a filter, or a removable selection. Static by default — it only
  * becomes a control when you give it something to do.
  */
-export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
-  { tone = "neutral", selected, onRemove, removeLabel, className, onClick, disabled, children, ...rest },
-  ref,
-) {
+export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(props, ref) {
+  const { tone = "neutral", selected, className, onClick, disabled, children, ...allRest } = props;
+  const { onRemove: _onRemove, removeLabel: _removeLabel, ...rest } = allRest;
   const interactive = onClick !== undefined || selected !== undefined;
   const toneClass = selected === true ? styles.selected : styles[tone];
-  const removable = onRemove !== undefined;
+  const removable = props.onRemove !== undefined;
 
   const bodyClass = removable
     ? cx(styles.groupBody, interactive && styles.interactive)
@@ -71,17 +70,17 @@ export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
     </span>
   );
 
-  if (!removable) return body;
+  if (props.onRemove === undefined) return body;
 
   return (
     <span className={cx(styles.root, styles.group, toneClass, className)}>
       {body}
       <IconButton
-        label={removeLabel ?? ""}
+        label={props.removeLabel}
         variant="quiet"
         size="sm"
         disabled={disabled}
-        onClick={onRemove}
+        onClick={props.onRemove}
         icon={CROSS}
       />
     </span>

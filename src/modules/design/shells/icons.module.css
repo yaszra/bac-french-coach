@@ -1,0 +1,16 @@
+.icon {
+  inline-size: 24px;
+  block-size: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+/* Children read the picture before the word, so the picture is bigger. */
+:global([data-tier="kids"]) .icon {
+  inline-size: 30px;
+  block-size: 30px;
+}

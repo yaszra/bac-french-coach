@@ -1,0 +1,91 @@
+/* Menu — a short list of actions hung off a button.
+   Placement is logical, so it flips with the document direction. */
+
+.root {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap-min);
+  padding-inline: var(--space-4);
+  padding-block: var(--space-2);
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.trigger:hover { border-color: var(--border-strong); }
+
+.triggerGlyph {
+  inline-size: 12px;
+  block-size: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--text-muted);
+}
+
+.menu {
+  position: absolute;
+  z-index: var(--z-menu);
+  min-inline-size: 12rem;
+  max-block-size: 60vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: var(--space-1) 0 0;
+  padding: var(--space-1);
+  list-style: none;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--elevation-3);
+  animation: menu-enter var(--motion-fast) var(--ease-standard);
+}
+
+.menu[data-placement="block-end"] { inset-block-start: 100%; }
+.menu[data-placement="block-start"] { inset-block-end: 100%; margin: 0 0 var(--space-1); }
+.menu[data-align="start"] { inset-inline-start: 0; }
+.menu[data-align="end"] { inset-inline-end: 0; }
+
+.item {
+  display: block;
+}
+
+.itemButton {
+  display: flex;
+  align-items: center;
+  inline-size: 100%;
+  min-block-size: var(--tap-min);
+  padding-inline: var(--space-3);
+  padding-block: var(--space-2);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  text-align: start;
+  cursor: pointer;
+}
+
+.itemButton:hover:not(:disabled) { background: var(--accent-quiet); }
+.itemButton:disabled { color: var(--text-muted); cursor: default; }
+
+@keyframes menu-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu { animation: none; }
+}

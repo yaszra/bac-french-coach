@@ -1,0 +1,145 @@
+/* One navigation style, three shells. Bar on the phone, rail on the desktop,
+   sidebar for the teacher. Nothing here knows what a destination does. */
+
+.nav {
+  background: var(--surface-raised);
+}
+
+.list {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-block-size: var(--tap-min);
+  padding: var(--space-2);
+  background: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-tight);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+.link:hover {
+  color: var(--text);
+}
+
+.link[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-quiet);
+}
+
+/* Children: the picture leads, the target is generous. */
+:global([data-tier="kids"]) .link {
+  min-block-size: var(--tap-comfortable);
+}
+
+.label {
+  font-size: var(--text-2xs);
+  line-height: var(--leading-tight);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 20px;
+  padding-inline: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-size: var(--text-2xs);
+  line-height: 1.4;
+}
+
+/* ── Bottom bar: the phone ─────────────────────────────────────────────── */
+.nav[data-variant="bar"] {
+  border-block-start: 1px solid var(--border);
+  padding-block-end: env(safe-area-inset-bottom);
+}
+.nav[data-variant="bar"] .list {
+  justify-content: space-around;
+  padding: var(--space-1) var(--space-2);
+}
+.nav[data-variant="bar"] .item {
+  flex: 1 1 0;
+}
+.nav[data-variant="bar"] .link {
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-block-size: var(--tap-comfortable);
+}
+
+/* ── Rail: the desktop learner ─────────────────────────────────────────── */
+.nav[data-variant="rail"] {
+  block-size: 100%;
+  overflow-y: auto;
+  border-inline-end: 1px solid var(--border);
+}
+.nav[data-variant="rail"] .list {
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-3);
+}
+.nav[data-variant="rail"] .link {
+  flex-direction: column;
+  inline-size: 76px;
+  min-block-size: var(--tap-comfortable);
+}
+
+/* ── Sidebar: the teacher ──────────────────────────────────────────────── */
+.nav[data-variant="sidebar"] {
+  block-size: 100%;
+  overflow-y: auto;
+  border-inline-end: 1px solid var(--border);
+}
+.nav[data-variant="sidebar"] .list {
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+}
+.nav[data-variant="sidebar"] .item {
+  inline-size: 100%;
+}
+.nav[data-variant="sidebar"] .link {
+  inline-size: 100%;
+  gap: var(--space-3);
+  justify-content: flex-start;
+  padding-inline: var(--space-3);
+  font-size: var(--text-sm);
+  text-align: start;
+}
+
+/* Collapsed rail: the name stays in the accessible name, not on the screen. */
+.nav[data-collapsed="true"] .label {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.nav[data-collapsed="true"] .link {
+  justify-content: center;
+}

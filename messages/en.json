@@ -1,5 +1,8 @@
 {
-  "app": { "name": "Itqān", "tagline": "Mastery with precision" },
+  "app": {
+    "name": "Itqān",
+    "tagline": "Mastery with precision"
+  },
   "nav": {
     "today": "Today",
     "quran": "Qurʾān",
@@ -53,7 +56,37 @@
     "inkDepth": "Memory strength {depth} of 5"
   },
   "count": {
-    "dueReviews": { "one": "{count} review due", "other": "{count} reviews due" },
-    "studentsNeedYou": { "one": "{count} student needs you today", "other": "{count} students need you today" }
+    "dueReviews": {
+      "one": "{count} review due",
+      "other": "{count} reviews due"
+    },
+    "studentsNeedYou": {
+      "one": "{count} student needs you today",
+      "other": "{count} students need you today"
+    }
+  },
+  "correction": {
+    "hesitation": "Hesitated",
+    "prompted": "Needed a prompt",
+    "wrongWord": "Different word",
+    "skippedWord": "Word skipped",
+    "skippedAyah": "Āyah skipped",
+    "wrongJoin": "Went to a look-alike āyah",
+    "repeated": "Repeated a phrase",
+    "makhraj": "Articulation point",
+    "sifah": "Letter quality",
+    "maddLength": "Madd length",
+    "ghunnahIdgham": "Ghunnah / idghām"
+  },
+  "verdict": {
+    "notAttempted": "Not attempted",
+    "needsWork": "Needs more work",
+    "passedClean": "Recited cleanly"
+  },
+  "drill": {
+    "wrongJoin": "Practise the join to the next āyah",
+    "needsPrompt": "Connect the chain without a prompt",
+    "wordLevel": "Fill the missing words",
+    "articulation": "Listen and imitate"
   }
 }

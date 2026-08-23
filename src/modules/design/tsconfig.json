@@ -1,0 +1,13 @@
+{
+  // BUILD SHIM, not a second source of truth.
+  //
+  // The root tsconfig sets `jsx: "preserve"` because Next's compiler owns the
+  // JSX transform. Vite (and therefore vitest) reads the *nearest* tsconfig per
+  // file and refuses to transform preserved JSX, so component tests cannot run
+  // without this. It changes nothing for `next build` or for the root
+  // `tsc --noEmit`, both of which use the root config.
+  //
+  // Delete this file the moment vitest.config.ts sets `esbuild: { jsx: "automatic" }`.
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": { "jsx": "react-jsx" }
+}

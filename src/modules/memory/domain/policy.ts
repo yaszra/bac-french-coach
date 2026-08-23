@@ -90,7 +90,11 @@ export interface TierPolicy {
   readonly newMaterialLoadRatio: number;
   /** A failure this recent still counts as needing repair. */
   readonly repairWindowDays: number;
-  /** Retrievability gap below the joined bodies that marks a weak join. */
+  /**
+   * Retrievability gap below the joined bodies that marks a weak join. A transition
+   * that is not yet due always sits above the target retention (0.90), so the margin
+   * must stay below 1 − targetRetention or no join could ever qualify.
+   */
   readonly weakJoinMargin: number;
   /** Days after a verification request before it counts as overdue. */
   readonly verificationGraceDays: number;
@@ -128,7 +132,7 @@ export const DEFAULT_TIER_POLICIES: Readonly<Record<LearnerTier, TierPolicy>> = 
     maxNewUnitsPerSession: 2,
     newMaterialLoadRatio: 0.5,
     repairWindowDays: 3,
-    weakJoinMargin: 0.08,
+    weakJoinMargin: 0.04,
     verificationGraceDays: 1,
     maintenanceIntervalDays: 14,
     actionMinutes: KIDS_ACTION_MINUTES,
@@ -138,7 +142,7 @@ export const DEFAULT_TIER_POLICIES: Readonly<Record<LearnerTier, TierPolicy>> = 
     maxNewUnitsPerSession: 5,
     newMaterialLoadRatio: 0.7,
     repairWindowDays: 5,
-    weakJoinMargin: 0.1,
+    weakJoinMargin: 0.05,
     verificationGraceDays: 2,
     maintenanceIntervalDays: 21,
     actionMinutes: OLDER_ACTION_MINUTES,
@@ -148,7 +152,7 @@ export const DEFAULT_TIER_POLICIES: Readonly<Record<LearnerTier, TierPolicy>> = 
     maxNewUnitsPerSession: 8,
     newMaterialLoadRatio: 0.8,
     repairWindowDays: 7,
-    weakJoinMargin: 0.1,
+    weakJoinMargin: 0.05,
     verificationGraceDays: 3,
     maintenanceIntervalDays: 30,
     actionMinutes: OLDER_ACTION_MINUTES,
