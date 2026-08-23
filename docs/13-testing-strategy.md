@@ -51,15 +51,15 @@ lie about a child's memory.
 | 14 | Pending guardian sees nothing; tutoring revocable immediately | `policy.test.ts` |
 | 15 | Cross-tenant access fails in policy, DB, API, and E2E | `policy.test.ts` (+ integration) |
 | 16 | Failed notification or AI service cannot lose or roll back evidence | `outbox.test.ts` |
-| 17 | Restored backup passes integrity and reconciliation | *specified; DR drill runbook* |
+| 17 | Restored backup passes integrity and reconciliation | `reconciliation.test.ts` + `npm run drill` |
 | 18 | Arabic/RTL, keyboard, SR labels, reduced motion, 200 % zoom pass critical journey | `ui/accessibility.test.tsx` |
 | 19 | Declared performance budgets met on representative hardware | `scripts/bundle-budget.mjs` (bundle half); field metrics pending |
 | 20 | No Qurʾānic string, timing, audio, or asset reaches production without source, licence, approval | `content.test.ts` (tripwire + release gate) |
 
 ### What runs today, and what does not
 
-**Executable now** (`npm test`, 644 tests): criteria 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-11, 12, 13, 14, 15, 16, 18, 20.
+**Executable now** (`npm test`, 659 tests): criteria 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+11, 12, 13, 14, 15, 16, 17, 18, 20.
 
 **Executable now against real PostgreSQL** — the full Phase 1 journey
 (`npm run test:pg`, 18 tests) plus schema invariants (`npm run test:db`, 18
@@ -68,6 +68,12 @@ the database half of criteria 8, 10, 15, 20 — append-only evidence, corpus
 immutability, the self-verification constraint, the pending-claim constraint,
 the segment/assignment composite key, RLS tenant isolation, and the absence of
 an `estimated` alignment method.
+
+**Executable now against real PostgreSQL, additionally** — criterion 17.
+`reconciliation.test.ts` runs a real `pg_dump`/`pg_restore` cycle, proves a
+faithful restore reconciles, damages the restore the way a careless recovery
+would, and requires the reconciler to reject it. `npm run drill` is the same
+check as an operator-runnable script.
 
 **Partly executable** — criterion 19. The bundle half is enforced:
 `npm run budget` fails the build if a learner route's initial JavaScript
@@ -88,7 +94,7 @@ Measured at the time of writing, gzipped, excluding `nomodule` polyfills
 The shared React and Next runtime is 127.7 KB of that, so roughly 58 KB of
 the learner budget remains for everything the loop still has to grow.
 
-**Specified but not yet executable** — criterion 17. Criterion 17 needs deployed infrastructure and a restore drill.
+**Specified but not yet executable** — criterion 17. 
 Criterion 18's contrast half is verified numerically against the tokens
 (`tokens.test.ts`) because jsdom has no layout engine; the rest — keyboard
 operation, screen-reader names, RTL, reduced motion, and non-colour

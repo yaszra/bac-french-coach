@@ -10,9 +10,22 @@
  * runnable on a laptop without PostgreSQL.
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
 import pg from "pg";
+import {
+  ACADEMY,
+  AYAH,
+  CLASSROOM,
+  CORPUS,
+  LEARNER as LEARNER_ID,
+  ORG,
+  OTHER_ORG,
+  PASSAGE,
+  TEACHER,
+  connectionFor,
+  databaseReachable,
+  migrateAndSeed,
+  recreateDatabase,
+} from "./pg-seed.js";
 import { PgDatabase } from "../src/application/pg-store.js";
 import {
   createAssignment,
@@ -29,112 +42,22 @@ import type { Actor } from "../src/auth/policy.js";
 import type { AssignmentId, LearnerId } from "../src/core/types.js";
 import { MS_PER_DAY } from "../src/core/types.js";
 
-const CONNECTION =
-  process.env["ATHAR_TEST_DATABASE_URL"] ??
-  "postgres://postgres:postgres@127.0.0.1:5432/athar_pg_test";
-
-const ORG = "11111111-1111-4111-8111-111111111111";
-const OTHER_ORG = "22222222-2222-4222-8222-222222222222";
-const ACADEMY = "11111111-1111-4111-8111-111111111112";
-const CLASSROOM = "11111111-1111-4111-8111-111111111113";
-const TEACHER = "11111111-1111-4111-8111-111111111114";
-const LEARNER = "11111111-1111-4111-8111-111111111115" as LearnerId;
-const CORPUS = "11111111-1111-4111-8111-111111111116";
-const AYAH = "11111111-1111-4111-8111-111111111117";
-const PASSAGE = "11111111-1111-4111-8111-111111111118";
+/** This suite owns its own database, so no other suite can race it. */
+const DATABASE = "athar_journey_test";
+const CONNECTION = connectionFor(DATABASE);
+const LEARNER = LEARNER_ID as LearnerId;
 
 const T0 = Date.UTC(2026, 2, 2, 9, 0, 0);
 
 let pool: pg.Pool | undefined;
 let db: PgDatabase;
 
-async function reachable(): Promise<boolean> {
-  const probe = new pg.Pool({ connectionString: CONNECTION, connectionTimeoutMillis: 2000 });
-  try {
-    await probe.query("SELECT 1");
-    await probe.end();
-    return true;
-  } catch {
-    await probe.end().catch(() => undefined);
-    return false;
-  }
-}
-
 /**
  * Probed at module scope, not in `beforeAll`: vitest evaluates `describe`
  * bodies during collection, so a flag set in `beforeAll` would always read
  * false when the skip decision is made.
  */
-const available = await reachable();
-
-/**
- * Seed only what a real deployment seeds outside the learning loop:
- * organizations, people, the approved corpus, and a released passage.
- * Everything the journey itself needs is created by commands.
- */
-async function seed(client: pg.PoolClient): Promise<void> {
-  const migrations = join(import.meta.dirname, "..", "db", "migrations");
-  for (const file of readdirSync(migrations).sort())
-    await client.query(readFileSync(join(migrations, file), "utf8"));
-
-  await client.query(
-    `DO $$ BEGIN
-       IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'athar_app') THEN
-         CREATE ROLE athar_app NOLOGIN;
-       END IF;
-     END $$;
-     GRANT USAGE ON SCHEMA public TO athar_app;
-     GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO athar_app;
-     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO athar_app;`,
-  );
-
-  await client.query(`INSERT INTO organization (id, name) VALUES ($1,'Org A'),($2,'Org B')`, [
-    ORG,
-    OTHER_ORG,
-  ]);
-  await client.query(
-    `INSERT INTO academy (id, organization_id, name, territory) VALUES ($1,$2,'Academy A','GB')`,
-    [ACADEMY, ORG],
-  );
-  await client.query(
-    `INSERT INTO classroom (id, organization_id, academy_id, name) VALUES ($1,$2,$3,'Hifz 2')`,
-    [CLASSROOM, ORG, ACADEMY],
-  );
-  await client.query(
-    `INSERT INTO app_user (id, organization_id, display_name)
-     VALUES ($1,$3,'Ustadh Kareem'),($2,$3,'Amina S.')`,
-    [TEACHER, LEARNER, ORG],
-  );
-  await client.query(
-    `INSERT INTO enrollment (organization_id, academy_id, classroom_id, learner_id)
-     VALUES ($1,$2,$3,$4)`,
-    [ORG, ACADEMY, CLASSROOM, LEARNER],
-  );
-
-  // An approved, published corpus. No Qur'anic text: the token is an
-  // opaque synthetic identifier, as everywhere else in this repository.
-  await client.query(
-    `INSERT INTO corpus_version
-       (id, edition, lifecycle, sha256, surah_count, ayah_count, word_count,
-        page_count, expected_lines_per_page, published_at)
-     VALUES ($1,'test-edition','published','deadbeef',1,1,1,1,15, now())`,
-    [CORPUS],
-  );
-  await client.query(`INSERT INTO surah (corpus_version_id, number, ayah_count) VALUES ($1,1,1)`, [
-    CORPUS,
-  ]);
-  await client.query(
-    `INSERT INTO ayah (id, corpus_version_id, surah_number, number_in_surah) VALUES ($1,$2,1,1)`,
-    [AYAH, CORPUS],
-  );
-  await client.query(
-    `INSERT INTO passage
-       (id, organization_id, corpus_version_id, label, start_ayah_id, end_ayah_id,
-        segment_count, released, release_blocks, released_at, released_by_user_id)
-     VALUES ($1,$2,$3,'Al-Mulk 12-15',$4,$4,1,true,'{}', now(), $5)`,
-    [PASSAGE, ORG, CORPUS, AYAH, TEACHER],
-  );
-}
+const available = await databaseReachable();
 
 const teacher: Actor = {
   userId: TEACHER,
@@ -153,16 +76,10 @@ const learner: Actor = {
 
 beforeAll(async () => {
   if (!available) return;
+  recreateDatabase(DATABASE);
   const admin = new pg.Pool({ connectionString: CONNECTION });
-  const client = await admin.connect();
-  try {
-    // A clean schema per run, so the journey starts from nothing.
-    await client.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
-    await seed(client);
-  } finally {
-    client.release();
-    await admin.end();
-  }
+  await migrateAndSeed(admin);
+  await admin.end();
   pool = new pg.Pool({ connectionString: CONNECTION });
   // Run as a non-superuser so row-level security actually applies.
   db = new PgDatabase(pool, { applicationRole: "athar_app" });

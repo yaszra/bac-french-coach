@@ -71,3 +71,12 @@ jobs:
 
       - name: Bundle budget
         run: npm run budget
+
+      # A disaster-recovery drill that is never run is not a recovery plan.
+      - name: Restore drill
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          ATHAR_SOURCE_DB: athar_journey_test
+        run: npm run drill

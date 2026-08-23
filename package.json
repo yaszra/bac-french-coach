@@ -14,7 +14,8 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "budget": "node scripts/bundle-budget.mjs"
+    "budget": "node scripts/bundle-budget.mjs",
+    "drill": "bash scripts/restore-drill.sh"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
