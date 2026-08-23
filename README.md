@@ -49,7 +49,7 @@ src/server/   session signing, actor resolution, read-side queries
 app/          Next.js App Router routes and server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        516 tests, organized by the acceptance criteria they protect
+tests/        570 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -74,7 +74,7 @@ tests/        516 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # typecheck, 516 tests, 18 DB invariants, build, bundle budget
+npm run verify      # typecheck, 570 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 npm run build       # Next.js production build
@@ -154,6 +154,17 @@ tagged evidence or inference, inferences must state confidence, evidence must
 not, and phrasing that would certify recitation or assert what the text should
 be is rejected. A test greps the whole `src/ai` tree for repository imports.
 
+**`src/core/knowledge-graph.ts`** — answers the one question a teacher
+cannot answer alone: is this a memory problem, a reading problem, or a
+connection problem? Reading prerequisites are checked first, because
+repetition cannot fix them. Below three independent attempts it says
+"insufficient evidence" rather than guessing from one bad day.
+
+**`src/core/motivation.ts`** — rewards behaviour that predicts learning.
+There is no coin, heart, energy timer, or ranking, and none appears as a
+disabled option: nothing in the module could produce one. A streak survives
+a missed day and a set pause, and nothing shown about it is ever a countdown.
+
 **`db/tests/invariants.sql`** — the rules that must hold below the application:
 append-only evidence, corpus immutability, `verifier_user_id <> learner_id`,
 pending claims that cannot carry capabilities, passage release that must be
@@ -193,6 +204,9 @@ attributable, and RLS tenant isolation.
 | An assistant never certifies recitation | `validateDraft` rejects the phrasing |
 | An assistant cannot write learner state | `src/ai` has no repository import, asserted |
 | Engagement alone never ships a change | `shouldShip` has no engagement path |
+| An AI-proposed graph edge needs review | `admitEdges` throws; DB `CHECK` agrees |
+| A milestone can never be earned by time | every branch reads verified or delayed evidence |
+| Absence is never turned into shame | no countdown, no loss warning, pauses keep the streak |
 
 Each row has at least one test named after it.
 

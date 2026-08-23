@@ -214,3 +214,60 @@ body {
 
 .athar-map__load { list-style: none; padding: 0; display: flex; flex-wrap: wrap;
   gap: calc(var(--athar-space) * 3); }
+
+/* ---------------------------------------------------------------------- *
+ * Little-learner presentation. Same engine, same evidence rules — only
+ * the controls change size, and the choices disappear.
+ * ---------------------------------------------------------------------- */
+
+.athar-little {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--athar-space) * 6);
+  padding: calc(var(--athar-space) * 8);
+  text-align: center;
+}
+
+.athar-little__heading { font-size: clamp(2rem, 8vw, 3.5rem); }
+
+.athar-little__start {
+  /* Deliberately far above the 44px floor: a small hand, in a hurry. */
+  min-block-size: clamp(6rem, 22vw, 10rem);
+  min-inline-size: clamp(12rem, 60vw, 22rem);
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
+  border: none;
+  border-radius: var(--athar-radius);
+  background: var(--athar-indigo);
+  color: #FFFFFF;
+}
+
+.athar-little__what { font-size: clamp(1.1rem, 4vw, 1.5rem); }
+
+.athar-little__stars { font-size: 1.25rem; color: var(--athar-copper-text); }
+
+.athar-little__grownup {
+  background: transparent;
+  border: 2px solid var(--athar-indigo);
+  color: var(--athar-indigo);
+  border-radius: var(--athar-radius);
+  padding-inline: calc(var(--athar-space) * 5);
+  font-size: 1.1rem;
+}
+
+/* ---------------------------------------------------------------------- *
+ * Assignment wizard.
+ * ---------------------------------------------------------------------- */
+
+.athar-wizard__steps {
+  display: flex;
+  gap: calc(var(--athar-space) * 4);
+  list-style: none;
+  padding: 0;
+}
+
+.athar-wizard__steps [data-state="current"] { font-weight: 600; }
+.athar-wizard__steps [data-state="ahead"] { opacity: 0.55; }
+.athar-wizard__blocked { color: var(--athar-warning-text); }
+.athar-wizard__issues { color: var(--athar-error); }
+.athar-wizard__hint { color: var(--athar-ink); opacity: 0.8; }

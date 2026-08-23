@@ -17,6 +17,7 @@ export * from "./components/LearningStateBadge.js";
 export * from "./components/RouteStates.js";
 export * from "./components/MemorizationSession.js";
 export * from "./components/LearnerToday.js";
+export * from "./components/LittleLearnerToday.js";
 export * from "./components/MemoryMap.js";
 export * from "./components/AssignmentWizard.js";
 export * from "./components/AttentionInbox.js";
