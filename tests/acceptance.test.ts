@@ -19,7 +19,6 @@ import {
   recordReviewOutcome,
   requestOralRecitation,
   submitRetrieval,
-  type Deps,
 } from "../src/app/commands.js";
 import {
   ACADEMY_A,
@@ -32,42 +31,49 @@ import {
   makeDeps,
   standardPolicy,
   teacher,
+  releasedPassage,
+  PASSAGE_A,
 } from "./helpers.js";
 import type { AssignmentId } from "../src/core/types.js";
+import type { MemoryDatabase } from "../src/app/memory-store.js";
 
-function assign(deps: Deps, now = T0) {
-  return createAssignment(deps, {
+async function assign(db: MemoryDatabase, now = T0) {
+  await db.repo.putPassage(releasedPassage());
+  const created = await createAssignment(db, {
     actor: teacher(),
     now,
     learnerId: LEARNER_A,
     academyId: ACADEMY_A,
     classroomId: CLASS_A,
     targetKind: "segment",
-    label: "Al-Mulk 12-15",
-    corpusVersionId: "corpus-1",
-    segmentIds: ["seg-1"],
+    passageId: PASSAGE_A,
     policy: standardPolicy,
     estimatedActiveMinutes: 9,
     dueAt: now + DAY,
-    corpusReleasable: true,
   });
+  return { ...created, segmentId: created.segmentIds[0]! };
 }
 
 /** Drive the learner to the verification threshold. */
-function reachThreshold(deps: Deps, assignmentId: AssignmentId, now: number) {
+async function reachThreshold(
+  deps: MemoryDatabase,
+  assignmentId: AssignmentId,
+  segmentId: string,
+  now: number,
+) {
   for (let i = 0; i < standardPolicy.requiredListens; i++)
-    recordListen(deps, {
+    await recordListen(deps, {
       actor: learner(),
       now: now + i,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
     });
 
-  submitRetrieval(deps, {
+  await submitRetrieval(deps, {
     actor: learner(),
     now: now + 10,
     assignmentId,
-    segmentId: "seg-1",
+    segmentId,
     scaffoldLevel: "no_answer_choices",
     startContext: "serial_start",
     correct: true,
@@ -79,7 +85,7 @@ function reachThreshold(deps: Deps, assignmentId: AssignmentId, now: number) {
     actor: learner(),
     now: now + 20,
     assignmentId,
-    segmentId: "seg-1",
+    segmentId,
     scaffoldLevel: "oral_blank_page",
     startContext: "boundary_probe",
     correct: true,
@@ -90,18 +96,25 @@ function reachThreshold(deps: Deps, assignmentId: AssignmentId, now: number) {
 }
 
 describe("criterion 1 — the teacher assigns an exact passage and evidence policy", () => {
-  it("creates the assignment with a first policy version", () => {
+  it("creates the assignment with a first policy version", async () => {
     const deps = makeDeps();
-    const { assignmentId, policyVersion } = assign(deps);
+    const { assignmentId, policyVersion } = await assign(deps);
     expect(policyVersion).toBe("v1");
-    const stored = deps.repo.getPolicyVersion(assignmentId, "v1");
+    const stored = await deps.repo.getPolicyVersion(assignmentId, "v1");
     expect(stored?.policy.requiredIndependentRecalls).toBe(2);
     expect(stored?.createdByUserId).toBe("teacher-a");
   });
 
-  it("refuses to publish against an unreleased corpus", () => {
+  it("refuses to publish against an unreleased passage", async () => {
     const deps = makeDeps();
-    expect(() =>
+    await deps.repo.putPassage(
+      releasedPassage({
+        passageId: "passage-draft",
+        released: false,
+        releaseBlocks: ["approval_missing", "licence_expired"],
+      }),
+    );
+    await expect(
       createAssignment(deps, {
         actor: teacher(),
         now: T0,
@@ -109,20 +122,59 @@ describe("criterion 1 — the teacher assigns an exact passage and evidence poli
         academyId: ACADEMY_A,
         classroomId: CLASS_A,
         targetKind: "segment",
-        label: "Al-Mulk 12-15",
-        corpusVersionId: "corpus-draft",
-        segmentIds: ["seg-1"],
+        passageId: "passage-draft",
         policy: standardPolicy,
         estimatedActiveMinutes: 9,
         dueAt: T0 + DAY,
-        corpusReleasable: false,
       }),
-    ).toThrow(/not released/);
+    ).rejects.toThrow(/not released: approval_missing, licence_expired/);
   });
 
-  it("does not let a learner create an assignment for themselves", () => {
+  it("cannot be told a passage is released by its caller", async () => {
     const deps = makeDeps();
-    expect(() =>
+    await deps.repo.putPassage(
+      releasedPassage({ passageId: "passage-draft", released: false, releaseBlocks: [] }),
+    );
+    // There is no input field a caller could set to override stored state.
+    await expect(
+      createAssignment(deps, {
+        actor: teacher(),
+        now: T0,
+        learnerId: LEARNER_A,
+        academyId: ACADEMY_A,
+        classroomId: CLASS_A,
+        targetKind: "segment",
+        passageId: "passage-draft",
+        policy: standardPolicy,
+        estimatedActiveMinutes: 9,
+        dueAt: T0 + DAY,
+      }),
+    ).rejects.toThrow(/not released/);
+  });
+
+  it("hides a passage belonging to another organization", async () => {
+    const deps = makeDeps();
+    await deps.repo.putPassage(releasedPassage({ organizationId: ORG_B }));
+    await expect(
+      createAssignment(deps, {
+        actor: teacher(),
+        now: T0,
+        learnerId: LEARNER_A,
+        academyId: ACADEMY_A,
+        classroomId: CLASS_A,
+        targetKind: "segment",
+        passageId: PASSAGE_A,
+        policy: standardPolicy,
+        estimatedActiveMinutes: 9,
+        dueAt: T0 + DAY,
+      }),
+    ).rejects.toThrow(/not found/i);
+  });
+
+  it("does not let a learner create an assignment for themselves", async () => {
+    const deps = makeDeps();
+    await deps.repo.putPassage(releasedPassage());
+    await expect(
       createAssignment(deps, {
         actor: learner(),
         now: T0,
@@ -130,23 +182,20 @@ describe("criterion 1 — the teacher assigns an exact passage and evidence poli
         academyId: ACADEMY_A,
         classroomId: CLASS_A,
         targetKind: "segment",
-        label: "self-assigned",
-        corpusVersionId: "corpus-1",
-        segmentIds: ["seg-1"],
+        passageId: PASSAGE_A,
         policy: { ...standardPolicy, requiredIndependentRecalls: 1 },
         estimatedActiveMinutes: 1,
         dueAt: T0 + DAY,
-        corpusReleasable: true,
       }),
-    ).toThrow(CommandError);
+    ).rejects.toThrow(CommandError);
   });
 });
 
 describe("criterion 2 — Today offers one clear next action with a reason", () => {
-  it("surfaces the newly assigned work", () => {
+  it("surfaces the newly assigned work", async () => {
     const deps = makeDeps();
-    assign(deps);
-    const plan = getToday(deps, {
+    await assign(deps);
+    const plan = await getToday(deps, {
       actor: learner(),
       now: T0,
       learnerId: LEARNER_A,
@@ -159,63 +208,61 @@ describe("criterion 2 — Today offers one clear next action with a reason", () 
 });
 
 describe("criteria 4 and 5 — listens are server-counted; tiles do not create memory", () => {
-  it("blocks tile reconstruction until the listen policy is met", () => {
+  it("blocks tile reconstruction until the listen policy is met", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
-    expect(() =>
-      submitRetrieval(deps, {
+    const { assignmentId, segmentId } = await assign(deps);
+    await expect(submitRetrieval(deps, {
         actor: learner(),
         now: T0 + 1,
         assignmentId,
-        segmentId: "seg-1",
+        segmentId,
         scaffoldLevel: "full_tiles",
         startContext: "serial_start",
         correct: true,
         assistance: ["tile_options_visible"],
         hesitant: false,
         idempotencyKey: "k-early",
-      }),
-    ).toThrow(/requires 3 listens/);
+      })).rejects.toThrow(/requires 3 listens/);
   });
 
-  it("counts listens on the server, from reported completions only", () => {
+  it("counts listens on the server, from reported completions only", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
-    let result = recordListen(deps, {
+    const { assignmentId, segmentId } = await assign(deps);
+    let result = await recordListen(deps, {
       actor: learner(),
       now: T0 + 1,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
     });
     expect(result.listensCompleted).toBe(1);
     expect(result.listenPolicyMet).toBe(false);
-    recordListen(deps, { actor: learner(), now: T0 + 2, assignmentId, segmentId: "seg-1" });
-    result = recordListen(deps, {
+    await recordListen(deps, { actor: learner(), now: T0 + 2, assignmentId, segmentId: "seg-1" });
+    result = await recordListen(deps, {
       actor: learner(),
       now: T0 + 3,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
     });
     expect(result.listensCompleted).toBe(3);
     expect(result.listenPolicyMet).toBe(true);
   });
 
-  it("records a successful tile reconstruction as scaffolded practice only", () => {
+  it("records a successful tile reconstruction as scaffolded practice only", async () => {
     const deps = makeDeps();
-    const { assignmentId, targetId } = assign(deps);
+    const { assignmentId, targetId, segmentId } = await assign(deps);
     for (let i = 0; i < 3; i++)
-      recordListen(deps, {
+      await recordListen(deps, {
         actor: learner(),
         now: T0 + i,
         assignmentId,
-        segmentId: "seg-1",
+        segmentId,
       });
 
-    const r = submitRetrieval(deps, {
+    const r = await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 10,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "full_tiles",
       startContext: "serial_start",
       correct: true,
@@ -227,22 +274,22 @@ describe("criteria 4 and 5 — listens are server-counted; tiles do not create m
     expect(r.evidenceClass).toBe("assisted_practice");
     expect(r.progress.independentRecalls).toBe(0);
     expect(r.readyForVerification).toBe(false);
-    expect(deps.repo.getMemoryState(targetId)?.state).toBe("preparing");
+    expect((await deps.repo.getMemoryState(targetId))?.state).toBe("preparing");
   });
 });
 
 describe("criterion 6 — a hint marks the attempt assisted", () => {
-  it("classifies a hinted cue-free attempt as assisted and stores that classification", () => {
+  it("classifies a hinted cue-free attempt as assisted and stores that classification", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
+    const { assignmentId, segmentId } = await assign(deps);
     for (let i = 0; i < 3; i++)
-      recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
 
-    const r = submitRetrieval(deps, {
+    const r = await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 10,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "oral_blank_page",
       startContext: "random_start",
       correct: true,
@@ -254,74 +301,68 @@ describe("criterion 6 — a hint marks the attempt assisted", () => {
     expect(r.evidenceClass).toBe("assisted_practice");
     expect(r.progress.independentRecalls).toBe(0);
     expect(r.reason).toMatch(/assistance was used/i);
-    const stored = deps.repo.listAttempts(assignmentId)[0];
+    const stored = (await deps.repo.listAttempts(assignmentId))[0];
     expect(stored?.evidenceClass).toBe("assisted_practice");
   });
 });
 
 describe("criterion 8 — a learner cannot self-approve, by any route", () => {
-  it("refuses a recitation request before the threshold is met", () => {
+  it("refuses a recitation request before the threshold is met", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
-    expect(() =>
-      requestOralRecitation(deps, { actor: learner(), now: T0, assignmentId }),
-    ).toThrow(/Evidence threshold not met/);
+    const { assignmentId, segmentId } = await assign(deps);
+    await expect(requestOralRecitation(deps, { actor: learner(), now: T0, assignmentId })).rejects.toThrow(/Evidence threshold not met/);
   });
 
-  it("refuses a learner recording their own verification", () => {
+  it("refuses a learner recording their own verification", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
-    reachThreshold(deps, assignmentId, T0);
-    const { requestId } = requestOralRecitation(deps, {
+    const { assignmentId, segmentId } = await assign(deps);
+    await reachThreshold(deps, assignmentId, segmentId, T0);
+    const { requestId } = await requestOralRecitation(deps, {
       actor: learner(),
       now: T0 + 30,
       assignmentId,
     });
-    expect(() =>
-      recordOralVerification(deps, {
+    await expect(recordOralVerification(deps, {
         actor: learner(),
         now: T0 + 40,
         requestId,
         decision: "verified_cleanly",
-      }),
-    ).toThrow(CommandError);
+      })).rejects.toThrow(CommandError);
     // No learner role carries the verification capability at all.
-    expect(deps.repo.listVerifications(assignmentId)).toHaveLength(0);
+    expect(await deps.repo.listVerifications(assignmentId)).toHaveLength(0);
   });
 
-  it("refuses even an account that is both a teacher and the learner", () => {
+  it("refuses even an account that is both a teacher and the learner", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
-    reachThreshold(deps, assignmentId, T0);
-    const { requestId } = requestOralRecitation(deps, {
+    const { assignmentId, segmentId } = await assign(deps);
+    await reachThreshold(deps, assignmentId, segmentId, T0);
+    const { requestId } = await requestOralRecitation(deps, {
       actor: learner(),
       now: T0 + 30,
       assignmentId,
     });
     // A teacher who is also enrolled as a learner at the same academy.
     const teacherWhoIsAlsoTheLearner = teacher({ userId: LEARNER_A });
-    expect(() =>
-      recordOralVerification(deps, {
+    await expect(recordOralVerification(deps, {
         actor: teacherWhoIsAlsoTheLearner,
         now: T0 + 40,
         requestId,
         decision: "verified_cleanly",
-      }),
-    ).toThrow(/cannot verify their own recitation/);
+      })).rejects.toThrow(/cannot verify their own recitation/);
   });
 
-  it("is not fooled by a replayed submission", () => {
+  it("is not fooled by a replayed submission", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
+    const { assignmentId, segmentId } = await assign(deps);
     for (let i = 0; i < 3; i++)
-      recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
 
     const key = "k-replay";
-    const first = submitRetrieval(deps, {
+    const first = await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 10,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "oral_blank_page",
       startContext: "random_start",
       correct: true,
@@ -329,11 +370,11 @@ describe("criterion 8 — a learner cannot self-approve, by any route", () => {
       hesitant: false,
       idempotencyKey: key,
     });
-    const replayed = submitRetrieval(deps, {
+    const replayed = await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 11,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "oral_blank_page",
       startContext: "random_start",
       correct: true,
@@ -343,16 +384,15 @@ describe("criterion 8 — a learner cannot self-approve, by any route", () => {
     });
     expect(replayed.attemptId).toBe(first.attemptId);
     expect(replayed.progress.independentRecalls).toBe(1);
-    expect(deps.repo.listAttempts(assignmentId)).toHaveLength(1);
+    expect(await deps.repo.listAttempts(assignmentId)).toHaveLength(1);
   });
 
-  it("refuses an attempt written against a segment the assignment does not own", () => {
+  it("refuses an attempt written against a segment the assignment does not own", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
+    const { assignmentId, segmentId } = await assign(deps);
     for (let i = 0; i < 3; i++)
-      recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
-    expect(() =>
-      submitRetrieval(deps, {
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
+    await expect(submitRetrieval(deps, {
         actor: learner(),
         now: T0 + 10,
         assignmentId,
@@ -363,63 +403,58 @@ describe("criterion 8 — a learner cannot self-approve, by any route", () => {
         assistance: [],
         hesitant: false,
         idempotencyKey: "k-cross-segment",
-      }),
-    ).toThrow(/only through its own assignment/);
+      })).rejects.toThrow(/only through its own assignment/);
   });
 });
 
 describe("criterion 15 — cross-tenant access fails as not_found", () => {
-  it("hides an assignment from a teacher in another organization", () => {
+  it("hides an assignment from a teacher in another organization", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
+    const { assignmentId, segmentId } = await assign(deps);
     const foreign = teacher({ userId: "teacher-b", organizationId: ORG_B });
-    expect(() =>
-      openAssignment(deps, { actor: foreign, now: T0, assignmentId }),
-    ).toThrow(/not found/i);
+    await expect(openAssignment(deps, { actor: foreign, now: T0, assignmentId })).rejects.toThrow(/not found/i);
   });
 
-  it("hides a recitation request from another organization", () => {
+  it("hides a recitation request from another organization", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
-    reachThreshold(deps, assignmentId, T0);
-    const { requestId } = requestOralRecitation(deps, {
+    const { assignmentId, segmentId } = await assign(deps);
+    await reachThreshold(deps, assignmentId, segmentId, T0);
+    const { requestId } = await requestOralRecitation(deps, {
       actor: learner(),
       now: T0 + 30,
       assignmentId,
     });
     const foreign = teacher({ userId: "teacher-b", organizationId: ORG_B });
-    expect(() =>
-      recordOralVerification(deps, {
+    await expect(recordOralVerification(deps, {
         actor: foreign,
         now: T0 + 40,
         requestId,
         decision: "verified_cleanly",
-      }),
-    ).toThrow(/not found/i);
+      })).rejects.toThrow(/not found/i);
   });
 });
 
 describe("the full journey", () => {
-  it("runs assign -> listen -> reconstruct -> recall -> verify -> review, with no admin edits", () => {
+  it("runs assign -> listen -> reconstruct -> recall -> verify -> review, with no admin edits", async () => {
     const deps = makeDeps();
-    const { assignmentId, targetId } = assign(deps);
+    const { assignmentId, targetId, segmentId } = await assign(deps);
 
     // --- open: the page is blank -------------------------------------
-    const opened = openAssignment(deps, { actor: learner(), now: T0, assignmentId });
+    const opened = await openAssignment(deps, { actor: learner(), now: T0, assignmentId });
     expect(opened.page.revealedTokenIds).toEqual([]);
     expect(opened.state).toBe("preparing");
     expect(opened.requiredListens).toBe(3);
 
     // --- listen ------------------------------------------------------
     for (let i = 0; i < 3; i++)
-      recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
 
     // --- reconstruct with tiles: fills the page, proves nothing -------
-    const tiles = submitRetrieval(deps, {
+    const tiles = await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 5,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "full_tiles",
       startContext: "serial_start",
       correct: true,
@@ -430,11 +465,11 @@ describe("the full journey", () => {
     expect(tiles.progress.independentRecalls).toBe(0);
 
     // --- lose cues, recall independently ------------------------------
-    const afterFirst = submitRetrieval(deps, {
+    const afterFirst = await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 10,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "no_answer_choices",
       startContext: "serial_start",
       correct: true,
@@ -445,11 +480,11 @@ describe("the full journey", () => {
     expect(afterFirst.state).toBe("recalled_independently");
     expect(afterFirst.readyForVerification).toBe(false);
 
-    const afterSecond = submitRetrieval(deps, {
+    const afterSecond = await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 20,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "oral_blank_page",
       startContext: "boundary_probe",
       correct: true,
@@ -460,12 +495,12 @@ describe("the full journey", () => {
     expect(afterSecond.state).toBe("ready_for_verification");
 
     // --- request and verify ------------------------------------------
-    const { requestId } = requestOralRecitation(deps, {
+    const { requestId } = await requestOralRecitation(deps, {
       actor: learner(),
       now: T0 + 30,
       assignmentId,
     });
-    const verification = recordOralVerification(deps, {
+    const verification = await recordOralVerification(deps, {
       actor: teacher(),
       now: T0 + 40,
       requestId,
@@ -476,14 +511,14 @@ describe("the full journey", () => {
     expect(verification.nextReviewAt).toBeGreaterThan(T0 + 40);
 
     // criterion 10 — verification pins the exact assignment and policy
-    const stored = deps.repo.listVerifications(assignmentId)[0];
+    const stored = (await deps.repo.listVerifications(assignmentId))[0];
     expect(stored?.policyVersion).toBe("v1");
     expect(stored?.corpusVersionId).toBe("corpus-1");
     expect(stored?.verifierUserId).toBe("teacher-a");
     expect(stored?.evidenceAttemptIds).toHaveLength(2);
 
     // criterion 11 — the next session begins from a blank page
-    const reopened = openAssignment(deps, {
+    const reopened = await openAssignment(deps, {
       actor: learner(),
       now: T0 + 50,
       assignmentId,
@@ -492,8 +527,8 @@ describe("the full journey", () => {
     expect(reopened.state).toBe("verified");
 
     // --- criterion 12 — delayed clean recall updates stability --------
-    const before = deps.repo.getMemoryState(targetId)?.scheduling;
-    const review = recordReviewOutcome(deps, {
+    const before = (await deps.repo.getMemoryState(targetId))?.scheduling;
+    const review = await recordReviewOutcome(deps, {
       actor: learner(),
       now: T0 + 6 * DAY,
       assignmentId,
@@ -510,24 +545,24 @@ describe("the full journey", () => {
     expect(review.reason).toContain("Stability");
   });
 
-  it("records an assisted review as practice and does not move the schedule", () => {
+  it("records an assisted review as practice and does not move the schedule", async () => {
     const deps = makeDeps();
-    const { assignmentId, targetId } = assign(deps);
-    reachThreshold(deps, assignmentId, T0);
-    const { requestId } = requestOralRecitation(deps, {
+    const { assignmentId, targetId, segmentId } = await assign(deps);
+    await reachThreshold(deps, assignmentId, segmentId, T0);
+    const { requestId } = await requestOralRecitation(deps, {
       actor: learner(),
       now: T0 + 30,
       assignmentId,
     });
-    recordOralVerification(deps, {
+    await recordOralVerification(deps, {
       actor: teacher(),
       now: T0 + 40,
       requestId,
       decision: "verified_cleanly",
     });
 
-    const before = deps.repo.getMemoryState(targetId)?.scheduling;
-    const result = recordReviewOutcome(deps, {
+    const before = (await deps.repo.getMemoryState(targetId))?.scheduling;
+    const result = await recordReviewOutcome(deps, {
       actor: learner(),
       now: T0 + 6 * DAY,
       assignmentId,
@@ -541,22 +576,22 @@ describe("the full journey", () => {
 
     expect(result.rescheduled).toBe(false);
     expect(result.reason).toMatch(/does not change the review schedule/);
-    const after = deps.repo.getMemoryState(targetId)?.scheduling;
+    const after = (await deps.repo.getMemoryState(targetId))?.scheduling;
     expect(after?.nextReviewAt).toBe(before?.nextReviewAt);
     // The attempt is still recorded as evidence, just not as recall.
     expect(
-      deps.repo.listAttempts(assignmentId).some((a) => a.evidenceClass === "assisted_practice"),
+      (await deps.repo.listAttempts(assignmentId)).some((a) => a.evidenceClass === "assisted_practice"),
     ).toBe(true);
   });
 
-  it("drops a target into repair when a correction recurs", () => {
+  it("drops a target into repair when a correction recurs", async () => {
     const deps = makeDeps();
-    const { assignmentId } = assign(deps);
+    const { assignmentId, segmentId } = await assign(deps);
 
     // First cycle: verified with a join correction.
-    reachThreshold(deps, assignmentId, T0);
-    const r1 = requestOralRecitation(deps, { actor: learner(), now: T0 + 30, assignmentId });
-    recordOralVerification(deps, {
+    await reachThreshold(deps, assignmentId, segmentId, T0);
+    const r1 = await requestOralRecitation(deps, { actor: learner(), now: T0 + 30, assignmentId });
+    await recordOralVerification(deps, {
       actor: teacher(),
       now: T0 + 40,
       requestId: r1.requestId,
@@ -565,11 +600,10 @@ describe("the full journey", () => {
     });
 
     // A later verification repeats the same open correction.
-    const state = deps.repo.getMemoryState(
-      deps.repo.getAssignment(assignmentId)!.targetId,
-    )!;
-    deps.repo.saveMemoryState({ ...state, state: "ready_for_verification" });
-    deps.repo.createRecitationRequest({
+    const assignment = (await deps.repo.getAssignment(assignmentId))!;
+    const state = (await deps.repo.getMemoryState(assignment.targetId))!;
+    await deps.repo.saveMemoryState({ ...state, state: "ready_for_verification" });
+    await deps.repo.createRecitationRequest({
       requestId: "req-2",
       assignmentId,
       learnerId: LEARNER_A,
@@ -580,7 +614,7 @@ describe("the full journey", () => {
       status: "pending",
     });
 
-    const second = recordOralVerification(deps, {
+    const second = await recordOralVerification(deps, {
       actor: teacher(),
       now: T0 + 60,
       requestId: "req-2",

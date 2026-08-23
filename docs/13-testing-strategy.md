@@ -47,7 +47,7 @@ lie about a child's memory.
 | 10 | Verification pins exact assignment and policy version | `acceptance.test.ts` |
 | 11 | Next review begins from a blank page | `acceptance.test.ts` |
 | 12 | Delayed clean recall changes stability and timing logically and reproducibly | `scheduler.test.ts` |
-| 13 | Teacher Today prioritizes actionable evidence | *specified; needs the teacher surface* |
+| 13 | Teacher Today prioritizes actionable evidence | `attention.test.ts` |
 | 14 | Pending guardian sees nothing; tutoring revocable immediately | `policy.test.ts` |
 | 15 | Cross-tenant access fails in policy, DB, API, and E2E | `policy.test.ts` (+ integration) |
 | 16 | Failed notification or AI service cannot lose or roll back evidence | `outbox.test.ts` |
@@ -58,16 +58,18 @@ lie about a child's memory.
 
 ### What runs today, and what does not
 
-**Executable now** (`npm test`, 194 tests): criteria 1, 2, 4, 5, 6, 7, 8, 9, 10,
-11, 12, 14, 15, 16, 20.
+**Executable now** (`npm test`, 234 tests): criteria 1, 2, 4, 5, 6, 7, 8, 9, 10,
+11, 12, 13, 14, 15, 16, 20.
 
-**Executable now against real PostgreSQL** (`npm run test:db`, 15 assertions):
+**Executable now against real PostgreSQL** — the full Phase 1 journey
+(`npm run test:pg`, 18 tests) plus schema invariants (`npm run test:db`, 18
+assertions):
 the database half of criteria 8, 10, 15, 20 — append-only evidence, corpus
 immutability, the self-verification constraint, the pending-claim constraint,
 the segment/assignment composite key, RLS tenant isolation, and the absence of
 an `estimated` alignment method.
 
-**Specified but not yet executable** — criteria 3, 13, 17, 18, 19. Each needs
+**Specified but not yet executable** — criteria 3, 17, 18, 19. Each needs
 something this repository does not yet contain: the UI layer, a licensed
 corpus, deployed infrastructure, or representative hardware. They are written
 down so they cannot be quietly forgotten, and they are the acceptance gate for

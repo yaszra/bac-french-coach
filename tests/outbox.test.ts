@@ -9,10 +9,10 @@ import {
   EVENT_CATALOG,
   Outbox,
   buildEvent,
-  resetEventSequence,
   type EventType,
   type LearningEventEnvelope,
 } from "../src/app/events.js";
+import { useDeterministicIds } from "../src/app/ids.js";
 import {
   createAssignment,
   recordListen,
@@ -29,10 +29,12 @@ import {
   makeDeps,
   standardPolicy,
   teacher,
+  releasedPassage,
+  PASSAGE_A,
 } from "./helpers.js";
 
 function event(type: EventType, key = "k1"): LearningEventEnvelope {
-  resetEventSequence();
+  useDeterministicIds();
   return buildEvent(
     {
       eventType: type,
@@ -46,30 +48,29 @@ function event(type: EventType, key = "k1"): LearningEventEnvelope {
 }
 
 describe("criterion 16 — downstream failure cannot touch learning evidence", () => {
-  it("keeps persisted evidence intact when every delivery attempt fails", () => {
+  it("keeps persisted evidence intact when every delivery attempt fails", async () => {
     const deps = makeDeps();
-    const { assignmentId, targetId } = createAssignment(deps, {
+    await deps.repo.putPassage(releasedPassage());
+    const { assignmentId, targetId, segmentIds } = await createAssignment(deps, {
       actor: teacher(),
       now: T0,
       learnerId: LEARNER_A,
       academyId: ACADEMY_A,
       classroomId: CLASS_A,
       targetKind: "segment",
-      label: "Al-Mulk 12-15",
-      corpusVersionId: "corpus-1",
-      segmentIds: ["seg-1"],
+      passageId: PASSAGE_A,
       policy: standardPolicy,
       estimatedActiveMinutes: 9,
       dueAt: T0 + DAY,
-      corpusReleasable: true,
     });
+    const segmentId = segmentIds[0]!;
     for (let i = 0; i < 3; i++)
-      recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
-    submitRetrieval(deps, {
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId });
+    await submitRetrieval(deps, {
       actor: learner(),
       now: T0 + 10,
       assignmentId,
-      segmentId: "seg-1",
+      segmentId,
       scaffoldLevel: "oral_blank_page",
       startContext: "random_start",
       correct: true,
@@ -78,8 +79,8 @@ describe("criterion 16 — downstream failure cannot touch learning evidence", (
       idempotencyKey: "k-evidence",
     });
 
-    const before = deps.repo.getMemoryState(targetId);
-    const attemptsBefore = deps.repo.listAttempts(assignmentId).length;
+    const before = await deps.repo.getMemoryState(targetId);
+    const attemptsBefore = (await deps.repo.listAttempts(assignmentId)).length;
 
     // The notification service is down and stays down.
     const result = deps.outbox.dispatch(() => {
@@ -89,11 +90,11 @@ describe("criterion 16 — downstream failure cannot touch learning evidence", (
     expect(result.delivered).toBe(0);
     expect(deps.outbox.deadLetters.length).toBeGreaterThan(0);
     // Evidence and state are untouched.
-    expect(deps.repo.listAttempts(assignmentId)).toHaveLength(attemptsBefore);
-    expect(deps.repo.getMemoryState(targetId)).toEqual(before);
+    expect(await deps.repo.listAttempts(assignmentId)).toHaveLength(attemptsBefore);
+    expect(await deps.repo.getMemoryState(targetId)).toEqual(before);
   });
 
-  it("retries before dead-lettering, and a late recovery still delivers", () => {
+  it("retries before dead-lettering, and a late recovery still delivers", async () => {
     const outbox = new Outbox();
     outbox.append(event("review_completed"));
 
@@ -113,7 +114,7 @@ describe("criterion 16 — downstream failure cannot touch learning evidence", (
     expect(outbox.deadLetters).toHaveLength(0);
   });
 
-  it("delivers healthy events even when one consumer keeps failing", () => {
+  it("delivers healthy events even when one consumer keeps failing", async () => {
     const outbox = new Outbox();
     outbox.append(event("review_completed", "good-1"));
     outbox.append(event("correction_added", "bad-1"));
@@ -131,14 +132,14 @@ describe("criterion 16 — downstream failure cannot touch learning evidence", (
 });
 
 describe("idempotency", () => {
-  it("drops a duplicate of the same event type and key", () => {
+  it("drops a duplicate of the same event type and key", async () => {
     const outbox = new Outbox();
     outbox.append(event("review_completed", "same"));
     outbox.append(event("review_completed", "same"));
     expect(outbox.pendingCount).toBe(1);
   });
 
-  it("keeps distinct event types that share an idempotency key", () => {
+  it("keeps distinct event types that share an idempotency key", async () => {
     const outbox = new Outbox();
     outbox.append(event("review_completed", "shared"));
     outbox.append(event("review_scheduled", "shared"));
@@ -147,7 +148,7 @@ describe("idempotency", () => {
 });
 
 describe("no sacred text ever enters the event stream", () => {
-  it("refuses to build an event carrying Arabic script in objectRefs", () => {
+  it("refuses to build an event carrying Arabic script in objectRefs", async () => {
     expect(() =>
       buildEvent(
         {
@@ -162,13 +163,13 @@ describe("no sacred text ever enters the event stream", () => {
     ).toThrow(/sacred text must never leave/);
   });
 
-  it("accepts reference labels, which are not sacred text", () => {
+  it("accepts reference labels, which are not sacred text", async () => {
     expect(() => event("retrieval_submitted")).not.toThrow();
   });
 });
 
 describe("event catalog governance", () => {
-  it("gives every event a purpose, a privacy class, a retention class, and a consumer", () => {
+  it("gives every event a purpose, a privacy class, a retention class, and a consumer", async () => {
     for (const [type, entry] of Object.entries(EVENT_CATALOG)) {
       expect(entry.purpose, type).toBeTruthy();
       expect(entry.privacy, type).toBeTruthy();
@@ -177,15 +178,14 @@ describe("event catalog governance", () => {
     }
   });
 
-  it("stamps the catalog metadata onto every envelope", () => {
+  it("stamps the catalog metadata onto every envelope", async () => {
     const e = event("correction_added");
     expect(e.privacy).toBe("learning_evidence_sensitive");
     expect(e.retention).toBe("academy_policy_7y");
     expect(e.purpose).toBe(EVENT_CATALOG.correction_added.purpose);
   });
 
-  it("records both occurred and received time, so clock skew stays visible", () => {
-    resetEventSequence();
+  it("records both occurred and received time, so clock skew stays visible", async () => {
     const e = buildEvent(
       {
         eventType: "review_completed",
@@ -199,7 +199,7 @@ describe("event catalog governance", () => {
     expect(e.receivedAt).toBe(T0 + 5000);
   });
 
-  it("classifies retrieval and verification as learning evidence, not product telemetry", () => {
+  it("classifies retrieval and verification as learning evidence, not product telemetry", async () => {
     for (const t of [
       "retrieval_submitted",
       "independent_recall_succeeded",

@@ -107,11 +107,13 @@ INSERT INTO segment (id, assignment_id, ordinal) VALUES
     ('00000000-0000-0000-0000-0000000000ac', '00000000-0000-0000-0000-0000000000aa', 1);
 
 INSERT INTO attempt
-    (id, organization_id, assignment_id, segment_id, learner_id, occurred_at,
-     scaffold_level, start_context, correct, hesitant, evidence_class, policy_version, idempotency_key)
+    (id, organization_id, assignment_id, segment_id, memory_target_id, learner_id,
+     occurred_at, scaffold_level, start_context, correct, hesitant, evidence_class,
+     policy_version, idempotency_key)
 VALUES
     ('00000000-0000-0000-0000-0000000000ad', '00000000-0000-0000-0000-0000000000a1',
      '00000000-0000-0000-0000-0000000000a9', '00000000-0000-0000-0000-0000000000ab',
+     '00000000-0000-0000-0000-0000000000a8',
      '00000000-0000-0000-0000-0000000000a5', now(), 'no_answer_choices', 'random_start',
      true, false, 'independent_recall', 'v1', 'idem-1');
 
@@ -120,11 +122,13 @@ VALUES
 -- ===========================================================================
 SELECT must_fail($$
     INSERT INTO attempt
-        (organization_id, assignment_id, segment_id, learner_id, occurred_at,
-         scaffold_level, start_context, correct, hesitant, evidence_class, policy_version, idempotency_key)
+        (organization_id, assignment_id, segment_id, memory_target_id, learner_id,
+         occurred_at, scaffold_level, start_context, correct, hesitant, evidence_class,
+         policy_version, idempotency_key)
     VALUES ('00000000-0000-0000-0000-0000000000a1',
             '00000000-0000-0000-0000-0000000000a9',
             '00000000-0000-0000-0000-0000000000ac',  -- segment of a DIFFERENT assignment
+            '00000000-0000-0000-0000-0000000000a8',
             '00000000-0000-0000-0000-0000000000a5', now(), 'no_answer_choices', 'serial_start',
             true, false, 'independent_recall', 'v1', 'idem-cross-segment')
 $$, 'segment is writable only through its own assignment');
@@ -229,6 +233,46 @@ SELECT must_fail($$
     VALUES ('00000000-0000-0000-0000-0000000000a9', 'v-bad', 3, 2, 5,
             '00000000-0000-0000-0000-0000000000a4')
 $$, 'non-serial recalls cannot exceed total required recalls');
+
+-- ===========================================================================
+-- Invariant 10 — a released passage must be attributable and unblocked
+-- ===========================================================================
+SELECT must_fail($$
+    INSERT INTO passage (organization_id, corpus_version_id, label,
+                         start_ayah_id, end_ayah_id, released)
+    VALUES ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000c1',
+            'Unattributed', '00000000-0000-0000-0000-0000000000c2',
+            '00000000-0000-0000-0000-0000000000c2', true)
+$$, 'a released passage must record who released it and when');
+
+SELECT must_fail($$
+    INSERT INTO passage (organization_id, corpus_version_id, label,
+                         start_ayah_id, end_ayah_id, released, release_blocks,
+                         released_at, released_by_user_id)
+    VALUES ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000c1',
+            'Contradictory', '00000000-0000-0000-0000-0000000000c2',
+            '00000000-0000-0000-0000-0000000000c2', true, '{approval_missing}',
+            now(), '00000000-0000-0000-0000-0000000000a4')
+$$, 'a released passage cannot also carry blocking reasons');
+
+-- ===========================================================================
+-- Invariant 11 — a passage cannot be released against an unpublished corpus
+-- ===========================================================================
+INSERT INTO corpus_version
+    (id, edition, lifecycle, sha256, surah_count, ayah_count, word_count,
+     page_count, expected_lines_per_page)
+VALUES ('00000000-0000-0000-0000-0000000000c9', 'draft-edition', 'draft',
+        'cafebabe', 0, 0, 0, 0, 15);
+
+SELECT must_fail($$
+    INSERT INTO passage (organization_id, corpus_version_id, label,
+                         start_ayah_id, end_ayah_id, released,
+                         released_at, released_by_user_id)
+    VALUES ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000c9',
+            'Draft corpus', '00000000-0000-0000-0000-0000000000c2',
+            '00000000-0000-0000-0000-0000000000c2', true,
+            now(), '00000000-0000-0000-0000-0000000000a4')
+$$, 'a passage cannot be released against an unpublished corpus version');
 
 -- ===========================================================================
 -- Invariant 9 — row-level security isolates tenants

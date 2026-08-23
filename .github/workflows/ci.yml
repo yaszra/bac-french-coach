@@ -31,20 +31,33 @@ jobs:
       # Strict types, then the engine tests. The content gates (corpus
       # integrity, release rules, and the Arabic-script tripwire) run inside
       # the test suite, so a pasted ayah fails the build here.
+      - name: Create integration database
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: createdb athar_pg_test
+
       - name: Typecheck
         run: npm run typecheck
       - name: Tests
+        env:
+          # The PostgreSQL integration suite runs the full journey against
+          # the real schema; without this it skips rather than failing.
+          ATHAR_TEST_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/athar_pg_test
         run: npm test
 
       # Database-level invariants: append-only evidence, corpus immutability,
       # tenant isolation. These cannot be asserted from TypeScript.
       - name: Database invariants
         env:
-          PGHOST: localhost
+          PGHOST: 127.0.0.1
           PGUSER: postgres
           PGPASSWORD: postgres
         run: |
-          psql -v ON_ERROR_STOP=1 -q -d athar_test -f db/migrations/0001_init.sql
+          for m in db/migrations/*.sql; do
+            psql -v ON_ERROR_STOP=1 -q -d athar_test -f "$m"
+          done
           output=$(psql -v ON_ERROR_STOP=1 -q -d athar_test -f db/tests/invariants.sql 2>&1)
           echo "$output" | grep -oE '(PASS|FAIL)  [^(]*'
           if echo "$output" | grep -q FAIL; then exit 1; fi

@@ -43,9 +43,9 @@ src/config/   brand and design tokens — the single place a rename touches
 src/core/     the pure learning engine: deterministic, framework-free, versioned
 src/content/  corpus verification, release gate, and the Arabic-script tripwire
 src/auth/     centralized authorization policy and tenant isolation
-src/app/      commands, repository ports, in-memory adapter, event outbox
-db/           PostgreSQL schema and database-level invariant tests
-tests/        194 tests, organized by the acceptance criteria they protect
+src/app/      commands, repository ports, in-memory and PostgreSQL adapters
+db/           PostgreSQL schema, migrations, and database-level invariants
+tests/        234 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -66,12 +66,16 @@ tests/        194 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # strict typecheck + 194 tests
-npm run test:db     # 15 database invariants against real PostgreSQL
+npm run verify      # strict typecheck + 234 tests + 18 database invariants
+npm run test:db     # 18 database invariants against real PostgreSQL
+npm run test:pg     # the full journey against real PostgreSQL
 ```
 
-`test:db` needs a running PostgreSQL 14+ and creates a scratch database
-(`athar_test` by default; override with `ATHAR_TEST_DB`).
+Both database suites need a running PostgreSQL 14+. `test:db` creates a
+scratch database (`athar_test`; override with `ATHAR_TEST_DB`). The
+integration suite reads `ATHAR_TEST_DATABASE_URL` and **skips itself** when
+no database is reachable, so the default `npm test` stays runnable on a
+laptop without PostgreSQL.
 
 ---
 
@@ -101,9 +105,18 @@ A check that cannot fail is not a check.
 first. A cross-tenant identifier fails as `not_found` and never confirms the
 resource exists.
 
+**`src/core/attention.ts`** — the teacher's ordered inbox. Facts get high
+confidence; inferences earn theirs from sample size, and below the minimum
+sample the row is not emitted at all rather than shown as a guess.
+
+**`src/app/pg-store.ts`** — the PostgreSQL adapter and the transaction
+boundary. State and the events that justify it commit together; a rolled-back
+command leaves neither behind.
+
 **`db/tests/invariants.sql`** — the rules that must hold below the application:
 append-only evidence, corpus immutability, `verifier_user_id <> learner_id`,
-pending claims that cannot carry capabilities, and RLS tenant isolation.
+pending claims that cannot carry capabilities, passage release that must be
+attributable, and RLS tenant isolation.
 
 ---
 
@@ -122,6 +135,9 @@ pending claims that cannot carry capabilities, and RLS tenant isolation.
 | Evidence is never overwritten | append-only ports; `BEFORE UPDATE OR DELETE` triggers |
 | A failed notification cannot lose evidence | transactional outbox with dead-letter and replay |
 | Deferred review work is never marked complete | `TodayPlan.deferred` + `cappedNotice` |
+| Content release cannot be asserted by its caller | `passage.released` is stored state, read not passed |
+| A rolled-back command emits no events | `EventSink` buffered until commit |
+| Teacher-facing inferences state their sample size | `attention.ts` confidence capped by observation count |
 
 Each row has at least one test named after it.
 
@@ -129,7 +145,12 @@ Each row has at least one test named after it.
 
 ## Status
 
-**Phase 1 vertical slice — engine complete, UI not started.**
+**Phase 1 vertical slice — engine and persistence complete, UI not started.**
+
+The complete journey (assign → listen → reconstruct → lose cues → recall →
+request → verify → schedule → return from blank → state updates) runs against
+real PostgreSQL with row-level security active and **no admin database edits**,
+which is the bar `docs/14` sets for Phase 1 being done.
 
 `docs/13-testing-strategy.md` lists all twenty acceptance criteria from the
 build brief and states plainly which are executable today (15 of 20) and which

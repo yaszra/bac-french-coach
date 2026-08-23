@@ -5,9 +5,10 @@
  * slice — so acceptance tests read as journeys rather than as fixtures.
  */
 import type { Actor, Enrollment, GuardianRelationship } from "../src/auth/policy.js";
-import { InMemoryRepository } from "../src/app/memory-store.js";
-import { Outbox, resetEventSequence } from "../src/app/events.js";
-import { resetIdSequence, type Deps } from "../src/app/commands.js";
+import { InMemoryRepository, MemoryDatabase } from "../src/app/memory-store.js";
+import { Outbox } from "../src/app/events.js";
+import { useDeterministicIds } from "../src/app/ids.js";
+import type { PassageRecord } from "../src/app/repository.js";
 import type { LearnerId } from "../src/core/types.js";
 
 export const ORG_A = "org-a";
@@ -101,20 +102,44 @@ export function pendingGuardianship(
   };
 }
 
+/**
+ * Returns the `MemoryDatabase` itself: it satisfies the `Database` port that
+ * commands take, and exposes `.repo` and `.outbox` for assertions. Tests
+ * therefore read as `await command(deps, ...)` and `await deps.repo.get(...)`.
+ */
 export function makeDeps(seed: {
   guardianRelationships?: GuardianRelationship[];
   enrollments?: Enrollment[];
-} = {}): Deps {
-  resetIdSequence();
-  resetEventSequence();
+} = {}): MemoryDatabase {
+  useDeterministicIds();
+  const repo = new InMemoryRepository({
+    enrollments: seed.enrollments ?? enrollmentsA,
+    ...(seed.guardianRelationships
+      ? { guardianRelationships: seed.guardianRelationships }
+      : {}),
+  });
+  return new MemoryDatabase(repo, new Outbox());
+}
+
+export const PASSAGE_A = "passage-a";
+
+/**
+ * A released curriculum passage. `released: true` here stands in for the
+ * content pipeline having approved it — see src/content/corpus.ts for the
+ * gate that actually sets it.
+ */
+export function releasedPassage(over: Partial<PassageRecord> = {}): PassageRecord {
   return {
-    repo: new InMemoryRepository({
-      enrollments: seed.enrollments ?? enrollmentsA,
-      ...(seed.guardianRelationships
-        ? { guardianRelationships: seed.guardianRelationships }
-        : {}),
-    }),
-    outbox: new Outbox(),
+    passageId: PASSAGE_A,
+    organizationId: ORG_A,
+    corpusVersionId: "corpus-1",
+    label: "Al-Mulk 12-15",
+    startAyahId: "ayah-12",
+    endAyahId: "ayah-15",
+    segmentCount: 1,
+    released: true,
+    releaseBlocks: [],
+    ...over,
   };
 }
 

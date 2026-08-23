@@ -10,6 +10,7 @@
  * stream, the logs, or the warehouse — asserted, not assumed.
  */
 import { assertNoSacredText } from "../content/tripwire.js";
+import { nextId } from "./ids.js";
 
 export const EVENT_SCHEMA_VERSION = 1;
 
@@ -183,12 +184,6 @@ export interface NewEvent {
   activeDurationMs?: number;
 }
 
-let sequence = 0;
-/** Deterministic id generator — no ambient randomness in the domain. */
-export function resetEventSequence(): void {
-  sequence = 0;
-}
-
 export function buildEvent(input: NewEvent, receivedAt: number): LearningEventEnvelope {
   const entry = EVENT_CATALOG[input.eventType];
   const refs = input.objectRefs ?? {};
@@ -198,9 +193,8 @@ export function buildEvent(input: NewEvent, receivedAt: number): LearningEventEn
     if (typeof value === "string")
       assertNoSacredText(value, `learning event ${input.eventType}.${key}`);
 
-  sequence += 1;
   const envelope: LearningEventEnvelope = {
-    eventId: `evt_${String(sequence).padStart(10, "0")}`,
+    eventId: nextId(),
     eventType: input.eventType,
     schemaVersion: EVENT_SCHEMA_VERSION,
     occurredAt: input.occurredAt,

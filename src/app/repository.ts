@@ -21,6 +21,30 @@ import type { EvidencePolicy, EvidenceProgress, RetrievalAttempt } from "../core
 import type { StateContext } from "../core/states.js";
 import type { SchedulingState } from "../core/scheduler.js";
 import type { Enrollment, GuardianRelationship, Role } from "../auth/policy.js";
+import type { LearningEventEnvelope } from "./events.js";
+
+/**
+ * A passage from the curriculum.
+ *
+ * `released` is stored state, set by the content release pipeline. It is
+ * deliberately not a parameter the assignment caller supplies: a caller
+ * that can assert "this content is approved" is not a release gate.
+ */
+export interface PassageRecord {
+  passageId: string;
+  organizationId: string;
+  /** Pinned, so a corpus bump cannot silently change an assignment. */
+  corpusVersionId: string;
+  /** Display reference such as "Al-Mulk 12-15". Never sacred text. */
+  label: string;
+  startAyahId: string;
+  endAyahId: string;
+  /** How many segments an assignment over this passage is split into. */
+  segmentCount: number;
+  released: boolean;
+  /** Why it is not released, for the admin surface. Empty when released. */
+  releaseBlocks: readonly string[];
+}
 
 export interface AssignmentRecord {
   assignmentId: AssignmentId;
@@ -32,7 +56,8 @@ export interface AssignmentRecord {
   ownerRole: Role;
   targetId: MemoryTargetId;
   targetKind: MemoryTargetKind;
-  /** Display reference such as "Al-Mulk 12-15". Never sacred text. */
+  passageId: string;
+  /** Denormalized from the passage at creation time, and pinned. */
   label: string;
   corpusVersionId: string;
   segmentIds: readonly string[];
@@ -128,41 +153,88 @@ export interface ListenRecord {
   completedAt: EpochMs;
 }
 
+/**
+ * Every method is asynchronous because every production implementation
+ * performs I/O. The pure engine stays synchronous; only the boundary is
+ * async, which is what keeps the learning logic testable without a
+ * database.
+ */
 export interface Repository {
-  getAssignment(id: AssignmentId): AssignmentRecord | undefined;
-  saveAssignment(record: AssignmentRecord): void;
-  listAssignmentsForLearner(learnerId: LearnerId): readonly AssignmentRecord[];
+  getPassage(passageId: string): Promise<PassageRecord | undefined>;
+  putPassage(record: PassageRecord): Promise<void>;
 
-  putPolicyVersion(record: AssignmentPolicyVersionRecord): void;
+  getAssignment(id: AssignmentId): Promise<AssignmentRecord | undefined>;
+  saveAssignment(record: AssignmentRecord): Promise<void>;
+  listAssignmentsForLearner(learnerId: LearnerId): Promise<readonly AssignmentRecord[]>;
+
+  putPolicyVersion(record: AssignmentPolicyVersionRecord): Promise<void>;
   getPolicyVersion(
     assignmentId: AssignmentId,
     policyVersion: string,
-  ): AssignmentPolicyVersionRecord | undefined;
+  ): Promise<AssignmentPolicyVersionRecord | undefined>;
 
-  getMemoryState(targetId: MemoryTargetId): MemoryStateRecord | undefined;
-  saveMemoryState(record: MemoryStateRecord): void;
-  listMemoryStatesForLearner(learnerId: LearnerId): readonly MemoryStateRecord[];
+  getMemoryState(targetId: MemoryTargetId): Promise<MemoryStateRecord | undefined>;
+  saveMemoryState(record: MemoryStateRecord): Promise<void>;
+  listMemoryStatesForLearner(
+    learnerId: LearnerId,
+  ): Promise<readonly MemoryStateRecord[]>;
 
   /** Append-only. There is deliberately no updateAttempt. */
-  appendAttempt(record: AttemptRecord): void;
-  listAttempts(assignmentId: AssignmentId): readonly AttemptRecord[];
-  findAttemptByIdempotencyKey(key: string): AttemptRecord | undefined;
+  appendAttempt(record: AttemptRecord): Promise<void>;
+  listAttempts(assignmentId: AssignmentId): Promise<readonly AttemptRecord[]>;
+  findAttemptByIdempotencyKey(key: string): Promise<AttemptRecord | undefined>;
 
-  appendListen(record: ListenRecord): void;
-  countListens(assignmentId: AssignmentId): number;
+  appendListen(record: ListenRecord): Promise<void>;
+  countListens(assignmentId: AssignmentId): Promise<number>;
 
-  createRecitationRequest(record: RecitationRequestRecord): void;
-  getRecitationRequest(requestId: string): RecitationRequestRecord | undefined;
-  markRequestDecided(requestId: string): void;
+  createRecitationRequest(record: RecitationRequestRecord): Promise<void>;
+  getRecitationRequest(requestId: string): Promise<RecitationRequestRecord | undefined>;
+  markRequestDecided(requestId: string): Promise<void>;
 
   /** Append-only. */
-  appendVerification(record: VerificationRecord): void;
-  listVerifications(assignmentId: AssignmentId): readonly VerificationRecord[];
+  appendVerification(record: VerificationRecord): Promise<void>;
+  listVerifications(assignmentId: AssignmentId): Promise<readonly VerificationRecord[]>;
 
-  appendCorrection(record: CorrectionRecord): void;
-  listCorrections(targetId: MemoryTargetId): readonly CorrectionRecord[];
-  resolveCorrection(correctionId: string, byUserId: string, at: EpochMs): void;
+  appendCorrection(record: CorrectionRecord): Promise<void>;
+  listCorrections(targetId: MemoryTargetId): Promise<readonly CorrectionRecord[]>;
+  resolveCorrection(correctionId: string, byUserId: string, at: EpochMs): Promise<void>;
 
-  guardianRelationships(): readonly GuardianRelationship[];
-  enrollments(): readonly Enrollment[];
+  guardianRelationships(): Promise<readonly GuardianRelationship[]>;
+  enrollments(): Promise<readonly Enrollment[]>;
+}
+
+/**
+ * Collects events during a transaction.
+ *
+ * Events reach the outbox only if the transaction commits. A rolled-back
+ * command emits nothing — which is the whole point of a transactional
+ * outbox, and the reason this is not a plain `outbox.append` call inside
+ * the command body.
+ */
+export interface EventSink {
+  append(event: LearningEventEnvelope): void;
+}
+
+export interface TxContext {
+  repo: Repository;
+  events: EventSink;
+}
+
+/**
+ * The transaction boundary. State and the events that justify it commit
+ * together, or neither does.
+ */
+/**
+ * Tenant scope for a transaction.
+ *
+ * The organization always comes from the session-derived actor, never from
+ * a request parameter. Adapters use it to set the database session variable
+ * that row-level security reads.
+ */
+export interface TxScope {
+  organizationId: string;
+}
+
+export interface Database {
+  transaction<T>(fn: (ctx: TxContext) => Promise<T>, scope?: TxScope): Promise<T>;
 }
