@@ -1,0 +1,47 @@
+.root {
+  display: block;
+  background-color: var(--surface-sunken);
+  /* A slow settle between two paper tones. No gradient sweep, no glow. */
+  animation: marginalia-settle calc(var(--motion-slow) * 5) var(--ease-standard) infinite alternate;
+}
+
+@keyframes marginalia-settle {
+  to {
+    background-color: var(--surface-raised);
+  }
+}
+
+/* Fully static under reduced motion (the tokens collapse to ~1ms, which would
+   flicker), so the placeholder is a quiet block and nothing else. */
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    animation: none;
+  }
+}
+
+.text {
+  block-size: var(--text-base);
+  border-radius: var(--radius-control);
+}
+.text:not(:last-child) {
+  margin-block-end: var(--space-2);
+}
+/* The last line of a paragraph is short — the shape of real prose. */
+.lastLine {
+  inline-size: 60%;
+}
+
+.block {
+  block-size: var(--space-16);
+  border-radius: var(--radius-card);
+}
+
+.circle {
+  inline-size: var(--space-10);
+  block-size: var(--space-10);
+  border-radius: var(--radius-pill);
+}
+
+.group {
+  display: block;
+}

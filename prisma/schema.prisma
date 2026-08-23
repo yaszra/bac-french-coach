@@ -1,0 +1,651 @@
+// Itqān — data model.
+//
+// Binding invariants encoded here:
+//  · Every tenant-owned row carries organizationId and is guarded by row-level
+//    security (see migrations/*_rls.sql). Cross-tenant reads are impossible at
+//    the database, not merely at the query layer.
+//  · LearningEvent is APPEND-ONLY (enforced by a rule + revoked UPDATE/DELETE).
+//    MemoryState, meters and reports are PROJECTIONS rebuilt from it.
+//  · Mastery is never a column a client can write. Verdicts come from humans;
+//    memory state comes from the server-side engine.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// ─── Identity & tenancy ──────────────────────────────────────────────────────
+
+enum Tier {
+  kids
+  teen
+  adult
+}
+
+enum ScopeType {
+  organization
+  school
+  classroom
+  learner
+}
+
+enum Role {
+  owner
+  admin
+  teacher
+  assistant
+  guardian
+  learner
+  studio
+  support
+}
+
+enum RelationshipKind {
+  teacher_student
+  guardian_child
+}
+
+enum RelationshipState {
+  claimed
+  approved
+  revoked
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  region    String   @default("eu")
+  locale    String   @default("en")
+  createdAt DateTime @default(now())
+  settings  Json     @default("{}")
+
+  users           User[]
+  roleGrants      RoleGrant[]
+  relationships   Relationship[]
+  learners        LearnerProfile[]
+  classrooms      Classroom[]
+  assignments     Assignment[]
+  learningEvents  LearningEvent[]
+  memoryStates    MemoryState[]
+  verifications   VerificationRequest[]
+  consents        ConsentRecord[]
+  dataRequests    DataRequest[]
+  auditEntries    AuditLog[]
+  notifications   Notification[]
+  reports         ReportRun[]
+  flagAssignments FeatureFlagAssignment[]
+  khatmaFlags     KhatmaFlag[]
+  attempts        Attempt[]
+
+  @@map("organization")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String?
+  // Children may have no email; they sign in with a code issued by an adult.
+  handle         String?
+  displayName    String
+  locale         String    @default("en")
+  createdAt      DateTime  @default(now())
+  disabledAt     DateTime?
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  credential     Credential?
+  sessions       Session[]
+  roleGrants     RoleGrant[]
+  learnerProfile LearnerProfile?
+  asSubject      Relationship[]  @relation("relationship_subject")
+  asObject       Relationship[]  @relation("relationship_object")
+  notifications  Notification[]
+  auditEntries   AuditLog[]
+
+  @@unique([organizationId, email])
+  @@unique([organizationId, handle])
+  @@index([organizationId])
+  @@map("app_user")
+}
+
+model Credential {
+  userId         String    @id
+  // argon2id. Never a reversible hash; never logged; never returned by any query
+  // that crosses the module boundary.
+  passwordHash   String
+  algorithm      String    @default("argon2id")
+  mfaSecret      String?
+  mfaEnrolledAt  DateTime?
+  updatedAt      DateTime  @updatedAt
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("credential")
+}
+
+model Session {
+  id             String    @id @default(cuid())
+  userId         String
+  organizationId String
+  version        Int       @default(1)
+  issuedAt       DateTime  @default(now())
+  expiresAt      DateTime
+  rotatedAt      DateTime?
+  revokedAt      DateTime?
+  userAgentHash  String?
+  ipHash         String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("session")
+}
+
+/// Scoped role: a role is always granted AT a scope, optionally with an expiry.
+model RoleGrant {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role
+  scopeType      ScopeType
+  scopeId        String
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+  createdBy      String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role, scopeType, scopeId])
+  @@index([organizationId, scopeType, scopeId])
+  @@map("role_grant")
+}
+
+/// Relationship grants: teacher↔student and guardian↔child. A guardian link
+/// starts as a CLAIM and becomes approved by a teacher (immediately when the
+/// learner has no teacher). canTutor lets a guardian assign and verify.
+model Relationship {
+  id             String            @id @default(cuid())
+  organizationId String
+  kind           RelationshipKind
+  subjectUserId  String // the adult (teacher or guardian)
+  objectUserId   String // the learner
+  state          RelationshipState @default(claimed)
+  canTutor       Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  approvedAt     DateTime?
+  approvedBy     String?
+  revokedAt      DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subject      User         @relation("relationship_subject", fields: [subjectUserId], references: [id], onDelete: Cascade)
+  object       User         @relation("relationship_object", fields: [objectUserId], references: [id], onDelete: Cascade)
+
+  @@unique([kind, subjectUserId, objectUserId])
+  @@index([organizationId, objectUserId])
+  @@map("relationship")
+}
+
+model LearnerProfile {
+  userId         String    @id
+  organizationId String
+  tier           Tier
+  birthYear      Int?
+  reciterId      String    @default("husary")
+  /// Settings an adult locked for this learner; the learner cannot change them.
+  lockedSettings Json      @default("{}")
+  preferences    Json      @default("{}")
+  dailyGoalUnits Int       @default(0)
+  timezone       String    @default("UTC")
+  placedAt       DateTime?
+  createdAt      DateTime  @default(now())
+
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization  Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  enrollments   Enrollment[]
+  memoryStates  MemoryState[]
+  attempts      Attempt[]
+  verifications VerificationRequest[]
+
+  @@index([organizationId])
+  @@map("learner_profile")
+}
+
+// ─── Classroom ───────────────────────────────────────────────────────────────
+
+model Classroom {
+  id             String    @id @default(cuid())
+  organizationId String
+  name           String
+  joinCode       String    @unique
+  teacherUserId  String
+  archivedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  enrollments  Enrollment[]
+  assignments  Assignment[]
+
+  @@index([organizationId])
+  @@map("classroom")
+}
+
+model Enrollment {
+  id             String    @id @default(cuid())
+  organizationId String
+  classroomId    String
+  learnerUserId  String
+  joinedAt       DateTime  @default(now())
+  leftAt         DateTime?
+
+  classroom Classroom      @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  learner   LearnerProfile @relation(fields: [learnerUserId], references: [userId], onDelete: Cascade)
+
+  @@unique([classroomId, learnerUserId])
+  @@index([organizationId])
+  @@map("enrollment")
+}
+
+// ─── Assignment ──────────────────────────────────────────────────────────────
+
+model Assignment {
+  id              String    @id @default(cuid())
+  organizationId  String
+  createdByUserId String
+  classroomId     String?
+  /// "hifz" | "reading" | "review" — validated by zod at the boundary.
+  track           String
+  /// Reference-only payload: sūrah/āyah ranges, page numbers, lesson ids.
+  /// NEVER Arabic text (sacred-content rule).
+  scope           Json
+  /// Locked exercise settings the learner may not change.
+  settings        Json      @default("{}")
+  dueAt           DateTime?
+  createdAt       DateTime  @default(now())
+  archivedAt      DateTime?
+
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  classroom    Classroom?         @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  targets      AssignmentTarget[]
+
+  @@index([organizationId, createdAt])
+  @@map("assignment")
+}
+
+model AssignmentTarget {
+  id            String    @id @default(cuid())
+  assignmentId  String
+  learnerUserId String
+  completedAt   DateTime?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, learnerUserId])
+  @@index([learnerUserId])
+  @@map("assignment_target")
+}
+
+// ─── Events (append-only) and projections ────────────────────────────────────
+
+/// The source of truth. Every interaction lands here exactly once (idempotency
+/// key), and everything else in the learning domain is derived from it.
+/// UPDATE and DELETE are revoked on this table in SQL.
+model LearningEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  learnerUserId  String
+  /// e.g. "attempt.recorded" | "verdict.given" | "review.scheduled"
+  type           String
+  unitId         String?
+  /// Client-supplied idempotency key so queued offline attempts replay safely.
+  idempotencyKey String
+  payload        Json
+  occurredAt     DateTime
+  recordedAt     DateTime @default(now())
+  /// Which client produced it — for audit, never for trust.
+  source         String   @default("web")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, idempotencyKey])
+  @@index([organizationId, learnerUserId, occurredAt])
+  @@index([organizationId, type, occurredAt])
+  @@map("learning_event")
+}
+
+/// Projection: the memory graph state per learner per unit. Rebuildable from
+/// LearningEvent at any time; never written by a client.
+model MemoryState {
+  id                String    @id @default(cuid())
+  organizationId    String
+  learnerUserId     String
+  unitId            String
+  unitKind          String
+  stability         Float     @default(0)
+  difficulty        Float     @default(5)
+  reps              Int       @default(0)
+  lapses            Int       @default(0)
+  lastReviewAt      DateTime?
+  lastRetrievalType String?
+  confidence        Float     @default(0)
+  dueAt             DateTime?
+  /// Ear-gated: set only by a human verdict, never by the scheduler.
+  verifiedAt        DateTime?
+  updatedAt         DateTime  @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  learner      LearnerProfile @relation(fields: [learnerUserId], references: [userId], onDelete: Cascade)
+
+  @@unique([learnerUserId, unitId])
+  @@index([organizationId, dueAt])
+  @@index([organizationId, learnerUserId, unitKind])
+  @@map("memory_state")
+}
+
+/// Cursor for the projection runner, so projections can be rebuilt and resumed.
+model ProjectionCheckpoint {
+  name         String    @id
+  lastEventId  String?
+  lastEventAt  DateTime?
+  rebuildingAt DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  @@map("projection_checkpoint")
+}
+
+/// A single graded interaction. Written by the server after validating the
+/// evidence; the grade is computed server-side, never sent by the client.
+model Attempt {
+  id             String   @id @default(cuid())
+  organizationId String
+  learnerUserId  String
+  unitId         String
+  retrievalType  String
+  /// Server-computed grade: again | hard | good | easy
+  grade          String
+  /// Advisory-only ASR diff, if any. Never used to grade.
+  advisory       Json?
+  durationMs     Int?
+  assignmentId   String?
+  occurredAt     DateTime
+  createdAt      DateTime @default(now())
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  learner      LearnerProfile @relation(fields: [learnerUserId], references: [userId], onDelete: Cascade)
+
+  @@index([organizationId, learnerUserId, occurredAt])
+  @@map("attempt")
+}
+
+// ─── Assessment: human verdicts ──────────────────────────────────────────────
+
+model VerificationRequest {
+  id             String    @id @default(cuid())
+  organizationId String
+  learnerUserId  String
+  unitScope      Json // references only
+  track          String
+  requestedAt    DateTime  @default(now())
+  /// Recording is optional and consent-gated; absence is normal, not an error.
+  audioAssetId   String?
+  state          String    @default("pending") // pending | verified | returned | expired
+  decidedAt      DateTime?
+  decidedBy      String?
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  learner      LearnerProfile @relation(fields: [learnerUserId], references: [userId], onDelete: Cascade)
+  verdict      Verdict?
+
+  @@index([organizationId, state, requestedAt])
+  @@map("verification_request")
+}
+
+model Verdict {
+  id                    String   @id @default(cuid())
+  organizationId        String
+  verificationRequestId String   @unique
+  verdict               String // passed | needs_work | not_attempted
+  /// Corrections from the 11-category taxonomy; each entry references a word
+  /// position, never Arabic text.
+  corrections           Json     @default("[]")
+  note                  String?
+  decidedByUserId       String
+  decidedAt             DateTime @default(now())
+
+  request VerificationRequest @relation(fields: [verificationRequestId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, decidedAt])
+  @@map("verdict")
+}
+
+// ─── Skill graph (curated content, versioned) ────────────────────────────────
+
+model Skill {
+  id             String @id
+  kind           String
+  labelKey       String
+  difficultyHint Float  @default(0.5)
+  contentVersion String
+  metadata       Json   @default("{}")
+
+  outgoing SkillEdge[] @relation("edge_from")
+  incoming SkillEdge[] @relation("edge_to")
+
+  @@map("skill")
+}
+
+model SkillEdge {
+  id       String @id @default(cuid())
+  fromId   String
+  toId     String
+  relation String // prerequisite | misconception_of | mutashabih_of | rule_ayah
+  weight   Float  @default(1)
+
+  from Skill @relation("edge_from", fields: [fromId], references: [id], onDelete: Cascade)
+  to   Skill @relation("edge_to", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId, relation])
+  @@index([relation])
+  @@map("skill_edge")
+}
+
+// ─── Audio & media (bytes live in object storage; rows carry provenance) ─────
+
+enum ApprovalState {
+  pending
+  approved
+  rejected
+}
+
+model AudioAsset {
+  id              String        @id @default(cuid())
+  organizationId  String? // null = platform-wide library asset
+  /// Content-addressed object key. Bytes never live in the database.
+  objectKey       String        @unique
+  sha256          String
+  durationMs      Int?
+  mimeType        String
+  /// human | studio_synth | library — synthesis is NEVER unlabelled.
+  provenance      String
+  reciterId       String?
+  narratorId      String?
+  license         String?
+  approval        ApprovalState @default(pending)
+  rejectionReason String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  /// Child voice recordings are purged on this date unless exported/erased first.
+  purgeAfter      DateTime?
+
+  @@index([organizationId])
+  @@index([approval])
+  @@map("audio_asset")
+}
+
+// ─── Privacy: consent, exports, erasure ──────────────────────────────────────
+
+model ConsentRecord {
+  id              String    @id @default(cuid())
+  organizationId  String
+  learnerUserId   String
+  /// voice_recording | analytics_none | comms_email | comms_whatsapp
+  purpose         String
+  granted         Boolean
+  grantedByUserId String
+  grantedAt       DateTime  @default(now())
+  revokedAt       DateTime?
+  retentionDays   Int       @default(90)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([learnerUserId, purpose])
+  @@index([organizationId])
+  @@map("consent_record")
+}
+
+model DataRequest {
+  id              String    @id @default(cuid())
+  organizationId  String
+  subjectUserId   String
+  kind            String // export | erasure
+  state           String    @default("received") // received | running | completed | failed
+  requestedBy     String
+  requestedAt     DateTime  @default(now())
+  completedAt     DateTime?
+  resultObjectKey String?
+  failureReason   String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, state])
+  @@map("data_request")
+}
+
+// ─── Operations ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String
+  actorUserId    String?
+  action         String
+  resourceType   String
+  resourceId     String
+  metadata       Json     @default("{}")
+  occurredAt     DateTime @default(now())
+  ipHash         String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actor        User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, occurredAt])
+  @@map("audit_log")
+}
+
+model FeatureFlag {
+  key         String   @id
+  description String
+  /// off | on | percentage | scoped
+  mode        String   @default("off")
+  percentage  Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  assignments FeatureFlagAssignment[]
+
+  @@map("feature_flag")
+}
+
+model FeatureFlagAssignment {
+  id             String    @id @default(cuid())
+  flagKey        String
+  organizationId String
+  scopeType      ScopeType
+  scopeId        String
+  enabled        Boolean   @default(true)
+
+  flag         FeatureFlag  @relation(fields: [flagKey], references: [key], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([flagKey, scopeType, scopeId])
+  @@index([organizationId])
+  @@map("feature_flag_assignment")
+}
+
+model ReportRun {
+  id             String    @id @default(cuid())
+  organizationId String
+  kind           String // daily_learner | nightly_parent | school_weekly
+  scopeType      ScopeType
+  scopeId        String
+  forDate        DateTime
+  state          String    @default("queued")
+  payload        Json?
+  generatedAt    DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([kind, scopeType, scopeId, forDate])
+  @@index([organizationId, forDate])
+  @@map("report_run")
+}
+
+model Notification {
+  id             String    @id @default(cuid())
+  organizationId String
+  userId         String
+  kind           String
+  payload        Json      @default("{}")
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+  /// in_app | push | email | whatsapp — with honest manual fallback states.
+  channel        String    @default("in_app")
+  deliveryState  String    @default("pending")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, userId, createdAt])
+  @@map("notification")
+}
+
+/// Persistent khatma flags a teacher places while listening.
+model KhatmaFlag {
+  id             String    @id @default(cuid())
+  organizationId String
+  learnerUserId  String
+  /// Reference only: {sura, ayah, wordIndex}
+  position       Json
+  category       String
+  note           String?
+  createdBy      String
+  createdAt      DateTime  @default(now())
+  resolvedAt     DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, learnerUserId, resolvedAt])
+  @@map("khatma_flag")
+}
+
+/// Erasure is a named path through the append-only log, never an exception to
+/// it. Every removed row is recorded here against the request that authorised
+/// it. This table is written by a database trigger, never by the application.
+model ErasureLog {
+  id        String   @id
+  requestId String
+  tableName String
+  operation String
+  rowId     String
+  erasedAt  DateTime @default(now())
+
+  @@index([requestId])
+  @@map("erasure_log")
+}

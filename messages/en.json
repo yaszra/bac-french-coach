@@ -1,0 +1,59 @@
+{
+  "app": { "name": "Itqān", "tagline": "Mastery with precision" },
+  "nav": {
+    "today": "Today",
+    "quran": "Qurʾān",
+    "reading": "Reading",
+    "practice": "Practice",
+    "me": "Me",
+    "students": "Students",
+    "assign": "Assign",
+    "verify": "Verify",
+    "reports": "Reports",
+    "tools": "Tools",
+    "triage": "Today · Triage",
+    "children": "Children",
+    "tonight": "Tonight",
+    "settings": "Settings"
+  },
+  "action": {
+    "continue": "Continue",
+    "start": "Start",
+    "listen": "Listen",
+    "sayIt": "Say it",
+    "build": "Build",
+    "next": "Next",
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "retry": "Try again",
+    "askGrownUp": "Ask a grown-up"
+  },
+  "state": {
+    "loading": "Loading",
+    "notYetRecorded": "Not yet recorded",
+    "empty": "Nothing here yet",
+    "error": "Something went wrong",
+    "pendingSync": "Waiting to sync",
+    "offline": "Offline — your work is saved here"
+  },
+  "progress": {
+    "held": "Held",
+    "due": "Due for review",
+    "notEarned": "Not yet earned",
+    "ofReviewed": "{done} of {total}"
+  },
+  "a11y": {
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeDialog": "Close dialogue",
+    "loading": "Loading",
+    "wordInAyah": "Word {index} of āyah {ayah}",
+    "inkDepth": "Memory strength {depth} of 5"
+  },
+  "count": {
+    "dueReviews": { "one": "{count} review due", "other": "{count} reviews due" },
+    "studentsNeedYou": { "one": "{count} student needs you today", "other": "{count} students need you today" }
+  }
+}

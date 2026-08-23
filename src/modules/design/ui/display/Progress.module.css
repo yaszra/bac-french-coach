@@ -1,0 +1,102 @@
+.root {
+  display: block;
+  inline-size: 100%;
+  font-family: var(--font-ui);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-block-end: var(--space-2);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text);
+}
+
+/* The denominator is never optional when a label is present: every rate
+   carries the count it was computed from. */
+.denominator {
+  font-size: var(--text-2xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.track {
+  position: relative;
+  overflow: hidden;
+  inline-size: 100%;
+  background-color: var(--surface-sunken);
+  border-radius: var(--radius-pill);
+}
+
+.sm {
+  block-size: var(--space-1);
+}
+.md {
+  block-size: var(--space-2);
+}
+
+.fill {
+  display: block;
+  block-size: 100%;
+  border-radius: var(--radius-pill);
+  transition: inline-size var(--motion-base) var(--ease-standard);
+}
+
+.accent {
+  background-color: var(--accent);
+}
+.success {
+  background-color: var(--success);
+}
+.milestone {
+  background-color: var(--milestone);
+}
+
+/* Indeterminate: a single measured sweep, no pulsing, no shimmer. */
+.indeterminate {
+  position: absolute;
+  inset-block: 0;
+  inline-size: 30%;
+  animation: marginalia-sweep calc(var(--motion-slow) * 5) var(--ease-standard) infinite;
+}
+
+@keyframes marginalia-sweep {
+  from {
+    inset-inline-start: -30%;
+  }
+  to {
+    inset-inline-start: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indeterminate {
+    animation: none;
+    inset-inline-start: 0;
+    inline-size: 100%;
+  }
+  .fill {
+    transition: none;
+  }
+}
+
+/* Not-yet-recorded: an empty ruled rail, never a fabricated 0%. */
+.unknownTrack {
+  background-color: transparent;
+  border: 1px dashed var(--border-strong);
+  box-sizing: border-box;
+}
+
+.unknownText {
+  display: block;
+  margin-block-start: var(--space-2);
+  font-size: var(--text-2xs);
+  color: var(--text-muted);
+}
