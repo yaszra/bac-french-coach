@@ -46,10 +46,10 @@ src/auth/     centralized authorization policy and tenant isolation
 src/ai/       the AI boundary — read-only, no write surface at all
 src/ui/       design tokens, bilingual catalogue, accessible components
 src/server/   session signing, actor resolution, read-side queries
-app/          Next.js App Router routes and server actions
+app/          all 32 routes from the documented map, with server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        570 tests, organized by the acceptance criteria they protect
+tests/        644 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -74,7 +74,7 @@ tests/        570 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # typecheck, 570 tests, 18 DB invariants, build, bundle budget
+npm run verify      # typecheck, 644 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 npm run build       # Next.js production build
@@ -207,6 +207,8 @@ attributable, and RLS tenant isolation.
 | An AI-proposed graph edge needs review | `admitEdges` throws; DB `CHECK` agrees |
 | A milestone can never be earned by time | every branch reads verified or delayed evidence |
 | Absence is never turned into shame | no countdown, no loss warning, pauses keep the streak |
+| No route can serve one tenant's data to another | every data route is `force-dynamic` and resolves the actor |
+| The route map cannot drift from the docs | `routes.test.ts` checks both directions |
 
 Each row has at least one test named after it.
 
@@ -214,8 +216,9 @@ Each row has at least one test named after it.
 
 ## Status
 
-**Phase 1 vertical slice — engine, persistence, component library, and
-application shell complete; sign-in and audio outstanding.**
+**Engine, persistence, component library, and all 32 documented routes
+complete. Sign-in and audio are outstanding, and both are content or
+operations dependencies rather than code.**
 
 The complete journey (assign → listen → reconstruct → lose cues → recall →
 request → verify → schedule → return from blank → state updates) runs against

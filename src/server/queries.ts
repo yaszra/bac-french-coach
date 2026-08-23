@@ -524,3 +524,262 @@ export async function loadMemoryMap(
 
   return buildMemoryMap(targets, now);
 }
+
+export interface AssignableContext {
+  learners: readonly { learnerId: string; displayName: string }[];
+  passages: readonly {
+    passageId: string;
+    label: string;
+    ayahCount: number;
+    released: boolean;
+    releaseBlocks: readonly string[];
+  }[];
+}
+
+/**
+ * What a teacher can assign, and to whom.
+ *
+ * Unreleased passages are returned with their blocking reasons rather than
+ * filtered out: a teacher who cannot find a passage will ask why, and the
+ * answer should already be on their screen.
+ */
+export async function loadAssignableContext(
+  actor: Actor,
+): Promise<AssignableContext> {
+  const learnerIds = await visibleLearnerIds(actor);
+  const pool = getPool();
+
+  const [learners, passages] = await Promise.all([
+    learnerIds.length > 0
+      ? pool.query(
+          `SELECT id, display_name FROM app_user
+            WHERE id = ANY($1::uuid[]) AND organization_id = $2
+            ORDER BY display_name`,
+          [learnerIds, actor.organizationId],
+        )
+      : Promise.resolve({ rows: [] as Record<string, unknown>[] }),
+    pool.query(
+      `SELECT p.id, p.label, p.released, p.release_blocks,
+              (SELECT count(*)::int FROM ayah a
+                WHERE a.corpus_version_id = p.corpus_version_id
+                  AND a.surah_number = s.surah_number
+                  AND a.number_in_surah BETWEEN s.number_in_surah AND e.number_in_surah)
+                AS ayah_count
+         FROM passage p
+         JOIN ayah s ON s.id = p.start_ayah_id
+         JOIN ayah e ON e.id = p.end_ayah_id
+        WHERE p.organization_id = $1
+        ORDER BY p.label`,
+      [actor.organizationId],
+    ),
+  ]);
+
+  return {
+    learners: learners.rows.map((r) => ({
+      learnerId: r["id"] as string,
+      displayName: r["display_name"] as string,
+    })),
+    passages: passages.rows.map((r) => ({
+      passageId: r["id"] as string,
+      label: r["label"] as string,
+      ayahCount: Number(r["ayah_count"] ?? 1),
+      released: r["released"] as boolean,
+      releaseBlocks: (r["release_blocks"] as string[]) ?? [],
+    })),
+  };
+}
+
+export interface LearnerProfile {
+  learnerId: string;
+  displayName: string;
+  states: Readonly<Record<string, number>>;
+  independentAttempts: number;
+  assistedAttempts: number;
+  recurringCorrections: readonly { category: string; count: number }[];
+  activeMinutesThisWeek: number;
+  inactiveDays: number;
+  dueReviews: number;
+}
+
+/** A teacher's view of one learner. Denominators throughout. */
+export async function loadLearnerProfile(
+  actor: Actor,
+  learnerId: string,
+): Promise<LearnerProfile | undefined> {
+  const visible = await visibleLearnerIds(actor);
+  if (!visible.includes(learnerId)) return undefined;
+
+  const pool = getPool();
+  const [user, states, attempts, corrections, activity] = await Promise.all([
+    pool.query(
+      `SELECT display_name FROM app_user WHERE id = $1 AND organization_id = $2`,
+      [learnerId, actor.organizationId],
+    ),
+    pool.query(
+      `SELECT state, count(*)::int AS n,
+              count(*) FILTER (WHERE next_review_at <= now())::int AS due
+         FROM memory_state
+        WHERE learner_id = $1 AND organization_id = $2
+        GROUP BY state`,
+      [learnerId, actor.organizationId],
+    ),
+    pool.query(
+      `SELECT evidence_class, count(*)::int AS n
+         FROM attempt WHERE learner_id = $1 AND organization_id = $2
+        GROUP BY evidence_class`,
+      [learnerId, actor.organizationId],
+    ),
+    pool.query(
+      `SELECT c.category, count(*)::int AS n
+         FROM correction c
+         JOIN memory_target t ON t.id = c.memory_target_id
+        WHERE t.learner_id = $1 AND c.organization_id = $2
+        GROUP BY c.category HAVING count(*) > 1
+        ORDER BY count(*) DESC`,
+      [learnerId, actor.organizationId],
+    ),
+    pool.query(
+      `SELECT count(DISTINCT date_trunc('day', occurred_at))::int AS active_days
+         FROM attempt
+        WHERE learner_id = $1 AND organization_id = $2
+          AND occurred_at > now() - interval '7 days'`,
+      [learnerId, actor.organizationId],
+    ),
+  ]);
+  if (!user.rows[0]) return undefined;
+
+  const stateCounts: Record<string, number> = {};
+  let due = 0;
+  for (const row of states.rows) {
+    stateCounts[row["state"] as string] = Number(row["n"]);
+    due += Number(row["due"] ?? 0);
+  }
+  const byClass = Object.fromEntries(
+    attempts.rows.map((r) => [r["evidence_class"] as string, Number(r["n"])]),
+  );
+  const activeDays = Number(activity.rows[0]?.["active_days"] ?? 0);
+
+  return {
+    learnerId,
+    displayName: user.rows[0]["display_name"] as string,
+    states: stateCounts,
+    independentAttempts: byClass["independent_recall"] ?? 0,
+    assistedAttempts:
+      (byClass["assisted_practice"] ?? 0) + (byClass["scaffolded_practice"] ?? 0),
+    recurringCorrections: corrections.rows.map((r) => ({
+      category: r["category"] as string,
+      count: Number(r["n"]),
+    })),
+    // Active minutes are not yet instrumented; reported as such rather
+    // than estimated from wall-clock time.
+    activeMinutesThisWeek: 0,
+    inactiveDays: 7 - activeDays,
+    dueReviews: due,
+  };
+}
+
+export interface VerificationQueueRow {
+  requestId: string;
+  learnerName: string;
+  passageLabel: string;
+  requestedAt: number;
+}
+
+export async function loadVerificationQueue(
+  actor: Actor,
+): Promise<readonly VerificationQueueRow[]> {
+  const visible = await visibleLearnerIds(actor);
+  if (visible.length === 0) return [];
+  const { rows } = await getPool().query(
+    `SELECT r.id, r.requested_at, u.display_name, p.label
+       FROM oral_recitation_request r
+       JOIN assignment a ON a.id = r.assignment_id
+       JOIN passage p ON p.id = a.passage_id
+       JOIN app_user u ON u.id = r.learner_id
+      WHERE r.organization_id = $1 AND r.learner_id = ANY($2::uuid[])
+        AND r.status = 'pending'
+      ORDER BY r.requested_at`,
+    [actor.organizationId, visible],
+  );
+  return rows.map((r) => ({
+    requestId: r["id"] as string,
+    learnerName: r["display_name"] as string,
+    passageLabel: r["label"] as string,
+    requestedAt: (r["requested_at"] as Date).getTime(),
+  }));
+}
+
+export interface AuditRow {
+  occurredAt: number;
+  actorName: string | null;
+  action: string;
+  resourceKind: string;
+  outcome: string;
+  reason: string | null;
+}
+
+export async function loadAuditLog(
+  actor: Actor,
+  limit = 100,
+): Promise<readonly AuditRow[]> {
+  const { rows } = await getPool().query(
+    `SELECT l.occurred_at, l.action, l.resource_kind, l.outcome, l.reason,
+            u.display_name
+       FROM audit_log l
+       LEFT JOIN app_user u ON u.id = l.actor_user_id
+      WHERE l.organization_id = $1
+      ORDER BY l.occurred_at DESC
+      LIMIT $2`,
+    [actor.organizationId, limit],
+  );
+  return rows.map((r) => ({
+    occurredAt: (r["occurred_at"] as Date).getTime(),
+    actorName: (r["display_name"] as string | null) ?? null,
+    action: r["action"] as string,
+    resourceKind: r["resource_kind"] as string,
+    outcome: r["outcome"] as string,
+    reason: (r["reason"] as string | null) ?? null,
+  }));
+}
+
+export interface ContentApprovalRow {
+  sourceId: string;
+  publisher: string;
+  edition: string;
+  decision: string;
+  reviewerName: string | null;
+  reviewerCredential: string | null;
+  decidedAt: number | null;
+  licenceExpiresAt: number | null;
+  territories: readonly string[];
+}
+
+export async function loadContentApprovals(
+  actor: Actor,
+): Promise<readonly ContentApprovalRow[]> {
+  void actor;
+  // Content sources are platform-level, not tenant-owned: the same
+  // approved corpus serves every academy.
+  const { rows } = await getPool().query(
+    `SELECT cs.id, cs.publisher, cs.edition,
+            ca.decision, ca.reviewer_credential, ca.decided_at,
+            u.display_name AS reviewer_name,
+            lr.expires_at, lr.territories
+       FROM content_source cs
+       LEFT JOIN content_approval ca ON ca.content_source_id = cs.id
+       LEFT JOIN app_user u ON u.id = ca.reviewer_user_id
+       LEFT JOIN license_record lr ON lr.content_source_id = cs.id
+      ORDER BY cs.publisher, cs.edition`,
+  );
+  return rows.map((r) => ({
+    sourceId: r["id"] as string,
+    publisher: r["publisher"] as string,
+    edition: r["edition"] as string,
+    decision: (r["decision"] as string | null) ?? "pending",
+    reviewerName: (r["reviewer_name"] as string | null) ?? null,
+    reviewerCredential: (r["reviewer_credential"] as string | null) ?? null,
+    decidedAt: r["decided_at"] ? (r["decided_at"] as Date).getTime() : null,
+    licenceExpiresAt: r["expires_at"] ? (r["expires_at"] as Date).getTime() : null,
+    territories: (r["territories"] as string[]) ?? [],
+  }));
+}
