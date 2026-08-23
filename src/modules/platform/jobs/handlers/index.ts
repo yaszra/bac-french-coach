@@ -1,12 +1,14 @@
 import { JOBS, work } from "../queue";
 import { runDailyReports, runNightlyFamilyReports, runSchoolWeekly, type ReportJobData } from "./reports";
 import { runAudioPurge, runDataErasure, runDataExport, type PrivacyJobData } from "./privacy";
+import { advanceProjections, rebuildProjections } from "./projection";
 
 /**
  * Binding the handlers to their queues. One place, so "which job actually has a
  * worker?" has an answer that can be read rather than inferred.
  */
 export async function registerJobHandlers(): Promise<void> {
+  await work<{ rebuild?: boolean }>(JOBS.projectionAdvance, advanceProjections);
   await work<ReportJobData>(JOBS.reportDaily, runDailyReports);
   await work<ReportJobData>(JOBS.reportNightlyFamily, runNightlyFamilyReports);
   await work<ReportJobData>(JOBS.reportSchoolWeekly, runSchoolWeekly);
@@ -18,6 +20,8 @@ export async function registerJobHandlers(): Promise<void> {
 }
 
 export {
+  advanceProjections,
+  rebuildProjections,
   runDailyReports,
   runNightlyFamilyReports,
   runSchoolWeekly,

@@ -39,7 +39,12 @@ const LEARNERS = [
 
 const EXERCISES = ["listen", "recall_first", "rebuild", "gap_fill", "next_ayah_cue"] as const;
 
-function evidenceFor(exercise: (typeof EXERCISES)[number], success: boolean, random: () => number) {
+function evidenceFor(
+  exercise: (typeof EXERCISES)[number],
+  success: boolean,
+  random: () => number,
+  cueRef: string,
+) {
   const wordCount = 6 + Math.floor(random() * 6);
   switch (exercise) {
     case "listen":
@@ -74,7 +79,10 @@ function evidenceFor(exercise: (typeof EXERCISES)[number], success: boolean, ran
     case "next_ayah_cue":
       return {
         exercise,
-        cueAyah: 1,
+        // A reference, not a number: the schema refuses free text and refuses
+        // integers, which is why every cue attempt here was silently skipped
+        // until this was fixed. The grader was right; the seed was wrong.
+        cueAyah: cueRef,
         producedFirstWords: success,
         latencyMs: success ? 1_400 : 9_000,
         hintsUsed: success ? 0 : 1,
@@ -103,14 +111,34 @@ async function main(): Promise<void> {
       const at = new Date(now.getTime() - dayOffset * 24 * 3_600_000 + 18 * 3_600_000);
 
       for (const [position, ayah] of learner.ayahs.entries()) {
-        const unitId = `b:${learner.sura}:${ayah}`;
         const exercise = EXERCISES[Math.floor(random() * EXERCISES.length)]!;
+
+        /* Which unit an exercise is evidence ABOUT.
+         *
+         * A next-āyah cue does not test the āyah, it tests the seam between two
+         * of them — and the seam is where ḥifẓ actually fails. Recording it
+         * against the body would hide exactly the thing the memory graph exists
+         * to find, and would leave the teacher's weak-join list permanently
+         * empty while the learner kept stumbling at the same join. */
+        const next = learner.ayahs[position + 1];
+        const testsTheSeam = exercise === "next_ayah_cue" && next !== undefined;
+        const unitId = testsTheSeam
+          ? `t:${learner.sura}:${ayah}>${learner.sura}:${next}`
+          : `b:${learner.sura}:${ayah}`;
+        const unitKind = testsTheSeam ? "ayah_transition" : "ayah_body";
         // Later āyahs are newer, so they are held less well — which is what a
         // learner's page actually looks like.
         const familiarity = 1 - position / (learner.ayahs.length + 2);
-        const success = random() < learner.skill * familiarity;
+        // A seam is harder than either āyah it joins. Without this the demo
+        // would show joins stronger than the passages they connect, which is
+        // the opposite of how ḥifẓ behaves.
+        const difficulty = testsTheSeam ? 0.65 : 1;
+        const success = random() < learner.skill * familiarity * difficulty;
 
-        const graded = gradeAttempt(evidenceFor(exercise, success, random) as never, {});
+        const graded = gradeAttempt(
+          evidenceFor(exercise, success, random, `${learner.sura}:${ayah}`) as never,
+          {},
+        );
         if (graded.kind !== "graded") continue;
         const review = reviewEvidenceOf(exercise, graded, at);
         if (!review) continue;
@@ -124,12 +152,7 @@ async function main(): Promise<void> {
               type: "attempt.recorded",
               unitId,
               idempotencyKey: key,
-              payload: {
-                unitId,
-                unitKind: "ayah_body",
-                retrievalType: review.retrievalType,
-                grade: review.grade,
-              },
+              payload: { unitId, unitKind, retrievalType: review.retrievalType, grade: review.grade },
               occurredAt: at,
               source: "web",
             },

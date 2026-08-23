@@ -24,7 +24,9 @@
     "content:fetch": "node scripts/fetch_quran.mjs",
     "content:layout": "node scripts/build_layout.mjs",
     "content:timings": "node scripts/fetch_word_timings.mjs",
-    "test:all": "vitest run"
+    "test:all": "vitest run",
+    "worker": "tsx scripts/worker.ts",
+    "projections:rebuild": "tsx -e \"import('./src/modules/platform/jobs/handlers/projection').then(m => m.rebuildProjections())\""
   },
   "dependencies": {
     "@fontsource-variable/instrument-sans": "^5.3.0",

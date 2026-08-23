@@ -121,6 +121,29 @@ export async function upsertState(
   });
 }
 
+/**
+ * Every recorded state for a learner, both kinds.
+ *
+ * Weak-join analysis needs the transitions AND the bodies either side of them
+ * in one place — a seam is only weak *relative* to what it joins — so this
+ * returns the whole set rather than making the caller guess which unit ids to
+ * ask for. Bounded, because a learner with a completed ḥifẓ has thousands.
+ */
+export async function getAllStates(
+  organizationId: string,
+  learnerUserId: string,
+  limit = 5_000,
+): Promise<readonly StoredState[]> {
+  return withTenant(organizationId, async (tx) => {
+    const rows = await tx.memoryState.findMany({
+      where: { learnerUserId },
+      orderBy: { unitId: "asc" },
+      take: limit,
+    });
+    return rows.map(toDomain);
+  });
+}
+
 /** How many words a learner currently holds — the trend a family understands. */
 export async function countHeldUnits(
   organizationId: string,

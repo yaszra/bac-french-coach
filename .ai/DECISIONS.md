@@ -257,3 +257,37 @@ Format: D-nnn · date · decision · provenance.
 - **Erasure only through the audited path.** `runDataErasure` sets `app.erasure_request_id` inside
   a maintenance transaction, so the database trigger records every removed row in `erasure_log`.
   Integration test `tests/integration/privacy.test.ts` proves both the deletion and the log.
+
+## Learner core
+
+- **Ink depth is 0, or 1–5, and never anything in between.** `inkDepthOf` returns 0 only when there
+  is no row or no reps — "not yet recorded" — and never returns 0 for a unit that has evidence,
+  because depth 0 blanks the word's space on the page and would erase real work. A passage takes
+  the depth of its WEAKEST recorded unit. Provenance: honesty rule + `mushaf/README.md` §3.
+  Proven by `src/modules/hifz/ui/ink-depth.test.ts`.
+- **Reading is never testing.** The `read` view forces depth 5 for every word regardless of memory
+  state, and records nothing. `wordDepthFor` is the single point where that override happens.
+- **The learner's copy lives in its own namespace.** The engines emit `{key, params}` reasons in
+  `memory.*` / `hifz.*`; `reason-copy.ts` maps them into `learner.why.*`. Two surfaces therefore
+  cannot fight over one message file, and an unmapped reason falls back to a general line rather
+  than leaking an engine identifier onto a screen. Provenance: i18n contract + honesty rule.
+- **The client reports what happened, never what it was worth.** Every rung of the workspace ends
+  in `submitOrQueue` with observations only; the submission schema is strict and has no field a
+  grade could travel in. `oral_recitation` is rendered as "your teacher will listen", never a pass.
+  Provenance: evidence rule.
+- **Queue first, then the network.** `submitOrQueue` writes the attempt to IndexedDB with its
+  idempotency key BEFORE trying the server, so a connection that dies mid-flight costs nothing and
+  a replay is recognised. A queued attempt is reported as "waiting to sync", never as recorded.
+- **No highlight without measured timings.** `content/timings/STATUS.json` records every reciter as
+  `not_yet_recorded`, so `ayahTimings()` returns nothing and the player says why. There is
+  deliberately no interpolation path: a highlight that drifts teaches the wrong rhythm.
+- **Word boundaries, not word edits.** The KFGQPC corpus writes an open tanwīn and its alif with a
+  space between them. `segmentWords` rejoins that fragment so word counts, tiles and the page are
+  right; every returned string is a contiguous substring of the corpus, proven over all 6236 āyāt.
+  Provenance: sacred-content rule.
+- **Speech synthesis takes a message KEY, never a string.** `SpokenPrompt` can therefore speak only
+  interface copy from the learner bundle — there is no parameter through which scripture could
+  reach a synthetic voice, even by mistake. Provenance: sacred-content rule.
+- **Tier arrives as a prop from the server.** `LearnerSurface` takes `tier` from the layout, which
+  reads it from the account; only `theme` honours a URL override. A child cannot promote themselves
+  to the adult surface by editing a URL.

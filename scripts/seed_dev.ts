@@ -26,16 +26,27 @@ async function main() {
     update: {},
   });
 
-  const people = [
+  const people: readonly {
+    id: string;
+    name: string;
+    email: string | null;
+    code?: string;
+    role: "teacher" | "guardian" | "admin" | "learner";
+    tier: "kids" | "teen" | "adult" | null;
+  }[] = [
     { id: "u_seed_teacher", name: "Ustādh Karīm", email: "teacher@itqan.test", role: "teacher" as const, tier: null },
     { id: "u_seed_parent", name: "Fāṭimah", email: "parent@itqan.test", role: "guardian" as const, tier: null },
     { id: "u_seed_admin", name: "School Office", email: "admin@itqan.test", role: "admin" as const, tier: null },
-    { id: "u_seed_kid", name: "Yūsuf", email: null, role: "learner" as const, tier: "kids" as const },
+    // A child signs in with a code an adult reads to them, so it has to be
+    // sayable out loud and long enough to be worth having: six characters, no
+    // ambiguous 0/O or 1/I, and no email or password anywhere near it.
+    { id: "u_seed_kid", name: "Yūsuf", email: null, code: "NUR482", role: "learner" as const, tier: "kids" as const },
     { id: "u_seed_teen", name: "Maryam", email: "maryam@itqan.test", role: "learner" as const, tier: "teen" as const },
     { id: "u_seed_adult", name: "Ibrāhīm", email: "adult@itqan.test", role: "learner" as const, tier: "adult" as const },
   ];
 
   for (const person of people) {
+    const handle = person.email ? null : (person.code ?? person.id.replace("u_seed_", "")).toLowerCase();
     await prisma.user.upsert({
       where: { id: person.id },
       create: {
@@ -43,10 +54,13 @@ async function main() {
         organizationId: ORG_ID,
         displayName: person.name,
         email: person.email,
-        handle: person.email ? null : person.id.replace("u_seed_", ""),
+        handle,
         locale: "en",
       },
-      update: { displayName: person.name },
+      // The update clause used to set only the name, so a corrected sign-in
+      // code never took effect on an already-seeded database — which is how a
+      // child ended up with an unusable three-character handle.
+      update: { displayName: person.name, email: person.email, handle },
     });
 
     if (person.email) {

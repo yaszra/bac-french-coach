@@ -44,31 +44,58 @@ function rowToState(row: Record<string, unknown> | null, unitId: UnitId, kind: U
   };
 }
 
+/**
+ * Fold one event into memory state, using whichever client the caller has.
+ *
+ * This is called from TWO places, deliberately:
+ *
+ *   · inline, in the same transaction that appends the event, with the
+ *     request's tenant-scoped client — so a learner who answers correctly sees
+ *     the unit stop being due, immediately, in the same unit of work. Without
+ *     this the scheduler is frozen: events accumulate and nothing moves.
+ *   · from the projection runner, with the maintenance client, as the catch-up
+ *     and rebuild path for anything the inline call missed.
+ *
+ * Both paths run the same fold, so the two can never disagree.
+ */
+export async function foldEventIntoMemoryState(
+  event: ProjectionEvent,
+  client: MaintenanceClient,
+): Promise<void> {
+  const payload = event.payload as Record<string, unknown>;
+
+  if (event.type === "attempt.recorded") {
+    const unitId = (payload.unitId ?? event.unitId) as UnitId | undefined;
+    if (!unitId) return;
+    await applyOne(
+      client,
+      event,
+      unitId,
+      payload.unitKind as UnitKind,
+      payload.grade as Grade,
+      payload.retrievalType as RetrievalType,
+    );
+    return;
+  }
+
+  if (event.type === "verdict.given") {
+    // A human's verdict is evidence like any other — stronger evidence, and
+    // the only kind that can mark a unit verified.
+    const unitIds = (payload.unitIds ?? []) as UnitId[];
+    const verdict = String(payload.verdict);
+    const grade: Grade = verdict === "passed" ? "good" : "again";
+    for (const unitId of unitIds) {
+      await applyOne(client, event, unitId, undefined, grade, "oral_recitation", verdict === "passed");
+    }
+  }
+}
+
 export const memoryProjection = {
   name: "memory_state",
   handles: ["attempt.recorded", "verdict.given"],
 
   async apply(event: ProjectionEvent, ctx: { db: unknown }): Promise<void> {
-    const db = ctx.db as MaintenanceClient;
-    const payload = event.payload as Record<string, unknown>;
-
-    if (event.type === "attempt.recorded") {
-      const unitId = (payload.unitId ?? event.unitId) as UnitId | undefined;
-      if (!unitId) return;
-      await applyOne(db, event, unitId, payload.unitKind as UnitKind, payload.grade as Grade, payload.retrievalType as RetrievalType);
-      return;
-    }
-
-    if (event.type === "verdict.given") {
-      // A human's verdict is evidence like any other — stronger evidence, and
-      // the only kind that can mark a unit verified.
-      const unitIds = (payload.unitIds ?? []) as UnitId[];
-      const verdict = String(payload.verdict);
-      const grade: Grade = verdict === "passed" ? "good" : "again";
-      for (const unitId of unitIds) {
-        await applyOne(db, event, unitId, "ayah_body", grade, "oral_recitation", verdict === "passed");
-      }
-    }
+    await foldEventIntoMemoryState(event, ctx.db as MaintenanceClient);
   },
 
   async reset(ctx: { db: unknown }): Promise<void> {

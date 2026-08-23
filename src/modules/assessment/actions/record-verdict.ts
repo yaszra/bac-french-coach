@@ -5,6 +5,7 @@
 import { verdictInput } from "../schemas/verdict";
 import { applyVerdict } from "../domain/verdict";
 import { appendEvent } from "../../platform/events/append";
+import { foldEventIntoMemoryState } from "../../memory/repo/memory-projection";
 import { withTenant } from "../../platform/db/tenant";
 import { requireCaller } from "../../identity/actions/session-context";
 import { assertCan } from "../../platform/authz/can";
@@ -90,6 +91,28 @@ export async function recordVerdict(input: unknown): Promise<RecordVerdictResult
         source: "teacher_console",
       },
       tx,
+    );
+
+    // The verdict is the only thing that marks a unit verified, so the fold
+    // runs here in the same transaction — a teacher who approves must see the
+    // learner's page change as a result of having approved.
+    await foldEventIntoMemoryState(
+      {
+        id: event.eventId,
+        organizationId: actor.organizationId,
+        learnerUserId: parsed.data.learnerUserId,
+        type: "verdict.given",
+        unitId: null,
+        payload: {
+          verdict: parsed.data.verdict,
+          unitIds: parsed.data.unitIds,
+          corrections: parsed.data.corrections,
+          decidedByUserId: actor.userId,
+        },
+        occurredAt: decidedAt,
+        recordedAt: decidedAt,
+      },
+      tx as never,
     );
 
     // A wrong join observed by a teacher is the strongest mutashābih evidence

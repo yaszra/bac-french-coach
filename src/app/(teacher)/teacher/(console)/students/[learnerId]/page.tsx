@@ -11,6 +11,8 @@ import { verdictHistory } from "@/modules/assessment/repo/verification-repo";
 import { mushafViewFor } from "@/modules/classroom/repo/mushaf-view";
 import { rate } from "@/modules/analytics/domain/denominator";
 import { unitsIn, type ScopeItem } from "@/modules/classroom/domain/assignment-scope";
+import { getAllStates } from "@/modules/memory/repo/memory-state-repo";
+import { splitByKind, weakJoins } from "@/modules/hifz/domain/weakJoins";
 import { StudentProfileView } from "@/modules/classroom/ui/StudentProfileView";
 
 /**
@@ -36,12 +38,20 @@ export default async function StudentPage({
   const facts = await learnerFacts(actor.organizationId, learnerId, now);
   if (facts === null) notFound();
 
-  const [attempts, verdicts, assignments, family] = await Promise.all([
+  const [attempts, verdicts, assignments, family, states] = await Promise.all([
     recentAttempts(actor.organizationId, learnerId),
     verdictHistory(actor.organizationId, learnerId),
     assignmentsFor(actor.organizationId, learnerId),
     familyLinks(actor.organizationId, learnerId),
+    getAllStates(actor.organizationId, learnerId),
   ]);
+
+  /* The seams a teacher should ask about first. A join is only weak relative to
+     the āyāt either side of it, so this needs the whole state set rather than a
+     guessed list of unit ids. A uniformly strong passage yields nothing, and
+     the tab says so — an empty list here is an answer, not a gap. */
+  const { transitions, bodies } = splitByKind(states);
+  const seams = weakJoins({ now, transitions, bodies, limit: 5 });
 
   /* The ink page shows the passage the most recent verdict was about, when
      there is one. With no verdict there is nothing to show, and the tab says
@@ -68,7 +78,7 @@ export default async function StudentPage({
       verdictPass={rate(facts.verdictsPassed, facts.verdictsGiven)}
       lines={facts.trackedUnits === 0 ? [] : view.lines}
       page={view.page}
-      weakJoins={[]}
+      weakJoins={seams.map((seam) => ({ unitId: seam.unitId, severity: seam.severity }))}
       attempts={attempts.map((attempt) => ({
         id: attempt.id,
         unitId: attempt.unitId,

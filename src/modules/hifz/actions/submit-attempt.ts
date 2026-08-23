@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { attemptSubmissionSchema, gradingContextOf } from "../schemas/evidence";
 import { gradeAttempt, reviewEvidenceOf } from "../domain/grading";
 import { appendEvent } from "../../platform/events/append";
+import { foldEventIntoMemoryState } from "../../memory/repo/memory-projection";
 import { withTenant } from "../../platform/db/tenant";
 import { requireCaller } from "../../identity/actions/session-context";
 import { assertCan } from "../../platform/authz/can";
@@ -108,6 +109,29 @@ export async function submitAttempt(input: {
           occurredAt,
         },
       });
+
+      // Advance memory state in the SAME transaction as the event. A learner
+      // who answers correctly must see the unit stop being due now, not after
+      // a background sweep — and a rollback must undo both together, or the
+      // projection would claim something the history does not contain.
+      await foldEventIntoMemoryState(
+        {
+          id: event.eventId,
+          organizationId: actor.organizationId,
+          learnerUserId: input.learnerUserId,
+          type: "attempt.recorded",
+          unitId: parsed.data.unitId,
+          payload: {
+            unitId: parsed.data.unitId,
+            unitKind: unitKindOf(parsed.data.unitId),
+            retrievalType: review.retrievalType,
+            grade: review.grade,
+          },
+          occurredAt,
+          recordedAt: occurredAt,
+        },
+        tx as never,
+      );
     }
     return event;
   });
