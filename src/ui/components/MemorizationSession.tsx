@@ -1,3 +1,7 @@
+"use client";
+
+/* Holds the blank-page notice state for the current session. */
+
 /**
  * The memorization workspace.
  *

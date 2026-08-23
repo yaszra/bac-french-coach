@@ -5,10 +5,10 @@
  * slice — so acceptance tests read as journeys rather than as fixtures.
  */
 import type { Actor, Enrollment, GuardianRelationship } from "../src/auth/policy.js";
-import { InMemoryRepository, MemoryDatabase } from "../src/app/memory-store.js";
-import { Outbox } from "../src/app/events.js";
-import { useDeterministicIds } from "../src/app/ids.js";
-import type { PassageRecord } from "../src/app/repository.js";
+import { InMemoryRepository, MemoryDatabase } from "../src/application/memory-store.js";
+import { Outbox } from "../src/application/events.js";
+import { useDeterministicIds } from "../src/application/ids.js";
+import type { PassageRecord } from "../src/application/repository.js";
 import type { LearnerId } from "../src/core/types.js";
 
 export const ORG_A = "org-a";

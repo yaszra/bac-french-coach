@@ -1,3 +1,7 @@
+"use client";
+
+/* Holds the in-progress decision and listens for the keyboard shortcuts. */
+
 /**
  * The verification workspace.
  *

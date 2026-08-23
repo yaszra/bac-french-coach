@@ -1,3 +1,7 @@
+"use client";
+
+/* The error state takes a retry callback. */
+
 /**
  * The seven states every route must ship, from docs/02.
  *

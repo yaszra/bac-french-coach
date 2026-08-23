@@ -1,3 +1,7 @@
+"use client";
+
+/* Holds focus state for the roving tabindex. */
+
 /**
  * The word-tile tray.
  *

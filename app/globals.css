@@ -1,0 +1,162 @@
+/*
+ * Layout only. Every colour, radius, spacing step, and duration comes from
+ * a custom property defined in src/ui/tokens.ts — a hard-coded value here
+ * would be outside the design system and outside its contrast tests.
+ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--athar-surface);
+  color: var(--athar-on-surface);
+  font-family: var(--athar-font-latin);
+  line-height: 1.5;
+}
+
+[dir="rtl"] { font-family: var(--athar-font-arabic); }
+
+.athar-visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.athar-skip-link {
+  position: absolute;
+  inset-inline-start: calc(var(--athar-space) * 2);
+  inset-block-start: calc(var(--athar-space) * -12);
+  background: var(--athar-paper);
+  color: var(--athar-ink);
+  padding: calc(var(--athar-space) * 2);
+  border-radius: var(--athar-radius);
+  transition: inset-block-start var(--athar-motion-state);
+}
+.athar-skip-link:focus { inset-block-start: calc(var(--athar-space) * 2); }
+
+/* ---------------------------------------------------------------------- *
+ * The muṣḥaf. Geometry lives here; nothing else may position over it.
+ * ---------------------------------------------------------------------- */
+
+.athar-mushaf {
+  padding: calc(var(--athar-space) * 6);
+  border-radius: var(--athar-radius);
+  border: 1px solid var(--athar-border);
+  /* The page is the dominant element on its screen. */
+  container-type: inline-size;
+}
+
+.athar-mushaf__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  /* A fixed number of equal rows: line positions never depend on content. */
+  gap: calc(var(--athar-space) * 2);
+}
+
+.athar-mushaf__line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  min-block-size: calc(var(--athar-space) * 8);
+}
+
+.athar-mushaf__slot {
+  /* flex-basis is set per token from the approved layout width. */
+  flex-grow: 0;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.athar-mushaf__word { font-family: var(--athar-font-quran); }
+
+.athar-mushaf__blank {
+  display: block;
+  block-size: 1em;
+  border-block-end: 1px solid var(--athar-mist);
+}
+
+/* ---------------------------------------------------------------------- *
+ * Session layout: rail, page, actions. The page is widest by design.
+ * ---------------------------------------------------------------------- */
+
+.athar-session {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr) minmax(0, 1fr);
+  gap: calc(var(--athar-space) * 4);
+  padding: calc(var(--athar-space) * 4);
+  align-items: start;
+}
+
+/* On small screens the page takes the full width and controls move below. */
+@media (max-width: 60rem) {
+  .athar-session { grid-template-columns: minmax(0, 1fr); }
+}
+
+.athar-tray {
+  margin-block-start: calc(var(--athar-space) * 4);
+  padding: calc(var(--athar-space) * 3);
+  border-radius: var(--athar-radius);
+  background: var(--athar-canvas);
+}
+
+.athar-tray__tiles { display: flex; flex-wrap: wrap; gap: var(--athar-space); }
+
+.athar-tray__tile {
+  padding: calc(var(--athar-space) * 2) calc(var(--athar-space) * 3);
+  border: 1px solid var(--athar-border);
+  border-radius: var(--athar-radius);
+  background: var(--athar-paper);
+  color: var(--athar-ink);
+  font-family: var(--athar-font-quran);
+}
+
+/* ---------------------------------------------------------------------- *
+ * Cards, badges, and states.
+ * ---------------------------------------------------------------------- */
+
+.athar-card {
+  padding: calc(var(--athar-space) * 4);
+  border: 1px solid var(--athar-border);
+  border-radius: var(--athar-radius);
+  margin-block-end: calc(var(--athar-space) * 3);
+}
+
+.athar-card__action[data-variant="primary"] {
+  background: var(--athar-indigo);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--athar-radius);
+  padding-inline: calc(var(--athar-space) * 4);
+}
+
+.athar-card__action[data-variant="secondary"] {
+  background: transparent;
+  color: var(--athar-indigo);
+  border: 1px solid var(--athar-indigo);
+  border-radius: var(--athar-radius);
+  padding-inline: calc(var(--athar-space) * 4);
+}
+
+.athar-badge { display: inline-flex; gap: var(--athar-space); align-items: center; }
+
+.athar-attention__row {
+  padding: calc(var(--athar-space) * 3);
+  border-block-end: 1px solid var(--athar-border);
+}
+
+.athar-attention__confidence[data-confidence="low"] { color: var(--athar-warning-text); }
+
+.athar-skeleton {
+  block-size: calc(var(--athar-space) * 20);
+  border-radius: var(--athar-radius);
+  background: var(--athar-mist);
+}
+
+.athar-state--denied, .athar-state--error { color: var(--athar-error); }
+.athar-state--stale, .athar-state--offline { color: var(--athar-warning-text); }

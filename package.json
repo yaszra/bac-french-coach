@@ -9,8 +9,12 @@
     "test:watch": "vitest",
     "test:db": "bash scripts/test-db.sh",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && npm test && npm run test:db",
-    "test:pg": "vitest run tests/pg-integration.test.ts"
+    "verify": "npm run typecheck && npm test && npm run test:db && npm run build && npm run budget",
+    "test:pg": "vitest run tests/pg-integration.test.ts",
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "budget": "node scripts/bundle-budget.mjs"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",

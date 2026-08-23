@@ -61,3 +61,13 @@ jobs:
           output=$(psql -v ON_ERROR_STOP=1 -q -d athar_test -f db/tests/invariants.sql 2>&1)
           echo "$output" | grep -oE '(PASS|FAIL)  [^(]*'
           if echo "$output" | grep -q FAIL; then exit 1; fi
+
+      # A performance budget that is only written down is an aspiration.
+      - name: Build
+        env:
+          DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/athar_pg_test
+          ATHAR_SESSION_SECRET: ci-only-secret-at-least-32-characters-long
+        run: npm run build
+
+      - name: Bundle budget
+        run: npm run budget

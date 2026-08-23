@@ -13,7 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import pg from "pg";
-import { PgDatabase } from "../src/app/pg-store.js";
+import { PgDatabase } from "../src/application/pg-store.js";
 import {
   createAssignment,
   openAssignment,
@@ -23,8 +23,8 @@ import {
   requestOralRecitation,
   submitRetrieval,
   getToday,
-} from "../src/app/commands.js";
-import { useDeterministicIds } from "../src/app/ids.js";
+} from "../src/application/commands.js";
+import { useDeterministicIds } from "../src/application/ids.js";
 import type { Actor } from "../src/auth/policy.js";
 import type { AssignmentId, LearnerId } from "../src/core/types.js";
 import { MS_PER_DAY } from "../src/core/types.js";

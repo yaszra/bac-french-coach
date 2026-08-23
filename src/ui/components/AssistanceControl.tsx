@@ -1,3 +1,7 @@
+"use client";
+
+/* Takes a click handler. */
+
 /**
  * The hint control.
  *

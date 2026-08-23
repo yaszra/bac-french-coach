@@ -1,3 +1,7 @@
+"use client";
+
+/* Rendered inside the locale provider. */
+
 /**
  * A number that refuses to be shown without its denominator.
  *

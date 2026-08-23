@@ -1,3 +1,7 @@
+"use client";
+
+/* Rendered inside the locale provider. */
+
 /**
  * The scaffold ladder indicator.
  *

@@ -11,13 +11,13 @@ import {
   buildEvent,
   type EventType,
   type LearningEventEnvelope,
-} from "../src/app/events.js";
-import { useDeterministicIds } from "../src/app/ids.js";
+} from "../src/application/events.js";
+import { useDeterministicIds } from "../src/application/ids.js";
 import {
   createAssignment,
   recordListen,
   submitRetrieval,
-} from "../src/app/commands.js";
+} from "../src/application/commands.js";
 import {
   ACADEMY_A,
   CLASS_A,

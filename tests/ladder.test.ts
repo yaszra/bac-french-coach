@@ -1,5 +1,8 @@
 /**
  * Blank-page invariant and the scaffold ladder.
+ *
+ * Named `ladder` rather than `session` to keep it distinct from
+ * `server-session.test.ts`, which covers cookie signing.
  */
 import { describe, expect, it } from "vitest";
 import {

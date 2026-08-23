@@ -1,3 +1,7 @@
+"use client";
+
+/* Takes an action callback from the route. */
+
 /**
  * The teacher's attention inbox.
  *

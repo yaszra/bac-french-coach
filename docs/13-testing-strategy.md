@@ -53,12 +53,12 @@ lie about a child's memory.
 | 16 | Failed notification or AI service cannot lose or roll back evidence | `outbox.test.ts` |
 | 17 | Restored backup passes integrity and reconciliation | *specified; DR drill runbook* |
 | 18 | Arabic/RTL, keyboard, SR labels, reduced motion, 200 % zoom pass critical journey | `ui/accessibility.test.tsx` |
-| 19 | Declared performance budgets met on representative hardware | *specified; needs a built client* |
+| 19 | Declared performance budgets met on representative hardware | `scripts/bundle-budget.mjs` (bundle half); field metrics pending |
 | 20 | No Qurʾānic string, timing, audio, or asset reaches production without source, licence, approval | `content.test.ts` (tripwire + release gate) |
 
 ### What runs today, and what does not
 
-**Executable now** (`npm test`, 329 tests): criteria 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+**Executable now** (`npm test`, 341 tests): criteria 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 11, 12, 13, 14, 15, 16, 18, 20.
 
 **Executable now against real PostgreSQL** — the full Phase 1 journey
@@ -69,8 +69,26 @@ immutability, the self-verification constraint, the pending-claim constraint,
 the segment/assignment composite key, RLS tenant isolation, and the absence of
 an `estimated` alignment method.
 
-**Specified but not yet executable** — criteria 17 and 19. Criterion 17 needs deployed infrastructure and a restore drill;
-criterion 19 needs a built client measured on representative hardware.
+**Partly executable** — criterion 19. The bundle half is enforced:
+`npm run budget` fails the build if a learner route's initial JavaScript
+exceeds 200 KB gzipped. Current measurements are recorded below. LCP, INP,
+and CLS need a deployed client on representative hardware and remain
+outstanding.
+
+Measured at the time of writing, gzipped, excluding `nomodule` polyfills
+(a modern browser downloads and parses none of that chunk):
+
+| Route | Route chunks | Initial JS |
+|---|---:|---:|
+| `/learn/today` | 14.0 KB | 141.7 KB |
+| `/learn/session/[assignmentId]` | 7.0 KB | 134.7 KB |
+| `/teach/verify/[requestId]` | 5.4 KB | 133.1 KB |
+| shared shell | — | 127.7 KB |
+
+The shared React and Next runtime is 127.7 KB of that, so roughly 58 KB of
+the learner budget remains for everything the loop still has to grow.
+
+**Specified but not yet executable** — criterion 17. Criterion 17 needs deployed infrastructure and a restore drill.
 Criterion 18's contrast half is verified numerically against the tokens
 (`tokens.test.ts`) because jsdom has no layout engine; the rest — keyboard
 operation, screen-reader names, RTL, reduced motion, and non-colour

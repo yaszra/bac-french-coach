@@ -19,7 +19,7 @@ import {
   recordReviewOutcome,
   requestOralRecitation,
   submitRetrieval,
-} from "../src/app/commands.js";
+} from "../src/application/commands.js";
 import {
   ACADEMY_A,
   CLASS_A,
@@ -35,7 +35,7 @@ import {
   PASSAGE_A,
 } from "./helpers.js";
 import type { AssignmentId } from "../src/core/types.js";
-import type { MemoryDatabase } from "../src/app/memory-store.js";
+import type { MemoryDatabase } from "../src/application/memory-store.js";
 
 async function assign(db: MemoryDatabase, now = T0) {
   await db.repo.putPassage(releasedPassage());

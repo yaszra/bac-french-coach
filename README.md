@@ -44,9 +44,11 @@ src/core/     the pure learning engine: deterministic, framework-free, versioned
 src/content/  corpus verification, release gate, and the Arabic-script tripwire
 src/auth/     centralized authorization policy and tenant isolation
 src/ui/       design tokens, bilingual catalogue, accessible components
+src/server/   session signing, actor resolution, read-side queries
+app/          Next.js App Router routes and server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        329 tests, organized by the acceptance criteria they protect
+tests/        341 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -55,12 +57,14 @@ tests/        329 tests, organized by the acceptance criteria they protect
   a source file. Development uses a structurally-shaped synthetic fixture whose
   tokens are opaque Latin identifiers. A CI tripwire fails the build if any
   Arabic-script character appears in `src/` outside a two-entry allowlist.
-- **No application shell yet.** The component library is built and tested —
-  muṣḥaf page, tile tray, scaffold ladder, Today, session workspace, teacher
-  inbox, verification workspace, parent report — but the Next.js routes that
-  wire them to the command layer are not. Components were built before routes
-  because the geometry and accessibility rules are the hard part, and a route
-  is a thin thing to add once they hold.
+- **No sign-in flow.** Session verification is implemented and tested
+  (`src/server/session.ts`), but nothing issues a session yet: credential
+  handling, staff MFA enrolment, rate limiting, and account recovery are
+  scheduled with academy operations in `docs/14`. `/login` says so rather
+  than showing a form that does not work.
+- **No audio.** The listen step records completions server-side, but there is
+  no player: audio needs licensed recordings and measured alignment, which is
+  a Phase 0 content-operations dependency, not code.
 - **No AI anywhere near the learning loop.** See `docs/15-ai-boundary.md`.
 
 ---
@@ -69,9 +73,12 @@ tests/        329 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # strict typecheck + 329 tests + 18 database invariants
+npm run verify      # typecheck, 341 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
+npm run build       # Next.js production build
+npm run budget      # learner-route JavaScript against the declared budget
+npm run dev         # local server (needs DATABASE_URL and ATHAR_SESSION_SECRET)
 ```
 
 Both database suites need a running PostgreSQL 14+. `test:db` creates a
@@ -163,8 +170,8 @@ Each row has at least one test named after it.
 
 ## Status
 
-**Phase 1 vertical slice — engine, persistence, and component library complete;
-application shell not started.**
+**Phase 1 vertical slice — engine, persistence, component library, and
+application shell complete; sign-in and audio outstanding.**
 
 The complete journey (assign → listen → reconstruct → lose cues → recall →
 request → verify → schedule → return from blank → state updates) runs against
@@ -172,8 +179,9 @@ real PostgreSQL with row-level security active and **no admin database edits**,
 which is the bar `docs/14` sets for Phase 1 being done.
 
 `docs/13-testing-strategy.md` lists all twenty acceptance criteria from the
-build brief and states plainly which are executable today (18 of 20) and which
-need deployed infrastructure or representative hardware before they can run. Nothing here claims production readiness: Phase 0 (corpus rights,
+build brief and states plainly which are executable today (18 of 20, plus the
+bundle half of a nineteenth) and which need deployed infrastructure before
+they can run. Nothing here claims production readiness: Phase 0 (corpus rights,
 scholar governance, brand clearance, backups and restore drills) is a
 prerequisite that no amount of code satisfies.
 

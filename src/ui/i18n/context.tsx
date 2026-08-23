@@ -1,3 +1,9 @@
+"use client";
+
+/* The locale provider holds React context, which only exists on the
+ * client. Components that consume it are client components by extension —
+ * they are presentational, so that is where they belong. */
+
 /**
  * Locale context.
  *
