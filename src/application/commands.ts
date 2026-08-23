@@ -45,6 +45,12 @@ import type { StateContext } from "../core/states.js";
 import { initialState, review as runScheduler } from "../core/scheduler.js";
 import { blankPage, type PageRevealState } from "../core/session.js";
 import { buildTodayPlan, type Candidate, type TodayPlan } from "../core/recommend.js";
+import {
+  diffPolicy,
+  nextPolicyVersion,
+  validatePolicy,
+  type PolicyChange,
+} from "../core/assignment-policy.js";
 import type { Actor, PolicyContext, Resource, Role } from "../auth/policy.js";
 import { AuthorizationError, requireAuthorized } from "../auth/policy.js";
 import { buildEvent, type NewEvent } from "./events.js";
@@ -1178,5 +1184,87 @@ export function getToday(
       );
 
     return plan;
+  }, { organizationId: input.actor.organizationId });
+}
+
+// ---------------------------------------------------------------------------
+// editAssignmentPolicy
+// ---------------------------------------------------------------------------
+
+export interface EditPolicyInput {
+  actor: Actor;
+  now: EpochMs;
+  assignmentId: AssignmentId;
+  policy: Omit<EvidencePolicy, "policyVersion">;
+}
+
+export interface EditPolicyResult {
+  policyVersion: string;
+  supersedes: string;
+  changes: readonly PolicyChange[];
+}
+
+/**
+ * Change an assignment's evidence policy.
+ *
+ * Creates a new version rather than mutating the old one, so a
+ * verification recorded under the previous policy still points at exactly
+ * what applied at the time. A policy loosened today cannot retroactively
+ * make yesterday's evidence sufficient.
+ */
+export function editAssignmentPolicy(
+  db: Database,
+  input: EditPolicyInput,
+): Promise<EditPolicyResult> {
+  return db.transaction(async ({ repo }) => {
+    const assignment = await loadAssignmentScoped(repo, input.actor, input.assignmentId);
+    await authorizeOrThrow(
+      repo,
+      input.actor,
+      "assignment.policy.edit",
+      resourceOf(assignment),
+      input.now,
+    );
+
+    const issues = validatePolicy(input.policy);
+    if (issues.length > 0)
+      throw new CommandError(
+        "policy_not_met",
+        issues.map((i) => i.message).join(" "),
+      );
+
+    const current = await resolvedPolicy(
+      repo,
+      input.assignmentId,
+      assignment.currentPolicyVersion,
+    );
+    const changes = diffPolicy(current, input.policy);
+    if (changes.length === 0)
+      throw new CommandError("conflict", "This policy is unchanged.");
+
+    const policyVersion = nextPolicyVersion(assignment.currentPolicyVersion);
+    await repo.putPolicyVersion({
+      assignmentId: input.assignmentId,
+      policyVersion,
+      policy: { ...input.policy, policyVersion },
+      createdAt: input.now,
+      createdByUserId: input.actor.userId,
+      supersedes: assignment.currentPolicyVersion,
+    });
+    await repo.saveAssignment({
+      ...assignment,
+      currentPolicyVersion: policyVersion,
+    });
+
+    // The memory state records which policy its evidence is measured
+    // against, so a threshold check never silently changes meaning.
+    const state = await loadState(repo, assignment.targetId);
+    await repo.saveMemoryState({ ...state, policyVersion, updatedAt: input.now });
+
+    return {
+      policyVersion,
+      supersedes: assignment.currentPolicyVersion,
+      changes,
+    };
   }, { organizationId: input.actor.organizationId });
 }

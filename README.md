@@ -43,12 +43,13 @@ src/config/   brand and design tokens — the single place a rename touches
 src/core/     the pure learning engine: deterministic, framework-free, versioned
 src/content/  corpus verification, release gate, and the Arabic-script tripwire
 src/auth/     centralized authorization policy and tenant isolation
+src/ai/       the AI boundary — read-only, no write surface at all
 src/ui/       design tokens, bilingual catalogue, accessible components
 src/server/   session signing, actor resolution, read-side queries
 app/          Next.js App Router routes and server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        420 tests, organized by the acceptance criteria they protect
+tests/        516 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -73,7 +74,7 @@ tests/        420 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # typecheck, 420 tests, 18 DB invariants, build, bundle budget
+npm run verify      # typecheck, 516 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 npm run build       # Next.js production build
@@ -142,6 +143,17 @@ a distinct glyph so the map survives greyscale and print.
 and never composed from data. A template with no interpolation cannot leak a
 value, which is a stronger guarantee than sanitising one.
 
+**`src/core/measurement.ts`** — the product's own scoreboard. `Rate` returns
+`undefined` rather than zero when nothing was measured, assisted attempts are
+excluded from the north star rather than counted as misses, and `shouldShip`
+has no path on which rising engagement ships a change that lowered delayed
+recall.
+
+**`src/ai/boundary.ts`** — a module whose write surface is empty. Claims are
+tagged evidence or inference, inferences must state confidence, evidence must
+not, and phrasing that would certify recitation or assert what the text should
+be is rejected. A test greps the whole `src/ai` tree for repository imports.
+
 **`db/tests/invariants.sql`** — the rules that must hold below the application:
 append-only evidence, corpus immutability, `verifier_user_id <> learner_id`,
 pending claims that cannot carry capabilities, passage release that must be
@@ -176,6 +188,11 @@ attributable, and RLS tenant isolation.
 | Revocation needs no session to expire | grants read live at decision time |
 | No sacred text or detail in a preview | previews are fixed templates with no interpolation |
 | A page is never "complete forever" | no such status exists in the memory map |
+| No synthetic articulation is ever substituted | `AudioProvenance` has no synthetic member |
+| Pronunciation is confirmed by a human only | no software path reaches `confirmed` |
+| An assistant never certifies recitation | `validateDraft` rejects the phrasing |
+| An assistant cannot write learner state | `src/ai` has no repository import, asserted |
+| Engagement alone never ships a change | `shouldShip` has no engagement path |
 
 Each row has at least one test named after it.
 

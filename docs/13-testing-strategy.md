@@ -58,7 +58,7 @@ lie about a child's memory.
 
 ### What runs today, and what does not
 
-**Executable now** (`npm test`, 420 tests): criteria 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+**Executable now** (`npm test`, 516 tests): criteria 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
 11, 12, 13, 14, 15, 16, 18, 20.
 
 **Executable now against real PostgreSQL** — the full Phase 1 journey
