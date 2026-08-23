@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type { ActivityKind, ConceptObservation, EvidenceKind, Presentation } from "./evidence";
 import {
+  MAX_SCORE,
+  MIN_SCORE,
   SMART_SCORE_DEFAULTS,
   bktStateFor,
   evidenceVariety,
@@ -84,21 +86,29 @@ describe("nothing recorded is a state, not a zero", () => {
 });
 
 describe("the score follows the evidence", () => {
-  it("rises with correct evidence", () => {
+  it("rises with correct evidence and never claims certainty", () => {
+    const one = smartScore(CONCEPT, correctRun(1)).score ?? 0;
     const two = smartScore(CONCEPT, correctRun(2)).score ?? 0;
     const six = smartScore(CONCEPT, correctRun(6)).score ?? 0;
     const twelve = smartScore(CONCEPT, correctRun(12)).score ?? 0;
-    expect(two).toBeGreaterThan(0);
+    expect(one).toBeGreaterThan(0);
+    expect(two).toBeGreaterThan(one);
     expect(six).toBeGreaterThan(two);
-    expect(twelve).toBeGreaterThan(six);
-    expect(twelve).toBeLessThanOrEqual(100);
+    expect(twelve).toBeGreaterThanOrEqual(six);
+    expect(twelve).toBe(MAX_SCORE);
+    expect(smartScore(CONCEPT, correctRun(500)).score).toBe(MAX_SCORE);
   });
 
   it("falls after a miss", () => {
-    const run = correctRun(6);
-    const withMiss = [...run, obs(false, 6)];
+    const run = correctRun(3);
+    const withMiss = [...run, obs(false, 3)];
     expect(smartScore(CONCEPT, withMiss).score ?? 0).toBeLessThan(
       smartScore(CONCEPT, run).score ?? 0,
+    );
+    // The posterior falls even where the displayed score has already saturated.
+    const long = correctRun(8);
+    expect(smartScore(CONCEPT, [...long, obs(false, 8)]).pKnown ?? 1).toBeLessThan(
+      smartScore(CONCEPT, long).pKnown ?? 0,
     );
   });
 
@@ -106,7 +116,7 @@ describe("the score follows the evidence", () => {
     const misses = Array.from({ length: 12 }, (_unused, index) => obs(false, index));
     const result = smartScore(CONCEPT, misses);
     expect(result.score).not.toBeNull();
-    expect(result.score ?? 0).toBeGreaterThanOrEqual(1);
+    expect(result.score ?? 0).toBeGreaterThanOrEqual(MIN_SCORE);
     expect(result.state).toBe("emerging");
   });
 

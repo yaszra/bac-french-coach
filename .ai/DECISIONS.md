@@ -156,3 +156,44 @@ Format: D-nnn · date · decision · provenance.
   madani-15 layout server-side (the layout still records `lines: "not_yet_recorded"`, so
   words are packed, not justified) and renders the honest empty state when either is
   absent — it never types Arabic. [specified:T0 sacred-content + honesty rules]
+
+- **D-032** · 2026-08-23 · Reading (Qāʿidah) makhārij follow the classical **seventeen makhārij in
+  five regions** of Ibn al-Jazarī's *al-Muqaddimah al-Jazariyyah* — the scheme taught with the
+  Ḥafṣ ʿan ʿĀṣim reading this platform follows. Every letter has exactly one PRIMARY makhraj
+  (`validateLattice` proves the partition): alif alone in al-jawf, wāw at ash-shafatān and yāʾ at
+  wasaṭ al-lisān (their madd resonance in al-jawf is modelled by the madd concepts, not by dual
+  membership). Al-khayshūm carries no primary letter — it is the makhraj of the *ghunnah*, so its
+  `letterCodepoints` is empty and `rule.ghunnah` points at it. Hamzah is a 29th letter concept
+  outside the 28-letter alphabet. [specified:al-Jazariyyah]
+- **D-033** · 2026-08-23 · Reading concept ids use **Unicode Arabic-block character names** for the
+  letter segment (`letter.beh`, `letter.theh`, `letter.hah`, `letter.heh`) rather than a
+  transliteration: ASCII, stable, and collision-free where ḥāʾ/hāʾ, tāʾ/ṭāʾ and dhāl/ẓāʾ/zāy all
+  collide. Display names come only from `labelKey`. [inferred:collision-free-ids]
+- **D-034** · 2026-08-23 · Letter FORM concepts are emitted only for the positions a letter actually
+  takes: four for connectors, `isolated`+`final` for the six non-connecting letters, `isolated`
+  alone for hamzah. Emitting four for all would invent skills a learner can neither practise nor
+  fail. [inferred:honesty rule]
+- **D-035** · 2026-08-23 · Solo self-confirmation is modelled as its own evidence kind
+  (`self_confirmed`), never as a weaker teacher verdict. With `hasTeacher: true` the in-person rung
+  accepts `teacher_observed` only and a self-confirmation is counted under
+  `unacceptedEvidence`; solo, it advances the rung and `LadderState` keeps
+  `finalRungEvidenceKind` / `teacherVerified` / `selfConfirmed` / `verificationLabelKey` as
+  separate fields so no projection can render it as verification. SmartScore excludes it (and
+  `advisory_only`) from the BKT posterior: it raises `confidence` and the denominator, never the
+  score. [specified:T0 evidence + honesty rules]
+- **D-036** · 2026-08-23 · SmartScore is `number | null`, capped to **1..99**. `null` is the sole
+  encoding of "not yet recorded" (0% is a claim); 100 would assert a certainty no finite run of
+  observations buys — the same principle that keeps BKT's probabilities inside (0, 1). The score's
+  own denominator travels beside it as `scoredAttempts`. [inferred:honesty rule]
+- **D-037** · 2026-08-23 · The in-person ladder rung is gated by the observer's MOST RECENT verdict
+  (`latestMustBeCorrect`), not by an accuracy threshold: a human's latest word is the word, in both
+  directions. [inferred:evidence rule]
+- **D-038** · 2026-08-23 · Talqīn assets are a discriminated union on `provenance`
+  (`human` | `studio_synth_reviewed` | `library`) with no unlabelled member, and the synthesized
+  variant structurally requires `reviewedByPersonId` + `reviewedAt`. `resolveTalqin` walks
+  teacher → studio → library → `{kind:"not_yet_recorded"}`; there is no synthesized floor, so a
+  machine voice is never a silent fallback. [specified:T0 sacred-content + honesty rules]
+- **D-039** · 2026-08-23 · "No hearts, timers or streak penalties" is enforced by type, not by
+  convention: `ActivityEvaluation.penalty` has type `null` and `PracticeGuarantees` is four literal
+  `false`s, validated at the boundary by `practiceGuaranteesSchema`. A wrong answer returns a
+  `correction` message key describing what to notice. [specified:T0 premium rule]

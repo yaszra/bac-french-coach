@@ -1,0 +1,151 @@
+"use server";
+
+import { randomUUID } from "node:crypto";
+import { z } from "zod";
+import { applyVerdict } from "../domain/verdict";
+import { CORRECTIONS } from "../domain/taxonomy";
+import { appendEvent } from "../../platform/events/append";
+import { withTenant } from "../../platform/db/tenant";
+import { requireCaller } from "../../identity/actions/session-context";
+import { assertCan } from "../../platform/authz/can";
+import { logger } from "../../platform/observability/logger";
+
+/**
+ * Recording a teacher's verdict — the ear-gate.
+ *
+ * This is the only path by which a unit becomes verified. It is also the only
+ * place a person's judgement enters the memory graph, which is why the verdict
+ * row is immutable at the database: correcting a verdict means recording a new
+ * one, so the history of what a teacher actually said survives.
+ */
+const correctionMark = z.strictObject({
+  category: z.enum(CORRECTIONS.map((c) => c.category) as [string, ...string[]]),
+  sura: z.number().int().min(1).max(114),
+  ayah: z.number().int().min(1),
+  wordIndex: z.number().int().nonnegative().optional(),
+  wentTo: z.strictObject({ sura: z.number().int().min(1).max(114), ayah: z.number().int().min(1) }).optional(),
+  note: z.string().max(500).optional(),
+});
+
+export const verdictInput = z.strictObject({
+  verificationRequestId: z.string().min(1),
+  learnerUserId: z.string().min(1),
+  verdict: z.enum(["passed", "needs_work", "not_attempted"]),
+  unitIds: z.array(z.string()).min(1),
+  corrections: z.array(correctionMark).default([]),
+  note: z.string().max(1000).optional(),
+});
+
+export type RecordVerdictResult =
+  | { readonly ok: true; readonly eventId: string; readonly drills: number; readonly graphSignals: number }
+  | { readonly ok: false; readonly error: "invalid" | "not_allowed" | "already_decided" };
+
+export async function recordVerdict(input: unknown): Promise<RecordVerdictResult> {
+  const actor = await requireCaller();
+  const parsed = verdictInput.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "invalid" };
+
+  try {
+    assertCan(actor, "teach:verifyRecitation", { type: "learner", id: parsed.data.learnerUserId });
+  } catch {
+    return { ok: false, error: "not_allowed" };
+  }
+
+  const decidedAt = new Date();
+  const consequences = applyVerdict({
+    kind: parsed.data.verdict,
+    unitIds: parsed.data.unitIds,
+    corrections: parsed.data.corrections as never,
+    decidedByUserId: actor.userId,
+    decidedAt,
+  });
+
+  const result = await withTenant(actor.organizationId, async (tx) => {
+    const request = await tx.verificationRequest.findUnique({
+      where: { id: parsed.data.verificationRequestId },
+      select: { id: true, state: true, learnerUserId: true },
+    });
+    if (!request || request.learnerUserId !== parsed.data.learnerUserId) return "invalid" as const;
+    // A verdict is a person's word, recorded once. A second one is a new
+    // request, not an edit of this one.
+    if (request.state !== "pending") return "already_decided" as const;
+
+    await tx.verdict.create({
+      data: {
+        organizationId: actor.organizationId,
+        verificationRequestId: request.id,
+        verdict: parsed.data.verdict,
+        corrections: parsed.data.corrections,
+        note: parsed.data.note ?? null,
+        decidedByUserId: actor.userId,
+        decidedAt,
+      },
+    });
+    await tx.verificationRequest.update({
+      where: { id: request.id },
+      data: {
+        state: parsed.data.verdict === "not_attempted" ? "returned" : "verified",
+        decidedAt,
+        decidedBy: actor.userId,
+      },
+    });
+
+    const event = await appendEvent(
+      {
+        organizationId: actor.organizationId,
+        learnerUserId: parsed.data.learnerUserId,
+        type: "verdict.given",
+        unitId: null,
+        idempotencyKey: `verdict:${request.id}`,
+        payload: {
+          verificationRequestId: request.id,
+          verdict: parsed.data.verdict,
+          unitIds: parsed.data.unitIds,
+          corrections: parsed.data.corrections,
+          decidedByUserId: actor.userId,
+        },
+        occurredAt: decidedAt,
+        source: "teacher_console",
+      },
+      tx,
+    );
+
+    // A wrong join observed by a teacher is the strongest mutashābih evidence
+    // there is: it happened, to this learner, on this page.
+    for (const signal of consequences.graphSignals) {
+      if (signal.relation !== "mutashabih_of") continue;
+      await tx.skillEdge
+        .create({ data: { fromId: signal.from, toId: signal.to, relation: signal.relation, weight: 1 } })
+        .catch(() => {
+          /* the edge already exists; observing it again is not an error */
+        });
+    }
+
+    await tx.auditLog.create({
+      data: {
+        organizationId: actor.organizationId,
+        actorUserId: actor.userId,
+        action: "assessment.verdict_given",
+        resourceType: "verification_request",
+        resourceId: request.id,
+        metadata: { verdict: parsed.data.verdict, units: parsed.data.unitIds.length },
+      },
+    });
+
+    return event;
+  });
+
+  if (result === "invalid") return { ok: false, error: "invalid" };
+  if (result === "already_decided") return { ok: false, error: "already_decided" };
+
+  logger.info(
+    { learner: parsed.data.learnerUserId, verdict: parsed.data.verdict, drills: consequences.drills.length },
+    "verdict recorded",
+  );
+  return {
+    ok: true,
+    eventId: result.eventId,
+    drills: consequences.drills.length,
+    graphSignals: consequences.graphSignals.length,
+  };
+}

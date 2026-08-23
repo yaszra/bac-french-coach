@@ -146,7 +146,17 @@ function presentationFor(state: ConceptPlanState, phase: LessonPhase): Presentat
   return phase === "review" ? "randomized" : state.ladder.workingOn;
 }
 
+/** Nothing has ever been recorded for this concept. */
+function isNew(state: ConceptPlanState): boolean {
+  return state.smartScore.denominator.attempts === 0;
+}
+
+/**
+ * Whether the concept has come round again. An explicit `dueAt` from the scheduler
+ * wins; without one, a concept untouched for the tier's interval is offered again.
+ */
 function isDue(state: ConceptPlanState, now: Date, policy: ReadingTierPolicy): boolean {
+  if (isNew(state)) return false;
   if (state.dueAt !== undefined) return state.dueAt.getTime() <= now.getTime();
   const last = state.smartScore.lastEvidenceAt;
   if (last === null) return false;
@@ -189,12 +199,19 @@ export function buildLessonPlan(input: LessonPlanInput): LessonPlan {
     });
   }
 
+  // Three buckets, in this precedence: a concept that has come round again is
+  // reviewed; one with unfinished ladder work is practised; one never seen is
+  // introduced. A concept that is neither due nor unfinished is left alone — that is
+  // what makes an empty plan possible, and honest.
   const introCandidates = unlocked
-    .filter((state) => state.smartScore.state === "not_yet_recorded")
+    .filter((state) => isNew(state))
     .sort((a, b) => compareIds(a.conceptId, b.conceptId));
 
   const practiceCandidates = unlocked
-    .filter((state) => state.smartScore.state === "emerging")
+    .filter(
+      (state) =>
+        !isNew(state) && !isDue(state, input.now, policy) && !state.ladder.complete,
+    )
     .sort((a, b) => {
       const aScore = a.smartScore.score ?? 0;
       const bScore = b.smartScore.score ?? 0;
@@ -203,7 +220,7 @@ export function buildLessonPlan(input: LessonPlanInput): LessonPlan {
     });
 
   const reviewCandidates = unlocked
-    .filter((state) => state.smartScore.state === "secure" && isDue(state, input.now, policy))
+    .filter((state) => isDue(state, input.now, policy))
     .sort((a, b) => {
       const aDue = a.dueAt?.getTime() ?? a.smartScore.lastEvidenceAt?.getTime() ?? 0;
       const bDue = b.dueAt?.getTime() ?? b.smartScore.lastEvidenceAt?.getTime() ?? 0;

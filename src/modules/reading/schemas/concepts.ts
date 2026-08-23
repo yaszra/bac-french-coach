@@ -10,7 +10,12 @@
 import { z } from "zod";
 
 import { CONCEPT_KINDS, MAKHRAJ_IDS, MAKHRAJ_REGIONS, SKELETONS } from "../domain/concepts";
-import { codepointsSchema, conceptIdSchema, i18nKeySchema } from "./common";
+import {
+  arabicCodepointSchema,
+  codepointsSchema,
+  conceptIdSchema,
+  i18nKeySchema,
+} from "./common";
 
 export const conceptKindSchema = z.enum(CONCEPT_KINDS);
 export const makhrajGroupSchema = z.enum(MAKHRAJ_IDS);
@@ -27,7 +32,7 @@ export const letterDotsSchema = z.object({
 export const arabicLetterSchema = z.object({
   id: conceptIdSchema,
   name: z.string().regex(/^[a-z]+$/, { message: "reading.schema.error.invalid_letter_name" }),
-  codepoint: codepointsSchema.length(1).transform((points) => points[0] ?? ""),
+  codepoint: arabicCodepointSchema,
   unicode: z.string().regex(/^U\+[0-9A-F]{4}$/, {
     message: "reading.schema.error.invalid_unicode_reference",
   }),

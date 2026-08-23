@@ -91,7 +91,6 @@ describe("READING_LATTICE integrity", () => {
   it("uses ASCII ids and i18n label keys everywhere — no literal text, no Arabic in an id", () => {
     for (const concept of READING_LATTICE.concepts) {
       expect(isConceptId(concept.id)).toBe(true);
-      // eslint-disable-next-line no-control-regex
       expect(/^[\x00-\x7F]*$/.test(concept.id)).toBe(true);
       expect(LABEL_KEY_RE.test(concept.labelKey)).toBe(true);
     }
