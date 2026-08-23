@@ -24,18 +24,18 @@ const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromi
 for (const theme of ["light", "dark"]) {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await ctx.newPage();
-  await page.goto("http://localhost:3000/teacher/sign-in");
+  await page.goto("http://localhost:3100/teacher/sign-in");
   await page.getByLabel("Email").fill("teacher@itqan.test");
   await page.getByLabel("Password").fill("itqan-dev-password");
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.waitForURL("**/teacher/today");
 
-  await page.goto(`http://localhost:3000/teacher/today?theme=${theme}`);
+  await page.goto(`http://localhost:3100/teacher/today?theme=${theme}`);
   await page.waitForFunction(() => document.documentElement.dataset.surfaceReady === "true");
   await page.waitForTimeout(800);
   await page.screenshot({ path: `${OUT}/triage-${theme}.png`, fullPage: true });
 
-  await page.goto(`http://localhost:3000/teacher/verify/${ID}?theme=${theme}`);
+  await page.goto(`http://localhost:3100/teacher/verify/${ID}?theme=${theme}`);
   await page.waitForFunction(() => document.documentElement.dataset.surfaceReady === "true");
   await page.evaluate(() => document.fonts?.ready);
   await page.waitForTimeout(800);

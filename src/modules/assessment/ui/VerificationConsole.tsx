@@ -214,25 +214,33 @@ export function VerificationConsole({ view }: { readonly view: VerificationView 
           </div>
         </div>
 
-        <div className={styles.wentTo}>
-          <Field
-            label={t("teacher.verify.wentToSura")}
-            description={t("teacher.verify.wentToHelp")}
-            className={styles.wentToField}
-          >
-            <Input
-              inputMode="numeric"
-              value={wentToSura}
-              onChange={(event) => setWentToSura(event.target.value)}
-            />
-          </Field>
-          <Field label={t("teacher.verify.wentToAyah")} className={styles.wentToField}>
-            <Input
-              inputMode="numeric"
-              value={wentToAyah}
-              onChange={(event) => setWentToAyah(event.target.value)}
-            />
-          </Field>
+        {/* A wrong join is the one correction that needs a SECOND position:
+            not only where they lost the thread but where they went instead.
+            That pair is a mutashābih confusion, observed rather than guessed,
+            and it is the most valuable thing a teacher can record here. */}
+        <div>
+          <p className={styles.familyLabel}>{t("teacher.verify.wentTo")}</p>
+          <p className={styles.help}>{t("teacher.verify.wentToHelp")}</p>
+          <div className={styles.wentTo}>
+            <Field
+              label={t("teacher.verify.wentToSura")}
+              hideLabel={false}
+              className={styles.wentToField}
+            >
+              <Input
+                inputMode="numeric"
+                value={wentToSura}
+                onChange={(event) => setWentToSura(event.target.value)}
+              />
+            </Field>
+            <Field label={t("teacher.verify.wentToAyah")} className={styles.wentToField}>
+              <Input
+                inputMode="numeric"
+                value={wentToAyah}
+                onChange={(event) => setWentToAyah(event.target.value)}
+              />
+            </Field>
+          </div>
         </div>
 
         <div>

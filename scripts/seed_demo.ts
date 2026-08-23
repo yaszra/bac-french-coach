@@ -102,12 +102,12 @@ async function main(): Promise<void> {
 
       const at = new Date(now.getTime() - dayOffset * 24 * 3_600_000 + 18 * 3_600_000);
 
-      for (const ayah of learner.ayahs) {
+      for (const [position, ayah] of learner.ayahs.entries()) {
         const unitId = `b:${learner.sura}:${ayah}`;
         const exercise = EXERCISES[Math.floor(random() * EXERCISES.length)]!;
         // Later āyahs are newer, so they are held less well — which is what a
         // learner's page actually looks like.
-        const familiarity = 1 - learner.ayahs.indexOf(ayah) / (learner.ayahs.length + 2);
+        const familiarity = 1 - position / (learner.ayahs.length + 2);
         const success = random() < learner.skill * familiarity;
 
         const graded = gradeAttempt(evidenceFor(exercise, success, random) as never, {});

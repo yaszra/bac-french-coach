@@ -114,7 +114,7 @@
       }
     },
     "why": {
-      "verificationOverdue": "Your teacher has been waiting {overdueDays} days to hear {unitId}.",
+      "verificationOverdue": "Your teacher is waiting to hear {unitId}.",
       "recentLapse": "{unitId} slipped {daysSinceLapse} days ago, so it comes before anything new.",
       "dueReview": "{unitId} is due — about {retrievability}% of it is still within reach.",
       "weakJoin": "The join at {unitId} is trailing the āyāt it connects.",

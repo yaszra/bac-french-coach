@@ -126,7 +126,7 @@
       }
     },
     "why": {
-      "verificationOverdue": "ينتظر معلّمك منذ {overdueDays} أيّام ليسمع {unitId}.",
+      "verificationOverdue": "معلّمك ينتظر أن يسمع {unitId}.",
       "recentLapse": "اضطرب {unitId} قبل {daysSinceLapse} أيّام، فهو يسبق كلّ جديد.",
       "dueReview": "{unitId} مستحقّ — نحو {retrievability}٪ منه ما زال في المتناول.",
       "weakJoin": "الوصل عند {unitId} متأخّر عن الآيتين اللتين يصلهما.",

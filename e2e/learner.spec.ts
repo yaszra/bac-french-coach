@@ -92,6 +92,12 @@ async function arrange(): Promise<void> {
         WHERE "learnerUserId" = $1 AND "occurredAt" >= date_trunc('day', now() at time zone 'utc')`,
       [LEARNER],
     );
+
+    // The seeded learner is shared with the teacher console's fixtures, and a
+    // pending verification outranks every other band — a teacher's ear beats any
+    // model, by design. Clearing them is what makes THIS learner's day
+    // deterministic; it is arrangement, not a claim about verification.
+    await client.query(`DELETE FROM verification_request WHERE "learnerUserId" = $1`, [LEARNER]);
   } finally {
     await client.end();
   }
@@ -118,9 +124,9 @@ test.describe("the learner's day", () => {
     await expect(card).toBeVisible();
     await expect(page.getByTestId("today-start")).toBeVisible();
 
-    // Nothing has been recorded today yet, and the screen says so rather than
-    // showing a confident zero.
-    await expect(page.getByTestId("today-due")).toContainText(/Nothing recorded yet/i);
+    // The day's count carries its denominator from the very first render: the
+    // screen never shows a bare number, and never a rate without one.
+    await expect(page.getByTestId("today-due")).toContainText(/0 of \d+ done today/i);
 
     await page.getByTestId("today-start").click();
     await page.waitForURL("**/practice**");
@@ -141,8 +147,7 @@ test.describe("the learner's day", () => {
 
     // Back on Today, the day's count has moved, and it carries its denominator.
     await page.goto("/today");
-    await expect(page.getByTestId("today-due")).toContainText(/\d+ of \d+ done today/i);
-    await expect(page.getByTestId("today-due")).not.toContainText(/Nothing recorded yet/i);
+    await expect(page.getByTestId("today-due")).toContainText(/1 of \d+ done today/i);
   });
 
   test("the muṣḥaf offers a full-ink read, one tap from the memory view", async ({ page }) => {

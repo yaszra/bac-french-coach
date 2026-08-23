@@ -133,11 +133,19 @@
   gap: var(--space-2);
 }
 
+/* The one obvious next action stays reachable however long the tray grows:
+   approve-and-next is a rhythm, and a teacher should never have to scroll to
+   keep it. */
 .actions {
+  position: sticky;
+  inset-block-end: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
+  padding-block: var(--space-4) var(--space-1);
+  margin-block-start: calc(var(--space-2) * -1);
+  background: linear-gradient(to bottom, transparent, var(--surface-raised) var(--space-4));
 }
 
 .once {
@@ -171,6 +179,7 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: flex-end;
+  margin-block-start: var(--space-3);
 }
 
 .wentToField {
