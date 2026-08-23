@@ -49,7 +49,7 @@ src/server/   session signing, actor resolution, read-side queries
 app/          all 32 routes from the documented map, with server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        644 tests, organized by the acceptance criteria they protect
+tests/        700 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -74,11 +74,12 @@ tests/        644 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # typecheck, 644 tests, 18 DB invariants, build, bundle budget
+npm run verify      # typecheck, 700 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 npm run build       # Next.js production build
 npm run budget      # learner-route JavaScript against the declared budget
+npm run drill       # dump, restore, and reconcile — the DR drill
 npm run dev         # local server (needs DATABASE_URL and ATHAR_SESSION_SECRET)
 ```
 
@@ -165,6 +166,17 @@ There is no coin, heart, energy timer, or ranking, and none appears as a
 disabled option: nothing in the module could produce one. A streak survives
 a missed day and a set pause, and nothing shown about it is ever a countdown.
 
+**`src/application/reconciliation.ts`** — a backup that restores is not the
+same as a backup that is correct. Missing evidence is fatal; so is evidence
+that *appeared*, and so is a sequence restored behind its data, which
+reissues identifiers already in use and corrupts a system quietly.
+
+**`src/core/practice-lab.ts`** — optional practice that is structurally
+incapable of writing memorization state. Its summary has no scaffold level,
+start context, assistance list, or evidence class, so there is nothing to
+pass to `classifyAttempt` or the scheduler. The class board sorts on accuracy
+and does not have elapsed time in its comparator at all.
+
 **`db/tests/invariants.sql`** — the rules that must hold below the application:
 append-only evidence, corpus immutability, `verifier_user_id <> learner_id`,
 pending claims that cannot carry capabilities, passage release that must be
@@ -209,6 +221,10 @@ attributable, and RLS tenant isolation.
 | Absence is never turned into shame | no countdown, no loss warning, pauses keep the streak |
 | No route can serve one tenant's data to another | every data route is `force-dynamic` and resolves the actor |
 | The route map cannot drift from the docs | `routes.test.ts` checks both directions |
+| A restore that lost evidence is rejected | `npm run drill` reconciles before and after |
+| A log line can never carry sacred text or a name | `assertLoggable` throws rather than redacting |
+| Optional practice cannot touch memory state | its summary has no field the engine accepts |
+| Accuracy outranks speed | elapsed time is not in the class-board comparator |
 
 Each row has at least one test named after it.
 
