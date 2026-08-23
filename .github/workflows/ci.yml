@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: athar_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports: ["5432:5432"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      # Strict types, then the engine tests. The content gates (corpus
+      # integrity, release rules, and the Arabic-script tripwire) run inside
+      # the test suite, so a pasted ayah fails the build here.
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
+
+      # Database-level invariants: append-only evidence, corpus immutability,
+      # tenant isolation. These cannot be asserted from TypeScript.
+      - name: Database invariants
+        env:
+          PGHOST: localhost
+          PGUSER: postgres
+          PGPASSWORD: postgres
+        run: |
+          psql -v ON_ERROR_STOP=1 -q -d athar_test -f db/migrations/0001_init.sql
+          output=$(psql -v ON_ERROR_STOP=1 -q -d athar_test -f db/tests/invariants.sql 2>&1)
+          echo "$output" | grep -oE '(PASS|FAIL)  [^(]*'
+          if echo "$output" | grep -q FAIL; then exit 1; fi
