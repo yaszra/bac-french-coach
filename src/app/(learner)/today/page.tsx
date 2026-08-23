@@ -11,6 +11,7 @@ import { inkDepthOf } from "@/modules/hifz/ui/ink-depth";
 import { practiceHref } from "../practice/href";
 import { LEARNER_NAV } from "../nav";
 import { PrimaryCard } from "./PrimaryCard";
+import { SpokenPrompt } from "@/modules/hifz/ui/SpokenPrompt";
 import { SyncBanner } from "../SyncBanner";
 import styles from "./today.module.css";
 
@@ -47,18 +48,21 @@ export default async function TodayPage() {
 
           <SyncBanner />
 
-          {headline.kind === "action" ? (
-            <PrimaryCard primary={headline.primary} remainingSteps={headline.remainingSteps} t={t} />
-          ) : (
-            <NothingDue plan={plan} t={t} />
-          )}
-
           {plan.tier === "kids" ? (
-            <KidsRhythm plan={plan} t={t} />
-          ) : plan.tier === "teen" ? (
-            <TeenRhythm plan={plan} t={t} />
+            headline.kind === "action" ? (
+              <KidsToday plan={plan} t={t} />
+            ) : (
+              <NothingDue plan={plan} t={t} />
+            )
           ) : (
-            <AdultRhythm plan={plan} t={t} />
+            <>
+              {headline.kind === "action" ? (
+                <PrimaryCard primary={headline.primary} remainingSteps={headline.remainingSteps} t={t} />
+              ) : (
+                <NothingDue plan={plan} t={t} />
+              )}
+              {plan.tier === "teen" ? <TeenRhythm plan={plan} t={t} /> : <AdultRhythm plan={plan} t={t} />}
+            </>
           )}
         </div>
       </div>
@@ -113,40 +117,56 @@ function NothingDue({ plan, t }: { readonly plan: TodayPlan; readonly t: Transla
 }
 
 /**
- * A child's rhythm: three doors and a lantern.
+ * A child's Today.
  *
- * No counts, no streak, no timer, no score — by tier policy and by the honesty
- * rule both. The lantern is the only progress language on this screen, and its
- * light is the same ink depth the page uses.
+ * Three doors, a lantern, and one lit path. No counts, no streak, no timer, no
+ * score, no XP — by tier policy and by the honesty rule both. The lantern is the
+ * only progress language here, and its light is the same ink depth the muṣḥaf
+ * page uses, so a child who cannot read a number still knows how they are doing.
+ *
+ * The doors never change in number or order. A five-year-old should find the
+ * same three shapes in the same three places every single day; only which one is
+ * lit changes.
  */
-function KidsRhythm({ plan, t }: { readonly plan: TodayPlan; readonly t: Translate }) {
+function KidsToday({ plan, t }: { readonly plan: TodayPlan; readonly t: Translate }) {
   const step = plan.plan.kind === "plan" ? plan.plan.firstAction : null;
-  const activeStep: KidStep | null = step === null ? null : kidStepFor(step.exercise);
-  const state = step === null ? undefined : plan.states.find((row) => row.unitId === step.unitId);
+  if (step === null) return null;
+  const activeStep = kidStepFor(step.exercise);
+  const state = plan.states.find((row) => row.unitId === step.unitId);
   const depth = inkDepthOf(state, plan.now);
 
   return (
-    <div className={styles.kids}>
+    <div className={styles.kids} data-testid="today-kids">
       <div className={styles.kidsLantern}>
         <Lantern depth={depth} size="lg" label={t("learner.kids.lantern")} />
+        <SpokenPrompt messageKey={`learner.kids.step.${activeStep}`} label="learner.kids.hear" />
       </div>
 
       <div className={styles.kidsSteps}>
-        {KID_STEPS.map((name, index) => (
-          <a
-            key={name}
-            className={styles.kidsStep}
-            data-active={activeStep === name ? "true" : "false"}
-            href={step === null ? "/today" : practiceHref({ unitId: step.unitId })}
-            aria-disabled={activeStep === name ? undefined : "true"}
-            aria-current={activeStep === name ? "step" : undefined}
-          >
-            <span className={styles.kidsIndex} aria-hidden="true">
-              {index + 1}
-            </span>
-            {t(`learner.kids.step.${name}`)}
-          </a>
-        ))}
+        {KID_STEPS.map((name, index) =>
+          name === activeStep ? (
+            <a
+              key={name}
+              className={styles.kidsStep}
+              data-active="true"
+              href={practiceHref({ unitId: step.unitId })}
+              aria-current="step"
+              data-testid="today-start"
+            >
+              <span className={styles.kidsIndex} aria-hidden="true">
+                {index + 1}
+              </span>
+              {t(`learner.kids.step.${name}`)}
+            </a>
+          ) : (
+            <div key={name} className={styles.kidsStep} data-active="false">
+              <span className={styles.kidsIndex} aria-hidden="true">
+                {index + 1}
+              </span>
+              {t(`learner.kids.step.${name}`)}
+            </div>
+          ),
+        )}
       </div>
     </div>
   );
@@ -162,12 +182,13 @@ function KidsRhythm({ plan, t }: { readonly plan: TodayPlan; readonly t: Transla
 function TeenRhythm({ plan, t }: { readonly plan: TodayPlan; readonly t: Translate }) {
   return (
     <div className={styles.panel} data-testid="today-teen-rhythm">
-      <p className={styles.panelTitle}>{t("learner.today.goal.label")}</p>
+      <p className={styles.panelTitle}>{t("learner.today.streams.title")}</p>
       <div className={styles.row}>
         {plan.goal.kind === "not_set" ? (
           <span>{t("learner.today.goal.notSet")}</span>
         ) : (
           <>
+            <span>{t("learner.today.goal.label")}</span>
             <span data-testid="today-goal">
               {t("learner.today.doneToday", {
                 done: plan.goal.progress.done,

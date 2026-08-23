@@ -47,9 +47,22 @@ describe("engine reasons become learner copy", () => {
   it("resolves every mapped key in both languages", () => {
     for (const key of ENGINE_KEYS) {
       const messageKey = reasonMessageKey(key);
-      expect(translate("en", messageKey), messageKey).not.toBe(messageKey);
-      expect(translate("ar", messageKey), messageKey).not.toBe(messageKey);
+      // `count` is supplied because some reasons are plural-bearing; a message
+      // that needs a form and is asked without one would return its own key.
+      expect(translate("en", messageKey, { count: 2 }), messageKey).not.toBe(messageKey);
+      expect(translate("ar", messageKey, { count: 2 }), messageKey).not.toBe(messageKey);
     }
+  });
+
+  it("mirrors the day count into `count`, so a plural form can be chosen", () => {
+    const copy = reasonCopy(reason("memory.reason.recent_lapse", { unitId: "b:78:1", daysSinceLapse: 1 }));
+    expect(copy.params.count).toBe(1);
+    expect(translate("en", copy.key, copy.params)).toContain("a day ago");
+    expect(translate("en", copy.key, { ...copy.params, count: 3, daysSinceLapse: 3 })).toContain("3 days ago");
+  });
+
+  it("adds no count where a reason has no day number to speak of", () => {
+    expect(reasonCopy(reason("memory.reason.new_material", { order: 4 })).params.count).toBeUndefined();
   });
 
   it("resolves the fallback in both languages", () => {

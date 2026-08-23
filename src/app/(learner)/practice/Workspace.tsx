@@ -19,6 +19,7 @@ import { buildPageModel, type AyahWords } from "@/modules/hifz/ui/page-model";
 import { isComplete, place, rebuildEvidence, startRebuild, type RebuildState } from "@/modules/hifz/ui/rebuild";
 import { submitOrQueue, type SubmitResult } from "@/modules/hifz/ui/submit-client";
 import { exerciseInstructionKey, exerciseMessageKey } from "@/modules/hifz/ui/reason-copy";
+import { SpokenPrompt } from "@/modules/hifz/ui/SpokenPrompt";
 import { practiceHref } from "./href";
 import styles from "./practice.module.css";
 
@@ -51,6 +52,9 @@ export type WorkspaceProps = {
   readonly nextUnitId: string | null;
   readonly gaps: readonly number[];
   readonly seed: number;
+  /** The scheduler's own "why this?", carried through unchanged from the plan. */
+  readonly reasonKey: string;
+  readonly reasonParams: Readonly<Record<string, string | number>>;
 };
 
 /**
@@ -108,7 +112,12 @@ export function Workspace(props: WorkspaceProps) {
           occurredAt: new Date(),
         });
         setResult(outcome);
-        router.refresh();
+        // Only ask the server for a fresh plan when the server actually has
+        // something new. A queued attempt has not reached it, and refreshing
+        // while offline throws away the screen the learner is looking at.
+        if (outcome.kind === "recorded" || outcome.kind === "requires_human") {
+          router.refresh();
+        }
       } finally {
         setBusy(false);
       }
@@ -144,7 +153,6 @@ export function Workspace(props: WorkspaceProps) {
   const page = pageHidden ? (
     <div className={styles.blankPage} data-testid="practice-blank-page">
       <p>{t("learner.practice.scaffold.blank")}</p>
-      <p className={styles.quietNotice}>{t(props.scaffoldReasonKey)}</p>
       {props.mode === "test" || !committed ? null : (
         <Button variant="quiet" onClick={() => setHints((n) => n + 1)}>
           {t("learner.practice.reveal")}
@@ -163,7 +171,10 @@ export function Workspace(props: WorkspaceProps) {
     <Result result={result} exercise={props.exercise} />
   ) : (
     <div className={styles.tray}>
-      <p className={styles.instruction}>{t(exerciseInstructionKey(props.exercise))}</p>
+      <p className={styles.instruction}>
+        {t(exerciseInstructionKey(props.exercise))}{" "}
+        <SpokenPrompt messageKey={exerciseInstructionKey(props.exercise)} label="learner.kids.hear" />
+      </p>
       {props.mode === "test" ? (
         <p className={styles.notice} data-testid="practice-test-notice">
           {t("learner.practice.testMode.body")}
@@ -262,19 +273,41 @@ export function Workspace(props: WorkspaceProps) {
     </div>
   );
 
+  /**
+   * The third pane: why this step, and what is on screen.
+   *
+   * It appears only where there is room for it (from 1100px), and it never
+   * competes with the exercise — it is the explanation a learner can look at, not
+   * one they have to read first.
+   */
+  const context = (
+    <div className={styles.tray}>
+      <p className={styles.instruction}>{t("learner.today.why")}</p>
+      <p className={styles.quietNotice}>{t(props.reasonKey, props.reasonParams)}</p>
+      <p className={styles.instruction}>{t(`learner.practice.scaffold.${props.scaffold}`)}</p>
+      <p className={styles.quietNotice}>{t(props.scaffoldReasonKey)}</p>
+      {model.linesAreMeasured ? null : (
+        <p className={styles.quietNotice}>{t("learner.quran.packedLines")}</p>
+      )}
+    </div>
+  );
+
   return (
     <div className={styles.shell}>
       <div className={styles.bar}>
         <div className={styles.barText}>
           <p className={styles.barTitle}>{t(exerciseMessageKey(props.exercise))}</p>
+          {/* Children are never shown a count — not of steps, not of anything. */}
           <p className={styles.barMeta}>
-            {t("learner.practice.unit", { unitId: props.unitLabel })} ·{" "}
-            {t("learner.practice.step", { order: props.stepOrder, total: props.totalSteps })}
+            {t("learner.practice.unit", { unitId: props.unitLabel })}
+            {policy.showsScores || tier !== "kids"
+              ? ` · ${t("learner.practice.step", { order: props.stepOrder, total: props.totalSteps })}`
+              : ""}
           </p>
         </div>
         {props.mode === "test" ? <Badge tone="caution">{t("learner.practice.testMode.title")}</Badge> : null}
       </div>
-      <PaneLayout page={page} exercise={tray} actionRow={actionRow} />
+      <PaneLayout page={page} exercise={tray} context={context} actionRow={actionRow} />
     </div>
   );
 }
@@ -533,7 +566,7 @@ function RebuildRung({
         )}
       </div>
 
-      <Progress value={state.placed.length} max={Math.max(1, words.length)} label={t("learner.rebuild.line")} />
+      <Progress value={state.placed.length} max={Math.max(1, words.length)} label={t("learner.rebuild.placed")} />
 
       <p className={styles.instruction}>{t("learner.rebuild.tray")}</p>
       <div className={styles.tiles} data-testid="rebuild-tray">

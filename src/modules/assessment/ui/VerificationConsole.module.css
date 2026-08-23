@@ -133,19 +133,17 @@
   gap: var(--space-2);
 }
 
-/* The one obvious next action stays reachable however long the tray grows:
-   approve-and-next is a rhythm, and a teacher should never have to scroll to
-   keep it. */
+/* Approve-and-next is a rhythm, so the action sits directly under the verdict
+   rather than at the very bottom of a long tray. It is NOT sticky: a control
+   floating over the corrections a teacher just marked would obscure the thing
+   they are about to attest to. */
 .actions {
-  position: sticky;
-  inset-block-end: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: center;
-  padding-block: var(--space-4) var(--space-1);
-  margin-block-start: calc(var(--space-2) * -1);
-  background: linear-gradient(to bottom, transparent, var(--surface-raised) var(--space-4));
+  padding-block-start: var(--space-4);
+  border-block-start: var(--hairline);
 }
 
 .once {

@@ -94,8 +94,10 @@ test.describe("the teacher console", () => {
     await expect(maryam).toContainText("Asked to be heard");
 
     await page.goto("/teacher/verify");
-    await page.locator("li", { hasText: "Maryam" }).getByRole("link", { name: "Listen" }).click();
-    await page.waitForURL("**/teacher/verify/**");
+    // Address the row by its request, not by the student's name: this database
+    // is shared, and the same person may legitimately be waiting twice.
+    await page.locator(`a[href="/teacher/verify/${REQUEST_ID}"]`).click();
+    await page.waitForURL(`**/teacher/verify/${REQUEST_ID}`);
 
     /* A correction marks a POSITION: choose the word, then say what happened
        there. Marking a category before choosing a word is refused. */
@@ -115,8 +117,8 @@ test.describe("the teacher console", () => {
 
     await page.goto("/teacher/verify");
 
-    /* The queue is one shorter: this student is no longer waiting on anyone. */
-    await expect(page.locator("li", { hasText: "Maryam" })).toHaveCount(0);
+    /* The queue is one shorter: this request is no longer waiting on anyone. */
+    await expect(page.locator(`a[href="/teacher/verify/${REQUEST_ID}"]`)).toHaveCount(0);
 
     await page.goto("/teacher/today");
     await expect(

@@ -270,15 +270,6 @@ export function VerificationConsole({ view }: { readonly view: VerificationView 
           )}
         </div>
 
-        <Field label={t("teacher.verify.note")}>
-          <Textarea
-            rows={2}
-            maxLength={1000}
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-          />
-        </Field>
-
         <div>
           <p className={styles.familyLabel}>{t("teacher.verify.verdictHeading")}</p>
           <div className={styles.verdictRow}>
@@ -311,6 +302,18 @@ export function VerificationConsole({ view }: { readonly view: VerificationView 
           </Button>
           <Badge tone="neutral">{t("teacher.verify.queue", { count: view.remaining })}</Badge>
         </div>
+
+        {/* The note is last on purpose. It is a teacher's aside to themselves,
+            not part of the verdict, and it must never sit between them and the
+            action that records what they just heard. */}
+        <Field label={t("teacher.verify.note")}>
+          <Textarea
+            rows={2}
+            maxLength={1000}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+          />
+        </Field>
       </div>
     </div>
   );

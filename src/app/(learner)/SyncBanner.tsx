@@ -71,7 +71,12 @@ export function SyncBanner() {
 
     async function readQueue(): Promise<void> {
       const count = await pendingCount();
-      if (active) setPending(count);
+      if (!active) return;
+      setPending(count);
+      // Anything left from a previous session goes out as soon as there is a
+      // connection. A learner should never have to press a button to be honest
+      // about work they have already done.
+      if (count > 0 && !isOffline()) await drain();
     }
     void readQueue();
 
@@ -100,7 +105,7 @@ export function SyncBanner() {
       </div>
       {pending > 0 && !offline ? (
         <Button variant="secondary" size="sm" loading={busy} onClick={() => void drain()}>
-          {t("learner.sync.syncing")}
+          {busy ? t("learner.sync.syncing") : t("learner.sync.send")}
         </Button>
       ) : null}
     </div>

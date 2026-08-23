@@ -9,6 +9,7 @@ import { segmentWords } from "@/modules/hifz/ui/words";
 import { getTodayPlan } from "@/modules/memory/actions/today-plan";
 import { decideScaffold } from "@/modules/hifz/ui/scaffold-select";
 import { ayahsOfUnit, unitReferenceLabel } from "@/modules/hifz/ui/passage";
+import { reasonCopy } from "@/modules/hifz/ui/reason-copy";
 import { inkDepthOf } from "@/modules/hifz/ui/ink-depth";
 import { chooseGaps } from "@/modules/hifz/ui/rebuild";
 import { streamOf, nextStepAfter, type Stream } from "@/modules/hifz/ui/plan-shape";
@@ -157,6 +158,8 @@ export default async function PracticePage({
       nextUnitId={nextStep?.unitId ?? null}
       gaps={chooseGaps(target?.words.length ?? 0, 2, seedFor(step.unitId), preferredGaps)}
       seed={seedFor(step.unitId)}
+      reasonKey={reasonCopy(step.reason).key}
+      reasonParams={reasonCopy(step.reason).params}
     />,
   );
 }

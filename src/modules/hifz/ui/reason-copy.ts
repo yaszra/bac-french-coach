@@ -70,6 +70,17 @@ export function reasonParams(reason: Reason): Record<string, string | number> {
     }
     params[name] = value;
   }
+
+  // The translator selects a plural form from `count`, so the one number a
+  // reason is really about is mirrored there. Without it Arabic — which has six
+  // forms — would be stuck on the fallback, and English would say "1 days".
+  for (const name of ["daysSinceLapse", "overdueDays", "daysSinceRead"]) {
+    const value = params[name];
+    if (typeof value === "number") {
+      params.count = value;
+      break;
+    }
+  }
   return params;
 }
 

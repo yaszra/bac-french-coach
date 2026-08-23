@@ -115,7 +115,11 @@
     },
     "why": {
       "verificationOverdue": "Your teacher is waiting to hear {unitId}.",
-      "recentLapse": "{unitId} slipped {daysSinceLapse} days ago, so it comes before anything new.",
+      "recentLapse": {
+        "zero": "{unitId} slipped today, so it comes before anything new.",
+        "one": "{unitId} slipped a day ago, so it comes before anything new.",
+        "other": "{unitId} slipped {count} days ago, so it comes before anything new."
+      },
       "dueReview": "{unitId} is due — about {retrievability}% of it is still within reach.",
       "weakJoin": "The join at {unitId} is trailing the āyāt it connects.",
       "joinNotYetRecorded": "The join at {unitId} has never been practised, though both āyāt around it hold.",
@@ -123,7 +127,10 @@
       "newWithheldLoad": "New material is held back: {dueLoadMinutes} minutes of review come first.",
       "newWithheldTier": "New material is not part of today's session.",
       "maintenanceNeverRead": "{unitId} has not been read since you learned it.",
-      "maintenanceDue": "{unitId} was last read {daysSinceRead} days ago.",
+      "maintenanceDue": {
+        "one": "{unitId} was last read a day ago.",
+        "other": "{unitId} was last read {count} days ago."
+      },
       "budgetSpent": "Held back — today's minutes are already spent.",
       "newCapped": "Held back — that is enough new material for one day.",
       "unknown": "This is the next thing your memory needs."
@@ -200,7 +207,8 @@
       "line": "The āyah so far",
       "empty": "Nothing placed yet",
       "shuffled": "Shuffled again",
-      "wrongWord": "Not that one — it is back in the tray."
+      "wrongWord": "Not that one — it is back in the tray.",
+      "placed": "Placed"
     },
     "gapFill": {
       "prompt": "Fill the missing words.",
@@ -243,7 +251,8 @@
       "empty": {
         "title": "No pages yet",
         "body": "Once something is set for you, your pages appear here."
-      }
+      },
+      "packedLines": "Lines are packed at a fixed width: this muṣḥaf's measured line breaks are not in the package yet."
     },
     "kids": {
       "step": {
@@ -253,7 +262,8 @@
       },
       "start": "Start",
       "wellDone": "Well done",
-      "lantern": "Your lantern"
+      "lantern": "Your lantern",
+      "hear": "Hear it"
     },
     "sync": {
       "pending": {
@@ -263,7 +273,8 @@
       "offline": "You are offline. Your work is saved on this device and will be sent when you are back.",
       "syncing": "Sending your work",
       "failed": "Could not send yet — your work is still saved here.",
-      "notCounted": "Nothing is counted until the server has it."
+      "notCounted": "Nothing is counted until the server has it.",
+      "send": "Send now"
     },
     "a11y": {
       "primaryAction": "Today's next action",
