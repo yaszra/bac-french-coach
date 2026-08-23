@@ -30,13 +30,12 @@ export default async function VerifyOnePage({
   const view =
     scope === null
       ? { lines: [], page: null, sura: 0, ayahFrom: 0, ayahTo: 0 }
-      : await mushafViewFor(
-          actor.organizationId,
-          scope.sura,
-          scope.ayahFrom,
-          scope.ayahTo,
-          request.learnerUserId,
-        );
+      : /* Full ink, deliberately. Ink depth is the LEARNER's progress language:
+           a word they have not earned yet is a blank space on their screen, and
+           that is right for them. A teacher listening needs to READ the page —
+           a half-blank muṣḥaf would make them unable to follow the recitation
+           they are judging. The learner's depths belong on their profile. */
+        await mushafViewFor(actor.organizationId, scope.sura, scope.ayahFrom, scope.ayahTo);
 
   /* The rest of the queue, so "record and next" knows where next is. */
   const classrooms = await listClassrooms(actor.organizationId, actor.userId);

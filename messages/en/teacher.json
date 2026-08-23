@@ -38,7 +38,7 @@
       "verification_waiting": "Asked to be heard · waiting {hoursWaiting}h",
       "guardian_claim_waiting": "A guardian is waiting to be linked · {hoursWaiting}h",
       "repeated_lapses": "{lapses} passages slipped in the last two weeks",
-      "reviews_overdue": "{overdue} of {tracked} recorded units are past due · oldest {daysOverdue}d",
+      "reviews_overdue": "Past due: {overdue} of {tracked} recorded units · oldest {daysOverdue}d",
       "activity_gap": "Nothing recorded for {days} days",
       "recommendation_unacted": "A suggested next step has stood for {days} days",
       "recommendation_acted": "Acted on the suggested next step"

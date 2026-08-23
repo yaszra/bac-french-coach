@@ -38,7 +38,7 @@
       "verification_waiting": "طلب أن يُسمَّع · ينتظر {hoursWaiting} ساعة",
       "guardian_claim_waiting": "وليٌّ ينتظر الربط · {hoursWaiting} ساعة",
       "repeated_lapses": "تفلّت {lapses} مواضع في الأسبوعين الماضيين",
-      "reviews_overdue": "{overdue} من {tracked} وحدة مسجَّلة تجاوزت موعدها · أقدمها {daysOverdue} يومًا",
+      "reviews_overdue": "تجاوز موعده: {overdue} من {tracked} وحدة مسجَّلة · أقدمها {daysOverdue} يومًا",
       "activity_gap": "لم يُسجَّل شيء منذ {days} يومًا",
       "recommendation_unacted": "اقتراحٌ قائم منذ {days} يومًا",
       "recommendation_acted": "عمِل بالاقتراح المطروح"

@@ -415,7 +415,14 @@ export async function recentBeats(
   return withTenant(organizationId, async (tx) => {
     const rows = await tx.learningEvent.groupBy({
       by: ["learnerUserId"],
-      where: { learnerUserId: { in: [...learnerUserIds] }, occurredAt: { gte: since } },
+      where: {
+        learnerUserId: { in: [...learnerUserIds] },
+        occurredAt: { gte: since },
+        // A teacher recording a verdict is the teacher working, not the
+        // learner. Counting it would show a student as present because
+        // somebody looked at them.
+        source: { notIn: ["teacher_console", "system"] },
+      },
       _max: { occurredAt: true },
     });
     return rows.flatMap((row) =>

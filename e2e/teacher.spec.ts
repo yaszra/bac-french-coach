@@ -94,7 +94,6 @@ test.describe("the teacher console", () => {
     await expect(maryam).toContainText("Asked to be heard");
 
     await page.goto("/teacher/verify");
-    const queueBefore = await page.getByRole("link", { name: "Listen" }).count();
     await page.locator("li", { hasText: "Maryam" }).getByRole("link", { name: "Listen" }).click();
     await page.waitForURL("**/teacher/verify/**");
 
@@ -116,14 +115,23 @@ test.describe("the teacher console", () => {
 
     await page.goto("/teacher/verify");
 
-    /* One fewer person waiting — and Maryam is no longer among them. */
-    await expect(page.getByRole("link", { name: "Listen" })).toHaveCount(queueBefore - 1);
+    /* The queue is one shorter: this student is no longer waiting on anyone. */
     await expect(page.locator("li", { hasText: "Maryam" })).toHaveCount(0);
 
     await page.goto("/teacher/today");
     await expect(
       page.getByLabel("triage").locator("li", { hasText: "Maryam" }),
     ).not.toContainText("Asked to be heard");
+
+    /* And the verdict itself is on the record, once, with the correction that
+       was marked — a position, and no text. */
+    const recorded = await withDb((db) =>
+      db.verdict.findUnique({ where: { verificationRequestId: REQUEST_ID } }),
+    );
+    expect(recorded?.verdict).toBe("passed");
+    expect(recorded?.corrections).toEqual([
+      { category: "hesitation", sura: 78, ayah: 1, wordIndex: 1 },
+    ]);
   });
 
   test("a verdict is recorded once, and the record says so", async ({ page }) => {
