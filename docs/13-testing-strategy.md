@@ -37,7 +37,7 @@ lie about a child's memory.
 |---|---|---|
 | 1 | Teacher assigns exact passage + policy without exposing answer keys or mutable learner settings | `acceptance.test.ts` |
 | 2 | Learner sees one clear next action on Today | `recommend.test.ts` |
-| 3 | Page geometry matches approved layout, invariant across EN/AR and light/dark | *specified; needs the UI and a real corpus* |
+| 3 | Page geometry matches approved layout, invariant across EN/AR and light/dark | `ui/mushaf.test.tsx` |
 | 4 | Required listens persisted server-side | `acceptance.test.ts` |
 | 5 | Tile success fills the page but creates no independent-recall or mastery evidence | `evidence.test.ts` |
 | 6 | Any hint marks the attempt assisted | `evidence.test.ts` (+ property test) |
@@ -52,14 +52,14 @@ lie about a child's memory.
 | 15 | Cross-tenant access fails in policy, DB, API, and E2E | `policy.test.ts` (+ integration) |
 | 16 | Failed notification or AI service cannot lose or roll back evidence | `outbox.test.ts` |
 | 17 | Restored backup passes integrity and reconciliation | *specified; DR drill runbook* |
-| 18 | Arabic/RTL, keyboard, SR labels, reduced motion, 200 % zoom pass critical journey | *specified; needs the component library* |
+| 18 | Arabic/RTL, keyboard, SR labels, reduced motion, 200 % zoom pass critical journey | `ui/accessibility.test.tsx` |
 | 19 | Declared performance budgets met on representative hardware | *specified; needs a built client* |
 | 20 | No Qurʾānic string, timing, audio, or asset reaches production without source, licence, approval | `content.test.ts` (tripwire + release gate) |
 
 ### What runs today, and what does not
 
-**Executable now** (`npm test`, 234 tests): criteria 1, 2, 4, 5, 6, 7, 8, 9, 10,
-11, 12, 13, 14, 15, 16, 20.
+**Executable now** (`npm test`, 329 tests): criteria 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+11, 12, 13, 14, 15, 16, 18, 20.
 
 **Executable now against real PostgreSQL** — the full Phase 1 journey
 (`npm run test:pg`, 18 tests) plus schema invariants (`npm run test:db`, 18
@@ -69,9 +69,12 @@ immutability, the self-verification constraint, the pending-claim constraint,
 the segment/assignment composite key, RLS tenant isolation, and the absence of
 an `estimated` alignment method.
 
-**Specified but not yet executable** — criteria 3, 17, 18, 19. Each needs
-something this repository does not yet contain: the UI layer, a licensed
-corpus, deployed infrastructure, or representative hardware. They are written
+**Specified but not yet executable** — criteria 17 and 19. Criterion 17 needs deployed infrastructure and a restore drill;
+criterion 19 needs a built client measured on representative hardware.
+Criterion 18's contrast half is verified numerically against the tokens
+(`tokens.test.ts`) because jsdom has no layout engine; the rest — keyboard
+operation, screen-reader names, RTL, reduced motion, and non-colour
+encoding — runs under axe in both locales. They are written
 down so they cannot be quietly forgotten, and they are the acceptance gate for
 the phases that build those pieces.
 

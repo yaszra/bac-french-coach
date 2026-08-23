@@ -23,10 +23,15 @@ const ARABIC =
  *   through the brand process, not the corpus process.
  * - `src/content/approved/` is the only place verified corpus data may be
  *   vendored, and it is verified by checksum and approval, not by reading.
+ * - `src/ui/i18n/messages.ts` holds hand-written Arabic interface copy,
+ *   reviewed through the localisation process. The corpus never passes
+ *   through it, and a separate test asserts no catalogue string could be
+ *   Qur'anic content.
  */
 export const DEFAULT_ALLOWLIST: readonly string[] = [
   "src/config/brand.ts",
   "src/content/approved/",
+  "src/ui/i18n/messages.ts",
 ];
 
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", "coverage"]);

@@ -283,7 +283,7 @@ describe("criterion 6 — a hint marks the attempt assisted", () => {
     const deps = makeDeps();
     const { assignmentId, segmentId } = await assign(deps);
     for (let i = 0; i < 3; i++)
-      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId });
 
     const r = await submitRetrieval(deps, {
       actor: learner(),
@@ -309,7 +309,7 @@ describe("criterion 6 — a hint marks the attempt assisted", () => {
 describe("criterion 8 — a learner cannot self-approve, by any route", () => {
   it("refuses a recitation request before the threshold is met", async () => {
     const deps = makeDeps();
-    const { assignmentId, segmentId } = await assign(deps);
+    const { assignmentId } = await assign(deps);
     await expect(requestOralRecitation(deps, { actor: learner(), now: T0, assignmentId })).rejects.toThrow(/Evidence threshold not met/);
   });
 
@@ -355,7 +355,7 @@ describe("criterion 8 — a learner cannot self-approve, by any route", () => {
     const deps = makeDeps();
     const { assignmentId, segmentId } = await assign(deps);
     for (let i = 0; i < 3; i++)
-      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId });
 
     const key = "k-replay";
     const first = await submitRetrieval(deps, {
@@ -391,7 +391,7 @@ describe("criterion 8 — a learner cannot self-approve, by any route", () => {
     const deps = makeDeps();
     const { assignmentId, segmentId } = await assign(deps);
     for (let i = 0; i < 3; i++)
-      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId: "seg-1" });
+      await recordListen(deps, { actor: learner(), now: T0 + i, assignmentId, segmentId });
     await expect(submitRetrieval(deps, {
         actor: learner(),
         now: T0 + 10,
@@ -410,7 +410,7 @@ describe("criterion 8 — a learner cannot self-approve, by any route", () => {
 describe("criterion 15 — cross-tenant access fails as not_found", () => {
   it("hides an assignment from a teacher in another organization", async () => {
     const deps = makeDeps();
-    const { assignmentId, segmentId } = await assign(deps);
+    const { assignmentId } = await assign(deps);
     const foreign = teacher({ userId: "teacher-b", organizationId: ORG_B });
     await expect(openAssignment(deps, { actor: foreign, now: T0, assignmentId })).rejects.toThrow(/not found/i);
   });

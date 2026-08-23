@@ -4,7 +4,9 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": [
-      "ES2022"
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
     ],
     "strict": true,
     "noUncheckedIndexedAccess": true,
@@ -15,11 +17,16 @@
     "skipLibCheck": true,
     "types": [
       "node"
-    ]
+    ],
+    "jsx": "react-jsx",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.tsx",
     "tests/**/*.ts",
+    "tests/**/*.tsx",
     "vitest.config.ts"
   ]
 }

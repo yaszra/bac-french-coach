@@ -183,7 +183,7 @@ function awaitingVerification(s: LearnerSnapshot, now: EpochMs): AttentionRow[] 
   ];
 }
 
-function repeatedCorrections(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
+function repeatedCorrections(s: LearnerSnapshot): AttentionRow[] {
   const byCategory = new Map<CorrectionCategory, CorrectionObservation[]>();
   for (const c of s.corrections) {
     const list = byCategory.get(c.category);
@@ -237,7 +237,7 @@ function repeatedCorrections(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
  * low-confidence guess. Comparing halves is deliberately crude and
  * legible — a teacher can check it by eye.
  */
-function recallDecline(s: LearnerSnapshot, _now: EpochMs): AttentionRow[] {
+function recallDecline(s: LearnerSnapshot): AttentionRow[] {
   const sorted = [...s.delayedRecalls].sort((a, b) => a.occurredAt - b.occurredAt);
   if (sorted.length < attentionParams.minRecallsForTrendClaim) return [];
 
@@ -318,7 +318,7 @@ function notStarted(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
   ];
 }
 
-function reviewOverload(s: LearnerSnapshot, _now: EpochMs): AttentionRow[] {
+function reviewOverload(s: LearnerSnapshot): AttentionRow[] {
   if (s.overdueReviewCount < attentionParams.reviewOverloadThreshold) return [];
   return [
     {
@@ -412,7 +412,7 @@ function governance(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
  * Last in the order on purpose: good news is worth surfacing, but never
  * above work that is waiting.
  */
-function recentlyImproved(s: LearnerSnapshot, _now: EpochMs): AttentionRow[] {
+function recentlyImproved(s: LearnerSnapshot): AttentionRow[] {
   const sorted = [...s.delayedRecalls].sort((a, b) => b.occurredAt - a.occurredAt);
   const streak = sorted.findIndex((r) => !r.correct);
   const cleanRun = streak === -1 ? sorted.length : streak;
@@ -441,13 +441,13 @@ const BUILDERS: Record<
   (s: LearnerSnapshot, now: EpochMs) => AttentionRow[]
 > = {
   awaiting_verification: awaitingVerification,
-  repeated_corrections: repeatedCorrections,
-  recall_decline: recallDecline,
+  repeated_corrections: (s) => repeatedCorrections(s),
+  recall_decline: (s) => recallDecline(s),
   not_started: notStarted,
-  review_overload: reviewOverload,
+  review_overload: (s) => reviewOverload(s),
   inactivity: inactivity,
   governance_request: governance,
-  recently_improved: recentlyImproved,
+  recently_improved: (s) => recentlyImproved(s),
 };
 
 export interface AttentionInbox {

@@ -43,9 +43,10 @@ src/config/   brand and design tokens — the single place a rename touches
 src/core/     the pure learning engine: deterministic, framework-free, versioned
 src/content/  corpus verification, release gate, and the Arabic-script tripwire
 src/auth/     centralized authorization policy and tenant isolation
+src/ui/       design tokens, bilingual catalogue, accessible components
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        234 tests, organized by the acceptance criteria they protect
+tests/        329 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -54,10 +55,12 @@ tests/        234 tests, organized by the acceptance criteria they protect
   a source file. Development uses a structurally-shaped synthetic fixture whose
   tokens are opaque Latin identifiers. A CI tripwire fails the build if any
   Arabic-script character appears in `src/` outside a two-entry allowlist.
-- **No UI layer yet.** Wireframes, tokens, and the accessible component
-  inventory are specified in `docs/03` and `docs/04`; the routes are mapped in
-  `docs/02`. The engine is built first because the UI is the easy part to
-  change and the evidence model is not.
+- **No application shell yet.** The component library is built and tested —
+  muṣḥaf page, tile tray, scaffold ladder, Today, session workspace, teacher
+  inbox, verification workspace, parent report — but the Next.js routes that
+  wire them to the command layer are not. Components were built before routes
+  because the geometry and accessibility rules are the hard part, and a route
+  is a thin thing to add once they hold.
 - **No AI anywhere near the learning loop.** See `docs/15-ai-boundary.md`.
 
 ---
@@ -66,7 +69,7 @@ tests/        234 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # strict typecheck + 234 tests + 18 database invariants
+npm run verify      # strict typecheck + 329 tests + 18 database invariants
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 ```
@@ -113,6 +116,16 @@ sample the row is not emitted at all rather than shown as a guess.
 boundary. State and the events that justify it commit together; a rolled-back
 command leaves neither behind.
 
+**`src/ui/components/MushafPage.tsx`** — fixed Madani geometry. Every line is
+rendered whether or not data covers it, and every slot reserves its measured
+width whether filled or blank, so a word appearing never shifts the words
+around it. Always right-to-left and always on warm paper, whatever the
+interface locale and theme are doing.
+
+**`src/ui/i18n/messages.ts`** — English and Arabic built together. The Arabic
+catalogue is typed as a complete record of the English keys, so omitting a
+string is a compile error rather than a silent fallback.
+
 **`db/tests/invariants.sql`** — the rules that must hold below the application:
 append-only evidence, corpus immutability, `verifier_user_id <> learner_id`,
 pending claims that cannot carry capabilities, passage release that must be
@@ -138,6 +151,11 @@ attributable, and RLS tenant isolation.
 | Content release cannot be asserted by its caller | `passage.released` is stored state, read not passed |
 | A rolled-back command emits no events | `EventSink` buffered until commit |
 | Teacher-facing inferences state their sample size | `attention.ts` confidence capped by observation count |
+| A word appearing never moves its neighbours | every slot reserves its width blank or filled |
+| Sacred text is never inverted or tinted | `.athar-mushaf` is exempt from theming, both selectors stated |
+| Every drag has a keyboard equivalent | `TileTray` roving tabindex + Enter to place |
+| No screen shows a bare percentage | `HonestMetric` takes count and total, never a percent |
+| A half-translated screen cannot ship | Arabic catalogue typed as complete |
 
 Each row has at least one test named after it.
 
@@ -145,7 +163,8 @@ Each row has at least one test named after it.
 
 ## Status
 
-**Phase 1 vertical slice — engine and persistence complete, UI not started.**
+**Phase 1 vertical slice — engine, persistence, and component library complete;
+application shell not started.**
 
 The complete journey (assign → listen → reconstruct → lose cues → recall →
 request → verify → schedule → return from blank → state updates) runs against
@@ -153,9 +172,8 @@ real PostgreSQL with row-level security active and **no admin database edits**,
 which is the bar `docs/14` sets for Phase 1 being done.
 
 `docs/13-testing-strategy.md` lists all twenty acceptance criteria from the
-build brief and states plainly which are executable today (15 of 20) and which
-need the UI layer, a licensed corpus, or deployed infrastructure before they
-can run. Nothing here claims production readiness: Phase 0 (corpus rights,
+build brief and states plainly which are executable today (18 of 20) and which
+need deployed infrastructure or representative hardware before they can run. Nothing here claims production readiness: Phase 0 (corpus rights,
 scholar governance, brand clearance, backups and restore drills) is a
 prerequisite that no amount of code satisfies.
 
