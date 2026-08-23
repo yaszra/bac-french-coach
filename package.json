@@ -1,0 +1,56 @@
+{
+  "name": "itqan",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Itqān — a premium learning platform for Qurʾān memorization (ḥifẓ) and Arabic reading (Qāʿidah).",
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/verify_content_hash.mjs && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --project integration",
+    "e2e": "playwright test",
+    "gates": "node scripts/verify_content.mjs && node scripts/verify_qaidah.mjs && node scripts/verify_audio_provenance.mjs && node scripts/verify_narration.mjs",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "content:fetch": "node scripts/fetch_quran.mjs",
+    "content:layout": "node scripts/build_layout.mjs",
+    "content:timings": "node scripts/fetch_word_timings.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "argon2": "^0.45.1",
+    "next": "16.3.2",
+    "pg-boss": "^12.27.0",
+    "pino": "^10.3.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.2.0",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitest/coverage-v8": "^4.1.11",
+    "eslint": "^10.9.0",
+    "eslint-config-next": "^16.3.2",
+    "pg": "^8.23.0",
+    "playwright": "^1.62.1",
+    "prisma": "^6.19.3",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

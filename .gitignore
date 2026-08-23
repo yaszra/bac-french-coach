@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# builds & coverage
+coverage/
+playwright-report/
+test-results/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# misc
+*.tsbuildinfo
+.DS_Store
+
+# large fetched audio (kept in object storage, never in git)
+content/audio/**/*.mp3
+content/audio/**/*.wav

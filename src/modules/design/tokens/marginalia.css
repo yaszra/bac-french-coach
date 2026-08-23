@@ -1,0 +1,16 @@
+/* Marginalia tokens — seeded here; the full token system is built in the design wave.
+   The muṣḥaf tokens are fixed in every theme and must never be overridden (tested). */
+:root {
+  --paper: #faf6ee;
+  --ink: #1f1b16;
+  --lapis: #23459c;
+  --gold: #a2792c;
+  --slate: #23272e;
+  /* muṣḥaf — fixed */
+  --mushaf-paper: #faf6ee;
+  --mushaf-ink: #1f1b16;
+}
+body {
+  background: var(--paper);
+  color: var(--ink);
+}

@@ -1,0 +1,17 @@
+{
+  "project": "itqan",
+  "phase": "foundation",
+  "updatedAt": "2026-08-23",
+  "note": "AI-ENGINEERING-OS scripts (~/.ai-engineering-os) were not available in the build environment; .ai/ memory is maintained by hand to the same contract.",
+  "currentBranch": "claude/itqan-platform-build-79fqtx",
+  "done": [],
+  "next": [
+    "content package + gates",
+    "marginalia design system",
+    "identity/tenancy + platform services",
+    "memory engine",
+    "learner core",
+    "teacher/family/school/studio",
+    "release hardening"
+  ]
+}
