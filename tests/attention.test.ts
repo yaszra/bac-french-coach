@@ -390,3 +390,50 @@ describe("an empty inbox is a valid, quiet answer", () => {
     for (const c of ATTENTION_ORDER) expect(inbox.counts[c]).toBe(0);
   });
 });
+
+describe("a row carries an identifier, not a destination", () => {
+  it("names the request id for a waiting verification", () => {
+    const inbox = buildAttentionInbox(
+      [
+        snapshot({
+          pendingVerifications: [
+            { requestId: "req-42", label: "Al-Mulk 12-15", requestedAt: ago(1) },
+          ],
+        }),
+      ],
+      { now: NOW },
+    );
+    expect(inbox.rows[0]?.actionTargetId).toBe("req-42");
+  });
+
+  it("names the learner for every other category", () => {
+    const inbox = buildAttentionInbox(
+      [snapshot({ learnerId: "learner-7" as LearnerId, lastActiveAt: ago(30) })],
+      { now: NOW },
+    );
+    for (const row of inbox.rows) expect(row.actionTargetId).toBe("learner-7");
+  });
+
+  it("gives every row an identifier the server can rebuild a route from", () => {
+    const inbox = buildAttentionInbox(
+      [
+        snapshot({
+          pendingVerifications: [{ requestId: "r", label: "P", requestedAt: ago(1) }],
+          corrections: [
+            { category: "join", addedAt: ago(8), resolvedAt: null },
+            { category: "join", addedAt: ago(2), resolvedAt: null },
+          ],
+          assignments: [
+            { assignmentId: "a", label: "Q", assignedAt: ago(4), dueAt: ago(-2), started: false },
+          ],
+          overdueReviewCount: 40,
+          dueReviewCount: 40,
+          governanceRequests: [{ kind: "tutoring_grant", requestedAt: ago(1) }],
+        }),
+      ],
+      { now: NOW },
+    );
+    expect(inbox.rows.length).toBeGreaterThan(3);
+    for (const row of inbox.rows) expect(row.actionTargetId.length).toBeGreaterThan(0);
+  });
+});

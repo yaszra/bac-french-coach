@@ -16,10 +16,21 @@ import { EmptyState } from "./RouteStates.js";
 
 export interface AttentionInboxProps {
   inbox: Inbox;
-  onAct: (row: AttentionRow) => void;
+  /**
+   * Called with the row's category and the identifier its action needs.
+   * Deliberately not the whole row: the route is rebuilt server-side, so a
+   * client cannot choose where the action leads.
+   */
+  onAct: (category: AttentionRow["category"], targetId: string) => void;
 }
 
-function Row({ row, onAct }: { row: AttentionRow; onAct: (r: AttentionRow) => void }) {
+function Row({
+  row,
+  onAct,
+}: {
+  row: AttentionRow;
+  onAct: AttentionInboxProps["onAct"];
+}) {
   const { t } = useLocale();
   return (
     <li className="athar-attention__row" data-category={row.category}>
@@ -46,7 +57,7 @@ function Row({ row, onAct }: { row: AttentionRow; onAct: (r: AttentionRow) => vo
       <button
         type="button"
         className="athar-attention__action"
-        onClick={() => onAct(row)}
+        onClick={() => onAct(row.category, row.actionTargetId)}
       >
         {row.action.label}
       </button>

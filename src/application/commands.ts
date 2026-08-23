@@ -1113,15 +1113,22 @@ export function getToday(
     const assignments = all.filter(
       (a) => a.organizationId === input.actor.organizationId,
     );
-    const first = assignments[0];
-    if (first)
-      await authorizeOrThrow(
-        repo,
-        input.actor,
-        "learner.practice.view",
-        resourceOf(first),
-        input.now,
-      );
+    // Authorize on every request, not only when an assignment happens to
+    // exist. Skipping the check for a learner with no assignments would
+    // let any actor probe which learners are empty.
+    await authorizeOrThrow(
+      repo,
+      input.actor,
+      "learner.practice.view",
+      assignments[0]
+        ? resourceOf(assignments[0])
+        : {
+            kind: "learner",
+            organizationId: input.actor.organizationId,
+            learnerId: input.learnerId,
+          },
+      input.now,
+    );
 
     const candidates: Candidate[] = [];
     for (const a of assignments) {

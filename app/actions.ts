@@ -21,8 +21,17 @@ import type { AssignmentId, CorrectionCategory, VerificationDecision } from "../
 import type { AssistanceKind } from "../src/core/evidence.js";
 import type { ScaffoldLevel, StartContext } from "../src/core/types.js";
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Open a session.
+ *
+ * The identifier is validated before it reaches a path. An unvalidated
+ * string interpolated into a redirect is an open redirect waiting for
+ * someone to notice.
+ */
 export async function startAssignment(assignmentId: string): Promise<void> {
-  if (!assignmentId) redirect("/learn/today");
+  if (!UUID.test(assignmentId)) redirect("/learn/today");
   redirect(`/learn/session/${assignmentId}`);
 }
 

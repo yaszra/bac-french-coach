@@ -227,9 +227,9 @@ describe("criterion 13 — Teacher Today prioritises actionable evidence", () =>
     const user = userEvent.setup();
     const onAct = renderInbox();
     await user.click(screen.getAllByRole("button", { name: "Verify" })[0]!);
-    expect(onAct).toHaveBeenCalledWith(
-      expect.objectContaining({ category: "awaiting_verification" }),
-    );
+    // A category and an identifier, not a route: the destination is
+    // rebuilt server-side so a client cannot choose where it leads.
+    expect(onAct).toHaveBeenCalledWith("awaiting_verification", "r1");
   });
 
   it("shows an honest empty inbox rather than filler", () => {

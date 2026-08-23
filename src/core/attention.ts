@@ -57,6 +57,12 @@ export interface AttentionAction {
 export interface AttentionRow {
   category: AttentionCategory;
   learnerId: LearnerId;
+  /**
+   * The identifier this row's action operates on — a request id for a
+   * waiting verification, the learner otherwise. Callers pass this rather
+   * than a route, so the destination is decided server-side.
+   */
+  actionTargetId: string;
   learnerName: string;
   /** One-line summary. Never a bare score or an unexplained label. */
   headline: string;
@@ -177,6 +183,7 @@ function awaitingVerification(s: LearnerSnapshot, now: EpochMs): AttentionRow[] 
       ],
       // A waiting request is an observed fact, not an inference.
       confidence: "high",
+      actionTargetId: oldest.requestId,
       action: { label: "Verify", route: `/teach/verify/${oldest.requestId}` },
       urgency: waited,
     },
@@ -219,6 +226,7 @@ function repeatedCorrections(s: LearnerSnapshot): AttentionRow[] {
       // Recurrence is counted, not inferred, but its significance grows
       // with the count.
       confidence: items.length >= 3 ? "high" : "medium",
+      actionTargetId: s.learnerId,
       action: {
         label: "Open profile",
         route: `/teach/learners/${s.learnerId}`,
@@ -283,6 +291,7 @@ function recallDecline(s: LearnerSnapshot): AttentionRow[] {
         },
       ],
       confidence,
+      actionTargetId: s.learnerId,
       action: { label: "Open profile", route: `/teach/learners/${s.learnerId}` },
       urgency: drop * 100 + sorted.length,
     },
@@ -312,6 +321,7 @@ function notStarted(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
         },
       ],
       confidence: "high",
+      actionTargetId: s.learnerId,
       action: { label: "Open profile", route: `/teach/learners/${s.learnerId}` },
       urgency: waiting + (overdue ? 100 : 0),
     },
@@ -333,6 +343,7 @@ function reviewOverload(s: LearnerSnapshot): AttentionRow[] {
         },
       ],
       confidence: "high",
+      actionTargetId: s.learnerId,
       action: { label: "Adjust plan", route: `/teach/learners/${s.learnerId}` },
       urgency: s.overdueReviewCount,
     },
@@ -350,7 +361,8 @@ function inactivity(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
         headline: "No practice has ever been recorded.",
         evidence: [{ statement: "No recorded activity.", observations: 0 }],
         confidence: "high",
-        action: { label: "Open profile", route: `/teach/learners/${s.learnerId}` },
+        actionTargetId: s.learnerId,
+      action: { label: "Open profile", route: `/teach/learners/${s.learnerId}` },
         urgency: 1000,
       },
     ];
@@ -370,6 +382,7 @@ function inactivity(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
         },
       ],
       confidence: "high",
+      actionTargetId: s.learnerId,
       action: { label: "Open profile", route: `/teach/learners/${s.learnerId}` },
       urgency: quiet,
     },
@@ -400,6 +413,7 @@ function governance(s: LearnerSnapshot, now: EpochMs): AttentionRow[] {
         },
       ],
       confidence: "high",
+      actionTargetId: s.learnerId,
       action: { label: "Review request", route: "/admin/governance" },
       urgency: days(oldest.requestedAt, now),
     },
@@ -430,6 +444,7 @@ function recentlyImproved(s: LearnerSnapshot): AttentionRow[] {
         },
       ],
       confidence: "high",
+      actionTargetId: s.learnerId,
       action: { label: "Open profile", route: `/teach/learners/${s.learnerId}` },
       urgency: cleanRun,
     },

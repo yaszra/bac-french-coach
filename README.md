@@ -49,7 +49,7 @@ src/server/   session signing, actor resolution, read-side queries
 app/          all 32 routes from the documented map, with server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        700 tests, organized by the acceptance criteria they protect
+tests/        718 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -74,7 +74,7 @@ tests/        700 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # typecheck, 700 tests, 18 DB invariants, build, bundle budget
+npm run verify      # typecheck, 718 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 npm run build       # Next.js production build
@@ -225,6 +225,8 @@ attributable, and RLS tenant isolation.
 | A log line can never carry sacred text or a name | `assertLoggable` throws rather than redacting |
 | Optional practice cannot touch memory state | its summary has no field the engine accepts |
 | Accuracy outranks speed | elapsed time is not in the class-board comparator |
+| A server action never redirects where a caller says | routes are rebuilt server-side from a fixed set |
+| The evidence policy is gated on the server | `validatePolicy` runs before any assignment is created |
 
 Each row has at least one test named after it.
 
