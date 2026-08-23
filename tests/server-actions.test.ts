@@ -107,3 +107,60 @@ describe("every action resolves the actor from the session", () => {
     expect(ALL).not.toMatch(/\bstate:\s*["']verified["']/);
   });
 });
+
+describe("every SQL value is parameterised", () => {
+  const sqlFiles = [
+    "src/application/pg-store.ts",
+    "src/server/queries.ts",
+    "src/server/session.ts",
+  ];
+
+  /**
+   * Interpolations that appear inside a template literal containing SQL.
+   *
+   * Scoped this way rather than over the whole file, because error
+   * messages and identifier building use template literals too, and a
+   * check that flags those is a check people learn to ignore.
+   */
+  function sqlInterpolations(source: string): string[] {
+    const literals = source.match(/`[^`]*`/gs) ?? [];
+    return literals
+      .filter((literal) => /\b(SELECT|INSERT INTO|UPDATE|DELETE FROM)\b/i.test(literal))
+      .flatMap((literal) => [...literal.matchAll(/\$\{([^}]+)\}/g)].map((m) => m[1]!.trim()));
+  }
+
+  it.each(sqlFiles)("%s interpolates no value into a query", (file) => {
+    // One interpolation is legitimate and is structural, not a value: a
+    // private SQL fragment composed at class level.
+    const allowed = new Set(["this.assignmentSelect"]);
+    const suspicious = sqlInterpolations(readFileSync(file, "utf8")).filter(
+      (expr) => !allowed.has(expr),
+    );
+    expect(suspicious, `${file} interpolates values into SQL`).toEqual([]);
+  });
+
+  it("catches an interpolated value if one is ever introduced", () => {
+    // Proves the check can fail, rather than passing because it looks in
+    // the wrong place.
+    const bad = 'await pool.query(`SELECT * FROM app_user WHERE id = ${userId}`);';
+    expect(sqlInterpolations(bad)).toEqual(["userId"]);
+  });
+
+  it("ignores template literals that are not SQL", () => {
+    const message = 'throw new Error(`Unsafe role identifier: ${name}`);';
+    expect(sqlInterpolations(message)).toEqual([]);
+  });
+
+  it("validates the role identifier PostgreSQL cannot parameterise", () => {
+    const source = readFileSync("src/application/pg-store.ts", "utf8");
+    expect(source).toMatch(/function quoteIdent/);
+    expect(source).toMatch(/Unsafe role identifier/);
+  });
+
+  it("sets the tenant through set_config, not through string building", () => {
+    const source = readFileSync("src/application/pg-store.ts", "utf8");
+    // `SET athar.org_id = '<value>'` would be string-built; set_config
+    // takes a parameter.
+    expect(source).toContain("set_config('athar.org_id', $1, true)");
+  });
+});

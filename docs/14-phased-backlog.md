@@ -31,7 +31,7 @@ review capacity is scarce; brand clearance can force a rename (mitigated by
 
 ---
 
-## Phase 1 — One production vertical slice ← *this repository*
+## Phase 1 — One production vertical slice ✅ *complete*
 
 One academy, one teacher, one learner, a controlled content range, through the
 complete journey:
@@ -45,63 +45,81 @@ assign → open Today → listen → reconstruct → lose cues → recall indepe
 Includes bilingual/RTL, accessibility, tenant enforcement, learning events, and
 automated tests **from the start**.
 
-**Not complete until the loop runs end to end with no admin database edits.**
+**Complete.** The loop runs end to end against real PostgreSQL with
+row-level security active and no admin database edits — `npm run test:pg`.
 
-*Depends on:* Phase 0 corpus gates, audit log, CI.
-*Risks:* the temptation to fake a transition to make a demo flow.
-
----
-
-## Phase 2 — Academy operations
-
-- Teacher Today attention inbox
-- Rosters, classes, invitations, recovery, staff MFA
-- Learner profiles and correction history
-- Reports and parent claims
-- Background jobs, read models, feature flags, pilot tooling
-- Memory map and the transparent review scheduler in production
-
-*Depends on:* Phase 1 evidence ledger; read-model infrastructure.
-*Risks:* dashboard sprawl — mitigated by the fixed inbox order in `03`.
+*Risk that materialised:* none of the transitions were faked, but four
+defects were found at the server-action boundary in review, including an
+evidence policy a crafted call could set to zero. Fixed and covered by
+`tests/server-actions.test.ts`. The lesson generalises: a UI check is an
+affordance, and the gate has to be where the request lands.
 
 ---
 
-## Phase 3 — Reading foundation and family
+## Phase 2 — Academy operations ◐ *largely built*
 
-- Qāʿidah path with **approved human audio** (resolution order enforced)
-- Tutoring-parent permissions and immediate revocation
-- Child-friendly Today
-- Home tasks and honest family reports
-- PWA resilience; carefully scoped offline curriculum caching
+| | Status |
+|---|---|
+| Teacher Today attention inbox | ✅ built and tested |
+| Learner profiles and correction history | ✅ built |
+| Parent claims and governance workflows | ✅ built and tested |
+| Memory map and the review scheduler | ✅ built |
+| Background jobs (outbox dispatcher) | ✅ built |
+| Rosters, invitations, recovery, staff MFA | ✗ **not built** — needs the sign-in flow |
+| Read models, feature flags, pilot tooling | ✗ not built; queries run against the transactional tables |
 
-*Depends on:* recorded human audio (a content-operations dependency, not code).
-*Risks:* offline answer capture — deferred until conflict rules, signed content
-manifests, device security, and safe sync are designed.
-
----
-
-## Phase 4 — Adaptive intelligence
-
-- Calibrated stability model (backtested against real delayed-recall data)
-- Knowledge-graph diagnostics: is this a memory, reading, or connection problem?
-- Similar-āyah and connection remediation
-- Recommendation explanations
-- Controlled experiments on delayed-recall outcomes
-
-*Depends on:* ≥ 6 months of Phase 1–2 evidence at sufficient n.
-*Risks:* calibrating on too little data and shipping pseudo-precision.
+*Risk that did not materialise:* dashboard sprawl. The fixed inbox order
+held, and a test asserts the DOM order matches the engine's.
 
 ---
 
-## Phase 5 — Guarded AI and institutional scale
+## Phase 3 — Reading foundation and family ◐ *engine built, audio blocked*
 
-- Teacher copilot with citations and human review
-- SSO / roster integrations **driven by buyer demand**
-- Warehouse and governed outcome research
-- Regional infrastructure and advanced tenancy **only when usage justifies it**
+| | Status |
+|---|---|
+| Qāʿidah engine and audio resolution order | ✅ built and tested |
+| Tutoring permissions and immediate revocation | ✅ built and tested |
+| Child-friendly Today | ✅ built and tested |
+| Honest family reports | ✅ built |
+| Approved human audio | ✗ **blocked** — a content-operations dependency, not code |
+| Home tasks | ✗ not built; `/family/tasks` says so |
+| PWA resilience and offline caching | ✗ not built |
 
-*Risks:* AI scope creep toward a learner chatbot. The boundary in `docs/15` is
-the control.
+The audio blocker is the point rather than a gap: pronunciation-bearing
+steps refuse to run without a qualified human recording, and there is no
+synthetic member on the provenance type for anyone to reach for.
+
+---
+
+## Phase 4 — Adaptive intelligence ◐ *mechanisms built, calibration blocked*
+
+| | Status |
+|---|---|
+| Knowledge-graph diagnostics | ✅ built and tested |
+| Recommendation explanations | ✅ built |
+| Experiment discipline (`shouldShip`) | ✅ built and tested |
+| Calibrated stability model | ✗ **blocked** — needs real delayed-recall data |
+
+The scheduler ships with conservative published parameters rather than
+fitted ones. Fitting them to fewer than six months of real data would be
+the pseudo-precision this phase was supposed to avoid, so the parameters
+stay where they are and the backtest is the gate for changing them.
+
+---
+
+## Phase 5 — Guarded AI and institutional scale ◐ *boundary built, nothing behind it*
+
+| | Status |
+|---|---|
+| AI boundary module, read-only by construction | ✅ built and tested |
+| Rule-based weekly summary with citations | ✅ built |
+| Model routing to an actual model | ✗ not built — deterministic rules cover the current cases |
+| SSO / roster integrations | ✗ not built; correctly waiting on buyer demand |
+| Warehouse and outcome research | ✗ not built |
+
+The boundary exists before anything that needs it, which is the right
+order: `src/ai` has an empty write surface and a test that greps the
+directory for repository imports, transactions, and SQL.
 
 ---
 
@@ -125,3 +143,4 @@ competes for the same content-operations capacity.
 | Speech recognition over-claimed by sales | High | Advisory-only enforced in code, copy, and contract |
 | Teacher adoption fails (inbox ignored) | High | Measure teacher minutes per verified learner from day one |
 | Feature growth before the loop is excellent | Medium | §21 defer list; freeze until retention measures are good |
+| A UI check mistaken for a gate | High | Server-action boundary tests; found a real policy bypass in review |

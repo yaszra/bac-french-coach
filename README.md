@@ -49,7 +49,7 @@ src/server/   session signing, actor resolution, read-side queries
 app/          all 32 routes from the documented map, with server actions
 src/app/      commands, repository ports, in-memory and PostgreSQL adapters
 db/           PostgreSQL schema, migrations, and database-level invariants
-tests/        718 tests, organized by the acceptance criteria they protect
+tests/        725 tests, organized by the acceptance criteria they protect
 ```
 
 ### What is deliberately **not** here
@@ -74,7 +74,7 @@ tests/        718 tests, organized by the acceptance criteria they protect
 
 ```bash
 npm install
-npm run verify      # typecheck, 718 tests, 18 DB invariants, build, bundle budget
+npm run verify      # typecheck, 725 tests, 18 DB invariants, build, bundle budget
 npm run test:db     # 18 database invariants against real PostgreSQL
 npm run test:pg     # the full journey against real PostgreSQL
 npm run build       # Next.js production build
@@ -234,20 +234,32 @@ Each row has at least one test named after it.
 
 ## Status
 
-**Engine, persistence, component library, and all 32 documented routes
-complete. Sign-in and audio are outstanding, and both are content or
-operations dependencies rather than code.**
+**Built and verified:** the pure learning engine, the sacred-content
+pipeline, server-side authorization and tenancy, PostgreSQL persistence with
+transactions and row-level security, the accessible bilingual component
+library, all 32 documented routes, governance workflows, the outbox
+dispatcher, the memory map, the assignment wizard, the Qāʿidah engine,
+measurement, the AI boundary, knowledge-graph diagnostics, motivation, the
+Practice Lab, observability, and a working restore drill.
 
-The complete journey (assign → listen → reconstruct → lose cues → recall →
-request → verify → schedule → return from blank → state updates) runs against
-real PostgreSQL with row-level security active and **no admin database edits**,
-which is the bar `docs/14` sets for Phase 1 being done.
+**Not built, and why:**
 
-`docs/13-testing-strategy.md` lists all twenty acceptance criteria from the
-build brief and states plainly which are executable today (18 of 20, plus the
-bundle half of a nineteenth) and which need deployed infrastructure before
-they can run. Nothing here claims production readiness: Phase 0 (corpus rights,
-scholar governance, brand clearance, backups and restore drills) is a
-prerequisite that no amount of code satisfies.
+| | Why |
+|---|---|
+| Sign-in | Session verification exists and is tested; issuing one needs credential handling, staff MFA, rate limiting, and recovery — scheduled with academy operations |
+| Audio | Needs licensed recordings and measured alignment. A content-operations dependency, not code — and the engine already refuses to run pronunciation steps without it |
+| Calibrated scheduler parameters | Needs six months of real delayed-recall data. Fitting them sooner would be the pseudo-precision the design exists to avoid |
+| Read models, feature flags, PWA/offline | Queries run against the transactional tables; no measured need yet |
+| Field performance metrics | LCP, INP, and CLS need a deployed client on representative hardware |
 
-See `docs/14-phased-backlog.md` for what comes next and why in that order.
+**Acceptance criteria:** 19 of the 20 in `docs/13-testing-strategy.md` are
+executable today. The twentieth (criterion 19) is half-executable — the
+bundle budget is enforced in CI; the field metrics are not.
+
+**This is not production-ready, and the blocker is not code.** Phase 0 —
+corpus rights, scholar governance, brand and linguistic clearance, off-box
+backups with real restore drills — is a prerequisite no amount of
+engineering satisfies. `/privacy` says as much in public: the service is not
+ready to hold real learner data.
+
+See `docs/14-phased-backlog.md` for what each phase actually contains now.
