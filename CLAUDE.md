@@ -4,7 +4,20 @@ This file provides guidance to AI assistants (such as Claude Code) working in th
 
 ## Project Status
 
-**This repository is currently empty.** As of 2026-08-23, it contains no source code, build configuration, or commit history beyond this documentation. The sections below describe the intended project and should be expanded as the codebase takes shape.
+As of 2026-08-24 the repository contains the **Forage** training-data pipeline (`forage/`, Python 3.11+, stdlib-only; pytest for tests). The coaching app itself has not been started. See `forage/README.md` for details.
+
+## Commands
+
+- Run tests: `python -m pytest tests/`
+- Collect sessions: `python -m forage collect [--claude-dir DIR --codex-dir DIR --store DIR]`
+- Export SFT dataset: `python -m forage export --out forage_sft.jsonl`
+- Store stats: `python -m forage stats`
+
+## Layout
+
+- `forage/` — session collector, parsers (Claude Code + Codex), secret scrubber, SFT exporter, CLI
+- `examples/` — fixture session logs in both source formats
+- `tests/` — end-to-end pipeline tests
 
 ## Project Overview
 
