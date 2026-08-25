@@ -100,7 +100,18 @@ const REQUIRES_TUTORING: ReadonlySet<Action> = new Set<Action>([
   "teach:verifyRecitation",
 ]);
 
-/** Actions that are about one learner and therefore need a relationship. */
+/**
+ * Actions that are about one learner.
+ *
+ * A guardian reaches these ONLY through a relationship — an approved link, and
+ * for the tutoring ones a link that says they tutor. Staff reach them through
+ * the scope of their grant instead: a classroom-scoped grant covers that
+ * classroom's learners, and an organisation-scoped one covers the school. That
+ * is deliberate — a school's teacher covering a colleague's ḥalaqah does not
+ * first need a row linking them to each child — but it is a different rule
+ * from the guardian's, and this comment used to claim both needed a
+ * relationship, which the code below has never done.
+ */
 const LEARNER_SCOPED: ReadonlySet<Action> = new Set<Action>([
   "teach:viewStudent",
   "teach:assign",

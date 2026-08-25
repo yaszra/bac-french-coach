@@ -82,15 +82,43 @@ export async function runProjection(
     }
 
     const checkpoint = await db.projectionCheckpoint.findUnique({ where: { name } });
-    let cursor = checkpoint?.lastEventId ?? null;
+    let cursorId = checkpoint?.lastEventId ?? null;
+    let cursorAt = checkpoint?.lastEventAt ?? null;
     let applied = 0;
+
+    /* The sweep reads by WHEN a row was recorded, not by its id.
+     *
+     * Ids are cuids, assigned when the row is constructed; a row becomes
+     * visible when its transaction commits. Two writers can therefore commit
+     * out of id order, and a cursor over ids leaves the lower id permanently
+     * behind — never applied, with nothing to say it was missed. That is
+     * exactly the case this sweep exists to cover, so ordering by id made it
+     * blind to its own purpose.
+     *
+     * `recordedAt` is the database's clock, and the lag keeps the cursor
+     * behind any transaction that could still commit into the window it has
+     * already read. Transactions here are bounded by a ten-second timeout, so
+     * a minute is generous.
+     */
+    const COMMIT_LAG_MS = 60_000;
+    const watermark = new Date(Date.now() - COMMIT_LAG_MS);
 
     for (;;) {
       const batch: ProjectionEvent[] = await db.learningEvent.findMany({
-        where: { type: { in: [...handler.handles] } },
-        orderBy: { id: "asc" },
+        where: {
+          type: { in: [...handler.handles] },
+          recordedAt: { lte: watermark },
+          ...(cursorAt === null || cursorId === null
+            ? {}
+            : {
+                OR: [
+                  { recordedAt: { gt: cursorAt } },
+                  { recordedAt: cursorAt, id: { gt: cursorId } },
+                ],
+              }),
+        },
+        orderBy: [{ recordedAt: "asc" }, { id: "asc" }],
         take: batchSize,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
         select: {
           id: true,
           organizationId: true,
@@ -106,23 +134,29 @@ export async function runProjection(
 
       for (const event of batch) {
         await handler.apply(event, ctx);
-        cursor = event.id;
+        cursorId = event.id;
+        cursorAt = event.recordedAt;
         applied++;
       }
 
       const last = batch[batch.length - 1];
       if (last) {
+        /* `recordedAt`, not `occurredAt`: the checkpoint IS the cursor, and
+           the cursor reads by when the database recorded a row. `occurredAt`
+           is when the learner did the thing, which an offline replay can
+           place days earlier — storing that would make the next sweep resume
+           from a point in the past and re-apply everything since. */
         await db.projectionCheckpoint.upsert({
           where: { name },
-          create: { name, lastEventId: last.id, lastEventAt: last.occurredAt },
-          update: { lastEventId: last.id, lastEventAt: last.occurredAt, rebuildingAt: null },
+          create: { name, lastEventId: last.id, lastEventAt: last.recordedAt },
+          update: { lastEventId: last.id, lastEventAt: last.recordedAt, rebuildingAt: null },
         });
       }
       if (batch.length < batchSize) break;
     }
 
     logger.info({ projection: name, applied }, "projection advanced");
-    return { projection: name, applied, lastEventId: cursor };
+    return { projection: name, applied, lastEventId: cursorId };
   });
 }
 

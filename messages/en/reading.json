@@ -396,6 +396,38 @@
       "letterGlyph": "The letter {label}",
       "mouthDiagram": "A side view of the mouth, marking where {label} is made",
       "choiceGroup": "Choose the sound of the letter shown"
+    },
+    "anomaly": {
+      "title": "Worth a look",
+      "help": "Patterns in recorded answers. Each one is a reason to look, never a judgement — and each carries what it was counted from.",
+      "none": "Nothing stands out in what has been recorded",
+      "noneHelp": "That is a real answer, not an empty screen: no learner in this class has a pattern above the floor these checks require.",
+      "severity": {
+        "notice": "Worth a look",
+        "attention": "Look sooner"
+      },
+      "kind": {
+        "possible_guessing": "Answers arriving faster than the prompt can be read",
+        "regression": "Accuracy below this learner's own earlier sessions",
+        "systematic_confusion": "Errors concentrated on one other letter",
+        "long_gap": "No reading evidence recorded for a while",
+        "stalled_near_threshold": "Close to the next rung for several sittings"
+      },
+      "reason": {
+        "answers_faster_than_plausible": "{fast} of {timed} timed answers arrived in under {fasterThanMs}ms.",
+        "accuracy_lower_than_earlier_sessions": "{latestCorrect} of {latestAttempts} correct lately, against {priorCorrect} of {priorAttempts} before.",
+        "errors_concentrated_on_one_concept": "{towardCount} of {errors} errors chose the same other letter, out of {distinctChoices} choices offered.",
+        "no_evidence_recorded_recently": "Nothing recorded for {days} days; this check looks past {thresholdDays}.",
+        "near_rung_threshold_for_several_sessions": "{correct} of {requiredCorrect} needed on this rung, across {sessions} sittings."
+      },
+      "fromAttempts": {
+        "one": "from {count} answer",
+        "other": "from {count} answers"
+      },
+      "acrossSessions": {
+        "one": "across {count} sitting",
+        "other": "across {count} sittings"
+      }
     }
   }
 }

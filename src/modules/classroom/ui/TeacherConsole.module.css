@@ -216,3 +216,39 @@
 .checkRow[data-state="done"] .checkLabel {
   color: var(--text-secondary);
 }
+
+/* ── reading anomalies ───────────────────────────────────────────────────── */
+
+.anomalyLearner {
+  margin-block-start: var(--space-6);
+}
+
+.anomalyLearner:first-of-type {
+  margin-block-start: var(--space-4);
+}
+
+.anomalyName {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug);
+  margin: 0 0 var(--space-2);
+}
+
+.anomalyItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-block: var(--space-4);
+  border-block-start: var(--hairline);
+}
+
+.anomalyItem:first-child {
+  border-block-start: none;
+}
+
+.anomalyHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}

@@ -186,7 +186,17 @@
       "verdictRate": "{percent}% of {denominator} verdicts passed",
       "notEnough": "Not yet recorded — {needed} more needed before a rate means anything",
       "lastActivity": "Last recorded {date}",
-      "neverActive": "Nothing recorded yet"
+      "neverActive": "Nothing recorded yet",
+      "verdictsTable": "Verdicts recorded for this student",
+      "attemptsTable": "Recent attempts by this student",
+      "colVerdict": "Verdict",
+      "colMarks": "Marks",
+      "colEvidence": "How it was heard",
+      "colDecided": "Decided",
+      "colUnit": "Passage",
+      "colExercise": "Exercise",
+      "colWhen": "When",
+      "heardInPerson": "In person"
     },
     "presence": {
       "heading": "In class now",

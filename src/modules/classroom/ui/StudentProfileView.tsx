@@ -169,16 +169,20 @@ export function StudentProfileView(props: StudentProfileViewProps) {
             <MeasuredLine measured={props.attemptSuccess} labelKey="teacher.students.successRate" />
             <MeasuredLine measured={props.verdictPass} labelKey="teacher.students.verdictRate" />
 
+            {/* A caption names its table. These captions used to be the
+                EMPTY-state sentence, so a screen reader announced "No verdicts
+                recorded yet" over a table full of verdicts, and the column
+                headers borrowed keys from unrelated screens. */}
             {props.verdicts.length === 0 ? (
               <p className={styles.meta}>{t("teacher.students.noVerdicts")}</p>
             ) : (
-              <Table caption={t("teacher.students.noVerdicts")} captionHidden>
+              <Table caption={t("teacher.students.verdictsTable")} captionHidden>
                 <TableHead>
                   <TableRow>
-                    <TableHeaderCell>{t("teacher.verify.verdictHeading")}</TableHeaderCell>
-                    <TableHeaderCell numeric>{t("teacher.verify.marks")}</TableHeaderCell>
-                    <TableHeaderCell>{t("teacher.readingGate.evidenceKind")}</TableHeaderCell>
-                    <TableHeaderCell>{t("teacher.students.lastActivity", { date: "" })}</TableHeaderCell>
+                    <TableHeaderCell>{t("teacher.students.colVerdict")}</TableHeaderCell>
+                    <TableHeaderCell numeric>{t("teacher.students.colMarks")}</TableHeaderCell>
+                    <TableHeaderCell>{t("teacher.students.colEvidence")}</TableHeaderCell>
+                    <TableHeaderCell>{t("teacher.students.colDecided")}</TableHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -188,7 +192,7 @@ export function StudentProfileView(props: StudentProfileViewProps) {
                       <TableCell numeric>{verdict.corrections}</TableCell>
                       <TableCell>
                         {verdict.evidenceKind === "in_person_confirmation"
-                          ? t("teacher.readingGate.evidenceKind")
+                          ? t("teacher.students.heardInPerson")
                           : "—"}
                       </TableCell>
                       <TableCell>{date(verdict.decidedAt)}</TableCell>
@@ -201,12 +205,12 @@ export function StudentProfileView(props: StudentProfileViewProps) {
             {props.attempts.length === 0 ? (
               <p className={styles.meta}>{t("teacher.students.noAttempts")}</p>
             ) : (
-              <Table caption={t("teacher.students.noAttempts")} captionHidden maxHeight="24rem">
+              <Table caption={t("teacher.students.attemptsTable")} captionHidden maxHeight="24rem">
                 <TableHead>
                   <TableRow>
-                    <TableHeaderCell>{t("teacher.students.tabMemory")}</TableHeaderCell>
-                    <TableHeaderCell>{t("teacher.assign.exercises")}</TableHeaderCell>
-                    <TableHeaderCell>{t("teacher.students.tabHistory")}</TableHeaderCell>
+                    <TableHeaderCell>{t("teacher.students.colUnit")}</TableHeaderCell>
+                    <TableHeaderCell>{t("teacher.students.colExercise")}</TableHeaderCell>
+                    <TableHeaderCell>{t("teacher.students.colWhen")}</TableHeaderCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

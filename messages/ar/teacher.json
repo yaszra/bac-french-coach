@@ -186,7 +186,17 @@
       "verdictRate": "أُجيز {percent}٪ من {denominator} حكمًا",
       "notEnough": "لم يُسجَّل بعد — يلزم {needed} أخرى قبل أن تدلّ النسبة على شيء",
       "lastActivity": "آخر تسجيل {date}",
-      "neverActive": "لم يُسجَّل شيء بعد"
+      "neverActive": "لم يُسجَّل شيء بعد",
+      "verdictsTable": "التصديقات المسجَّلة لهذا الطالب",
+      "attemptsTable": "المحاولات الأخيرة لهذا الطالب",
+      "colVerdict": "التصديق",
+      "colMarks": "الملاحظات",
+      "colEvidence": "كيف سُمِع",
+      "colDecided": "تاريخ القرار",
+      "colUnit": "المقطع",
+      "colExercise": "التمرين",
+      "colWhen": "الوقت",
+      "heardInPerson": "حضوريًّا"
     },
     "presence": {
       "heading": "الحاضرون الآن",

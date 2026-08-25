@@ -1,7 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import { memoryProjection } from "../../src/modules/memory/repo/memory-projection";
-import type { ProjectionEvent } from "../../src/modules/platform/events/projection";
+import {
+  runProjection,
+  type ProjectionEvent,
+} from "../../src/modules/platform/events/projection";
 
 /**
  * The property that justifies the whole event-sourced design: memory state can
@@ -154,4 +157,91 @@ describe("the memory projection", () => {
     // Listening is weak evidence; thirty of them must not look like holding it.
     expect(Number(row?.confidence)).toBeLessThan(0.5);
   }, 120_000);
+});
+
+describe("the sweep's cursor", () => {
+  /**
+   * An event whose id sorts BELOW the last one applied, committed after it.
+   *
+   * Ids are cuids assigned when a row is constructed; rows become visible when
+   * their transaction commits. Two writers can commit out of id order, so a
+   * cursor over ids leaves the lower id permanently behind — never applied,
+   * with nothing anywhere to say it was missed. The sweep exists precisely to
+   * catch what the inline path missed, so ordering by id made it blind to its
+   * own purpose.
+   */
+  it("applies an event that arrived out of id order", async () => {
+    const learner = `${LEARNER}_late`;
+    await db.user.upsert({
+      where: { id: learner },
+      create: { id: learner, organizationId: ORG, displayName: "Late", locale: "en" },
+      update: {},
+    });
+    await db.learnerProfile.upsert({
+      where: { userId: learner },
+      create: { userId: learner, organizationId: ORG, tier: "teen" },
+      update: {},
+    });
+
+    const write = async (id: string, unitId: string, recordedAt: Date) => {
+      await db.$executeRawUnsafe(
+        `INSERT INTO learning_event
+           (id,"organizationId","learnerUserId",type,"unitId","idempotencyKey",payload,"occurredAt","recordedAt",source)
+         VALUES ($1,$2,$3,'attempt.recorded',$4,$5,$6::jsonb,$7,$8,'web')
+         ON CONFLICT DO NOTHING`,
+        id,
+        ORG,
+        learner,
+        unitId,
+        `itest_late_${id}`,
+        JSON.stringify({ unitId, unitKind: "ayah_body", retrievalType: "recall_first", grade: "good" }),
+        recordedAt,
+        recordedAt,
+      );
+    };
+
+    /* "zzz" sorts above "aaa": the row that commits SECOND carries the LOWER
+       id, which is what a slower transaction produces — it built its id first
+       and became visible last. Both are old enough to be past the sweep's
+       commit lag. */
+    /* Leftovers from an earlier run would keep their original timestamps
+       while the pin below is recomputed, which would put the cursor ahead of
+       the fixture and test nothing. */
+    await db.memoryState.deleteMany({ where: { learnerUserId: learner } });
+    await db.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(`SET LOCAL app.erasure_request_id = 'itest_late_reset'`);
+      await tx.learningEvent.deleteMany({ where: { learnerUserId: learner } });
+    });
+    await db.$executeRawUnsafe(`DELETE FROM erasure_log WHERE "requestId" = 'itest_late_reset'`);
+
+    const first = new Date(Date.now() - 6 * 60_000);
+    const later = new Date(Date.now() - 5 * 60_000);
+    await write("itest_late_zzz", "b:78:31", first);
+    await write("itest_late_aaa", "b:78:32", later);
+
+    /* The checkpoint is put exactly where it would be after the first row was
+       applied. The question is only what the next sweep does with a row whose
+       id sorts below it — under the old id cursor, nothing, for ever. */
+    await db.projectionCheckpoint.upsert({
+      where: { name: "memory_state" },
+      create: { name: "memory_state", lastEventId: "itest_late_zzz", lastEventAt: first },
+      update: { lastEventId: "itest_late_zzz", lastEventAt: first, rebuildingAt: null },
+    });
+
+    await runProjection("memory_state");
+
+    const late = await db.memoryState.findUnique({
+      where: { learnerUserId_unitId: { learnerUserId: learner, unitId: "b:78:32" } },
+    });
+    expect(late, "an event committed after one with a higher id must still be applied").not.toBeNull();
+
+    await db.memoryState.deleteMany({ where: { learnerUserId: learner } });
+    await db.$transaction(async (tx) => {
+      await tx.$executeRawUnsafe(`SET LOCAL app.erasure_request_id = 'itest_late_teardown'`);
+      await tx.learningEvent.deleteMany({ where: { learnerUserId: learner } });
+    });
+    await db.$executeRawUnsafe(`DELETE FROM erasure_log WHERE "requestId" = 'itest_late_teardown'`);
+    await db.learnerProfile.deleteMany({ where: { userId: learner } });
+    await db.user.deleteMany({ where: { id: learner } });
+  }, 60_000);
 });

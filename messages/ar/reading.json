@@ -416,6 +416,46 @@
       "letterGlyph": "الحرف {label}",
       "mouthDiagram": "رسم جانبي للفم يبيّن موضع نطق {label}",
       "choiceGroup": "اختر صوت الحرف المعروض"
+    },
+    "anomaly": {
+      "title": "يستحق النظر",
+      "help": "أنماط في الإجابات المسجَّلة. كل واحد سببٌ للنظر، لا حكمًا — ويحمل ما حُسِب منه.",
+      "none": "لا شيء لافت فيما سُجِّل",
+      "noneHelp": "هذه إجابة حقيقية لا شاشة فارغة: لا أحد في هذا الفصل لديه نمط يتجاوز الحد الذي تتطلبه هذه الفحوص.",
+      "severity": {
+        "notice": "يستحق النظر",
+        "attention": "انظر قريبًا"
+      },
+      "kind": {
+        "possible_guessing": "إجابات تصل أسرع مما يمكن قراءة السؤال فيه",
+        "regression": "دقة أقل من جلسات هذا المتعلّم السابقة",
+        "systematic_confusion": "أخطاء متركّزة على حرف واحد بعينه",
+        "long_gap": "لم يُسجَّل دليل قراءة منذ مدة",
+        "stalled_near_threshold": "قريب من الدرجة التالية منذ عدة جلسات"
+      },
+      "reason": {
+        "answers_faster_than_plausible": "{fast} من {timed} إجابة موقوتة وصلت في أقل من {fasterThanMs} جزء من الثانية.",
+        "accuracy_lower_than_earlier_sessions": "{latestCorrect} من {latestAttempts} صحيحة مؤخرًا، مقابل {priorCorrect} من {priorAttempts} قبلها.",
+        "errors_concentrated_on_one_concept": "{towardCount} من {errors} خطأ اختارت الحرف نفسه، من بين {distinctChoices} خيارًا.",
+        "no_evidence_recorded_recently": "لم يُسجَّل شيء منذ {days} يومًا؛ هذا الفحص ينظر بعد {thresholdDays}.",
+        "near_rung_threshold_for_several_sessions": "{correct} من {requiredCorrect} المطلوبة في هذه الدرجة، عبر {sessions} جلسة."
+      },
+      "fromAttempts": {
+        "zero": "من {count} إجابة",
+        "one": "من إجابة واحدة",
+        "two": "من إجابتين",
+        "few": "من {count} إجابات",
+        "many": "من {count} إجابة",
+        "other": "من {count} إجابة"
+      },
+      "acrossSessions": {
+        "zero": "في {count} جلسة",
+        "one": "في جلسة واحدة",
+        "two": "في جلستين",
+        "few": "في {count} جلسات",
+        "many": "في {count} جلسة",
+        "other": "في {count} جلسة"
+      }
     }
   }
 }

@@ -134,3 +134,52 @@ describe("can()", () => {
     );
   });
 });
+
+describe("staff reach a learner through their grant's scope, guardians through a link", () => {
+  /* This was a comment that contradicted its own code: `LEARNER_SCOPED` said
+     these actions "need a relationship", while staff passed with no link at
+     all. The behaviour is defensible — a teacher covering a colleague's
+     ḥalaqah should not need a row per child — but it must be a decision, so
+     here it is, asserted. */
+  const learner = { type: "learner", id: "u_unlinked_child" } as const;
+
+  it("lets a teacher scoped to the school act on a learner they have no link to", () => {
+    const teacher = {
+      userId: "u_staff",
+      organizationId: "org",
+      grants: [
+        { role: "teacher", scopeType: "organization", scopeId: "org", expiresAt: null },
+      ],
+      relationships: [],
+    } as const;
+    expect(can(teacher as never, "teach:viewStudent", learner, NOW).allowed).toBe(true);
+    expect(can(teacher as never, "teach:verifyRecitation", learner, NOW).allowed).toBe(true);
+  });
+
+  it("refuses a guardian with no approved link, whatever their role grant says", () => {
+    const guardian = {
+      userId: "u_parent",
+      organizationId: "org",
+      grants: [
+        { role: "guardian", scopeType: "organization", scopeId: "org", expiresAt: null },
+      ],
+      relationships: [],
+    } as const;
+    const decision = can(guardian as never, "teach:verifyRecitation", learner, NOW);
+    expect(decision.allowed).toBe(false);
+    expect(decision.allowed === false && decision.reason).toBe("no_relationship");
+  });
+
+  it("refuses a teacher scoped to one classroom for a learner outside it", () => {
+    const teacher = {
+      userId: "u_staff",
+      organizationId: "org",
+      grants: [
+        { role: "teacher", scopeType: "classroom", scopeId: "c_other", expiresAt: null },
+      ],
+      relationships: [],
+      classroomLearnerIds: [],
+    } as const;
+    expect(can(teacher as never, "teach:viewStudent", learner, NOW).allowed).toBe(false);
+  });
+});
