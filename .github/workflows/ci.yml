@@ -40,6 +40,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
 
+      # Before anything typechecks. Without a generated client every Prisma
+      # callback parameter is an implicit `any` and the model types do not
+      # exist — which passes locally, where node_modules already holds a
+      # generated client from an earlier run, and fails on a clean runner.
+      - name: Generate the Prisma client
+        run: pnpm db:generate
+
       # Role attributes are provisioning, not schema: a migration cannot grant
       # itself privileges it does not hold, so this runs as the superuser first.
       - name: Provision database roles
@@ -58,7 +65,7 @@ jobs:
         env:
           # Migrations run as the owning role, never as the application role.
           DATABASE_URL: ${{ env.DIRECT_DATABASE_URL }}
-        run: pnpm db:generate && pnpm exec prisma migrate deploy
+        run: pnpm exec prisma migrate deploy
 
       - run: pnpm test:integration
 
