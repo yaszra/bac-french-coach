@@ -324,10 +324,19 @@ export function Workspace(props: WorkspaceProps) {
 function Result({ result, exercise }: { readonly result: SubmitResult; readonly exercise: HifzExercise }) {
   const { t } = useSurface();
   if (result.kind === "requires_human" || exercise === "oral_recitation") {
+    /* "Your teacher will listen" used to be said whether or not anyone had
+       been told — nothing in the product created a request, so for every
+       learner it was a promise the product could not keep. The server now
+       opens the request and reports whether someone is actually waiting to
+       hear them, and the screen says which of the two happened. */
+    const asked = result.kind === "requires_human" ? result.waiting : false;
     return (
       <div className={styles.result} data-testid="practice-requires-human">
         <p className={styles.resultTitle}>{t("learner.practice.teacherWillListen.title")}</p>
         <p className={styles.resultBody}>{t("learner.practice.teacherWillListen.body")}</p>
+        <p className={styles.resultBody} data-testid="practice-asked">
+          {t(asked ? "learner.practice.teacherWillListen.asked" : "learner.practice.teacherWillListen.notAsked")}
+        </p>
       </div>
     );
   }

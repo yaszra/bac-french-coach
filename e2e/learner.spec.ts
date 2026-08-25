@@ -26,6 +26,8 @@ const PASSWORD = "itqan-dev-password";
 const UNIT = "b:78:1";
 /** Due, but never practised: the unit whose first rung is a listen. */
 const FRESH_UNIT = "b:78:2";
+/** Long held and long unheard: the unit whose rung is a person's ear. */
+const MAINTENANCE_UNIT = "b:78:9";
 
 const DB =
   process.env.DIRECT_DATABASE_URL ?? "postgresql://itqan:itqan@localhost:5432/itqan";
@@ -102,6 +104,37 @@ async function arrange(): Promise<void> {
          SET reps = 0, lapses = 0, stability = 0, confidence = 0,
              "lastReviewAt" = NULL, "dueAt" = EXCLUDED."dueAt", "updatedAt" = now()`,
       ["ms_e2e_learner_fresh", ORG, LEARNER, FRESH_UNIT, dueAt],
+    );
+
+    /* A passage held for a long time and not recited to anyone for longer:
+       held so firmly that review has no claim on it (the review band follows
+       retrievability, not only the due date), and long past the maintenance
+       interval. That is what puts a unit on the last rung — the one the grader
+       refuses to mark, because only a person's ear can settle it. */
+    await client.query(
+      `INSERT INTO memory_state
+         (id, "organizationId", "learnerUserId", "unitId", "unitKind", stability, difficulty,
+          reps, lapses, "lastReviewAt", "lastRetrievalType", confidence, "dueAt", "updatedAt")
+       VALUES ($1,$2,$3,$4,'ayah_body',4000,4,12,0,$5,'recall_first',0.99,$6, now())
+       ON CONFLICT ("learnerUserId", "unitId") DO UPDATE
+         SET stability = 4000, reps = 12, lapses = 0, confidence = 0.99,
+             "lastReviewAt" = EXCLUDED."lastReviewAt", "dueAt" = EXCLUDED."dueAt",
+             "verifiedAt" = NULL, "updatedAt" = now()`,
+      [
+        "ms_e2e_learner_maintenance",
+        ORG,
+        LEARNER,
+        MAINTENANCE_UNIT,
+        new Date(Date.now() - 120 * 24 * 3600 * 1000),
+        new Date(Date.now() + 30 * 24 * 3600 * 1000),
+      ],
+    );
+
+    // Nobody is waiting to be heard yet: the point of the test below is that
+    // asking is what puts them there.
+    await client.query(
+      `DELETE FROM verification_request WHERE "learnerUserId" = $1 AND track = 'hifz'`,
+      [LEARNER],
     );
 
     // Today starts clean: attempts recorded by an earlier run would make the
@@ -183,6 +216,39 @@ test.describe("the learner's day", () => {
     await expect(page.getByText(/Memory view|وضع الذاكرة/i)).toBeVisible();
     await page.getByTestId("quran-toggle-view").click();
     await expect(page.getByText(/Reading view|وضع القراءة/i)).toBeVisible();
+  });
+
+  test("asking to be heard actually puts the learner in a teacher's queue", async ({
+    page,
+    context,
+  }) => {
+    await signInAs(context, LEARNER);
+
+    /* The screen has always said "your teacher will listen". Nothing in the
+       product created a verification request, so for every learner that was a
+       promise it could not keep: the teacher's queue could only be filled by a
+       fixture. This is the journey that makes it true. */
+    await page.goto(`/practice?unit=${MAINTENANCE_UNIT}`);
+    const send = page.getByTestId("oral-send");
+    await expect(send).toBeVisible();
+    await send.click();
+
+    await expect(page.getByTestId("practice-requires-human")).toBeVisible();
+    await expect(page.getByTestId("practice-asked")).toContainText("in their list");
+
+    const client = new Client({ connectionString: DB });
+    await client.connect();
+    try {
+      const waiting = await client.query(
+        `SELECT "unitScope" FROM verification_request
+          WHERE "learnerUserId" = $1 AND track = 'hifz' AND state = 'pending'`,
+        [LEARNER],
+      );
+      expect(waiting.rowCount, "a learner who asked is waiting to be heard").toBe(1);
+      expect(waiting.rows[0].unitScope).toEqual({ sura: 78, ayahFrom: 9, ayahTo: 9 });
+    } finally {
+      await client.end();
+    }
   });
 
   test("an unrecorded recitation is said plainly, never faked", async ({ page, context }) => {

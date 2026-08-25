@@ -150,7 +150,9 @@
       "notRecordedBody": "Something went wrong, so nothing was saved. Nothing has been counted either.",
       "teacherWillListen": {
         "title": "Your teacher will listen",
-        "body": "This one is not marked here. A person listens to it and decides."
+        "body": "This one is not marked here. A person listens to it and decides.",
+        "asked": "They have been asked, and you are in their list.",
+        "notAsked": "Nobody has been asked yet — tell your teacher you are ready."
       },
       "testMode": {
         "title": "Test",

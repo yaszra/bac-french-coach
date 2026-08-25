@@ -10,6 +10,10 @@ import { requireCaller } from "../../identity/actions/session-context";
 import { assertCan } from "../../platform/authz/can";
 import { rateLimit } from "../../platform/ratelimit/limiter";
 import { logger } from "../../platform/observability/logger";
+import {
+  notifyVerifiers,
+  openVerificationRequest,
+} from "../../assessment/repo/verification-request";
 
 /**
  * Submitting an attempt.
@@ -31,7 +35,13 @@ import { logger } from "../../platform/observability/logger";
  */
 export type SubmitAttemptResult =
   | { readonly ok: true; readonly outcome: "graded"; readonly eventId: string; readonly deduplicated: boolean }
-  | { readonly ok: true; readonly outcome: "requires_human"; readonly reasonKey: string }
+  | {
+      readonly ok: true;
+      readonly outcome: "requires_human";
+      readonly reasonKey: string;
+      /** Whether someone has actually been asked, rather than merely promised. */
+      readonly waiting: boolean;
+    }
   | { readonly ok: false; readonly error: "invalid" | "not_allowed" | "rate_limited"; readonly detail?: string };
 
 export async function submitAttempt(input: {
@@ -66,8 +76,47 @@ export async function submitAttempt(input: {
   const result = gradeAttempt(parsed.data.evidence, gradingContextOf(parsed.data.scaffold));
 
   if (result.kind === "requires_human") {
-    logger.info({ unitId: parsed.data.unitId }, "attempt needs a teacher's ear");
-    return { ok: true, outcome: "requires_human", reasonKey: result.reason };
+    /* The screen says "your teacher will listen". Until now nothing made that
+       true: no path in the product created a ḥifẓ verification request, so the
+       teacher's queue could only be filled by a fixture and the learner waited
+       for an ear nobody had been told about. Asking is recorded here — and it
+       records only the asking. Nothing about what this learner knows moves
+       because they asked to be heard. */
+    try {
+      assertCan(actor, "learn:requestVerification", { type: "learner", id: input.learnerUserId });
+    } catch {
+      return { ok: false, error: "not_allowed" };
+    }
+
+    const asked = await withTenant(actor.organizationId, async (tx) => {
+      const opened = await openVerificationRequest(tx, {
+        organizationId: actor.organizationId,
+        learnerUserId: input.learnerUserId,
+        unitId: parsed.data.unitId,
+        requestedAt: occurredAt,
+      });
+      // Only a new request is worth anyone's attention; a repeat is the same
+      // person still waiting, and telling the teacher twice is noise.
+      if (opened.kind === "opened") {
+        await notifyVerifiers(tx, {
+          organizationId: actor.organizationId,
+          learnerUserId: input.learnerUserId,
+          requestId: opened.requestId,
+        });
+      }
+      return opened;
+    });
+
+    logger.info(
+      { unitId: parsed.data.unitId, request: asked.kind },
+      "attempt needs a teacher's ear",
+    );
+    return {
+      ok: true,
+      outcome: "requires_human",
+      reasonKey: result.reason,
+      waiting: asked.kind !== "not_a_passage",
+    };
   }
   if (result.kind === "insufficient_evidence") {
     return { ok: false, error: "invalid", detail: result.missing.join(",") };

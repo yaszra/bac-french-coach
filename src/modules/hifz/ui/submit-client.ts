@@ -28,7 +28,7 @@ import { attemptQueue } from "./offline-store";
 export type SubmitResult =
   | { readonly kind: "recorded"; readonly deduplicated: boolean }
   /** The ear-gate. Not a pass, and the interface must not dress it up as one. */
-  | { readonly kind: "requires_human"; readonly reasonKey: string }
+  | { readonly kind: "requires_human"; readonly reasonKey: string; readonly waiting: boolean }
   | { readonly kind: "queued"; readonly pending: number }
   | { readonly kind: "rejected"; readonly reason: string };
 
@@ -121,7 +121,7 @@ export async function submitOrQueue(input: AttemptInput): Promise<SubmitResult> 
 
     await store.remove(idempotencyKey);
     if (result.outcome === "requires_human") {
-      return { kind: "requires_human", reasonKey: result.reasonKey };
+      return { kind: "requires_human", reasonKey: result.reasonKey, waiting: result.waiting };
     }
     return { kind: "recorded", deduplicated: result.deduplicated };
   } catch {
