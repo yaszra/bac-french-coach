@@ -1,0 +1,288 @@
+{
+  "learner": {
+    "signIn": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "code": "Your code",
+      "codeHint": "A grown-up will read it to you.",
+      "submit": "Sign in",
+      "useCode": "I have a code instead",
+      "useEmail": "I have an email and password",
+      "error": {
+        "notRecognised": "That did not work. Check it and try again.",
+        "tooManyTries": "Too many tries. Wait a moment and try again.",
+        "locked": "This account is paused. Ask your teacher to help."
+      }
+    },
+    "today": {
+      "title": "Today",
+      "greeting": "Peace be with you, {name}",
+      "nowDo": "Do this now",
+      "why": "Why this",
+      "start": "Start",
+      "startExercise": "Start: {exercise}",
+      "thenSteps": {
+        "one": "{count} more step after this",
+        "other": "{count} more steps after this"
+      },
+      "noneAfter": "This is the only step today.",
+      "minutes": "about {count} min",
+      "doneToday": "{done} of {total} done today",
+      "nothingRecordedYet": "Nothing recorded yet today",
+      "awaitingTeacher": {
+        "one": "{count} recitation is with your teacher",
+        "other": "{count} recitations are with your teacher"
+      },
+      "nothingDue": {
+        "title": "Nothing is due today",
+        "body": "Everything you have learned is still holding. That is a real result, not an empty day."
+      },
+      "nothingFits": {
+        "title": "Nothing fits today's time",
+        "body": "There is work waiting, but none of it fits the minutes set for you. Ask your teacher for a longer session."
+      },
+      "maintenance": {
+        "title": "Read to keep it",
+        "body": "You can read a passage you already hold. Reading is not tested and nothing is recorded from it.",
+        "action": "Open the muṣḥaf"
+      },
+      "askGrownUp": {
+        "title": "Nothing has been set for you",
+        "body": "Ask a grown-up to give you something to learn.",
+        "kids": "Ask a grown-up"
+      },
+      "goal": {
+        "notSet": "No daily goal is set",
+        "label": "Today's goal",
+        "met": "Goal met"
+      },
+      "streak": {
+        "label": {
+          "one": "{count} day in a row",
+          "other": "{count} days in a row"
+        },
+        "none": "Your first day starts whenever you begin",
+        "resting": "Today is still open",
+        "grace": "A missed day is kept for you — the run continues."
+      },
+      "streams": {
+        "title": "Your rhythm",
+        "new": "New",
+        "recent": "Recent",
+        "old": "Older",
+        "open": "Open {stream}",
+        "empty": "Nothing in this stream today"
+      }
+    },
+    "action": {
+      "verify_with_teacher": "Recite for your teacher",
+      "repair_drill": "Repair what slipped",
+      "review": "Review",
+      "strengthen_join": "Strengthen the join",
+      "learn_new": "Learn something new",
+      "maintenance_reading": "Read to keep it"
+    },
+    "exercise": {
+      "listen": {
+        "title": "Listen",
+        "instruction": "Listen to the recitation with the page open."
+      },
+      "recall_first": {
+        "title": "Say the first words",
+        "instruction": "Say or write the first words before anything is shown."
+      },
+      "rebuild": {
+        "title": "Rebuild the āyah",
+        "instruction": "Put the words back in order. The tray is shuffled after every word."
+      },
+      "gap_fill": {
+        "title": "Fill the gaps",
+        "instruction": "Supply the missing words."
+      },
+      "next_ayah_cue": {
+        "title": "What comes next",
+        "instruction": "Hear one āyah, then produce the one after it."
+      },
+      "connect_chain": {
+        "title": "Connect the chain",
+        "instruction": "Recite several āyāt in order, from a blank page."
+      },
+      "oral_recitation": {
+        "title": "Recite aloud",
+        "instruction": "Recite aloud. A person listens to this one."
+      }
+    },
+    "why": {
+      "verificationOverdue": "Your teacher is waiting to hear {unitId}.",
+      "recentLapse": {
+        "zero": "{unitId} slipped today, so it comes before anything new.",
+        "one": "{unitId} slipped a day ago, so it comes before anything new.",
+        "other": "{unitId} slipped {count} days ago, so it comes before anything new."
+      },
+      "dueReview": "{unitId} is due — about {retrievability}% of it is still within reach.",
+      "weakJoin": "The join at {unitId} is trailing the āyāt it connects.",
+      "joinNotYetRecorded": "The join at {unitId} has never been practised, though both āyāt around it hold.",
+      "newMaterial": "There is room today for something new.",
+      "newWithheldLoad": "New material is held back: {dueLoadMinutes} minutes of review come first.",
+      "newWithheldTier": "New material is not part of today's session.",
+      "maintenanceNeverRead": "{unitId} has not been read since you learned it.",
+      "maintenanceDue": {
+        "one": "{unitId} was last read a day ago.",
+        "other": "{unitId} was last read {count} days ago."
+      },
+      "budgetSpent": "Held back — today's minutes are already spent.",
+      "newCapped": "Held back — that is enough new material for one day.",
+      "unknown": "This is the next thing your memory needs."
+    },
+    "practice": {
+      "title": "Practice",
+      "leave": "Leave practice",
+      "unit": "Āyah {unitId}",
+      "step": "Step {order} of {total}",
+      "submit": "Done",
+      "next": "Next",
+      "finish": "Finish",
+      "backToToday": "Back to Today",
+      "recorded": "Recorded",
+      "recordedBody": "Your work is saved. What comes next is set by the server, never by this screen.",
+      "notRecorded": "Not recorded",
+      "notRecordedBody": "Something went wrong, so nothing was saved. Nothing has been counted either.",
+      "teacherWillListen": {
+        "title": "Your teacher will listen",
+        "body": "This one is not marked here. A person listens to it and decides.",
+        "asked": "They have been asked, and you are in their list.",
+        "notAsked": "Nobody has been asked yet — tell your teacher you are ready."
+      },
+      "testMode": {
+        "title": "Test",
+        "body": "No help and no hints. You will see how it went at the end."
+      },
+      "testResults": {
+        "title": "How the test went",
+        "body": "Every answer was checked on the server. Nothing on this screen decided it."
+      },
+      "hint": "Hint",
+      "hintsUsed": {
+        "one": "{count} hint used",
+        "other": "{count} hints used"
+      },
+      "noHints": "No hints in a test.",
+      "commit": "I am ready",
+      "reveal": "Show the words",
+      "scaffold": {
+        "full_text": "The words are on the page",
+        "first_letters": "First letters only",
+        "word_count": "Word count only",
+        "blank": "From a blank page"
+      },
+      "scaffoldReason": {
+        "test_mode": "A test shows nothing.",
+        "exercise_floor": "This exercise asks you to produce it.",
+        "strength": "This is what your memory has earned."
+      }
+    },
+    "listen": {
+      "play": "Play",
+      "pause": "Pause",
+      "replay": "Play again",
+      "noAudio": {
+        "title": "No recitation recorded yet",
+        "body": "No reciter's audio is in the package for this passage, so there is nothing to play. Read the page instead."
+      },
+      "noTimings": "Playing without a highlight: the word timings for this reciter have not been measured, and a guessed highlight would teach the wrong rhythm.",
+      "played": "Listened",
+      "replays": {
+        "one": "{count} replay",
+        "other": "{count} replays"
+      }
+    },
+    "recallFirst": {
+      "prompt": "Say the first words of this āyah.",
+      "blankNotice": "The page stays blank until you commit.",
+      "spoken": "I said it",
+      "typed": "Type what you remember",
+      "wordsProduced": "{count} words"
+    },
+    "rebuild": {
+      "tray": "Words",
+      "line": "The āyah so far",
+      "empty": "Nothing placed yet",
+      "shuffled": "Shuffled again",
+      "wrongWord": "Not that one — it is back in the tray.",
+      "placed": "Placed"
+    },
+    "gapFill": {
+      "prompt": "Fill the missing words.",
+      "gap": "Missing word {index}",
+      "got": "I had it",
+      "missed": "I did not have it"
+    },
+    "nextAyahCue": {
+      "prompt": "You heard {cue}. Produce the one after it.",
+      "produced": "I produced it",
+      "notProduced": "I could not",
+      "hearAgain": "Hear it again"
+    },
+    "connectChain": {
+      "prompt": "Recite {count} āyāt in order, from a blank page.",
+      "reached": "I reached āyah {index}",
+      "broke": "I broke here"
+    },
+    "oral": {
+      "prompt": "Recite this aloud for your teacher.",
+      "start": "Start",
+      "stop": "Stop",
+      "send": "Send to my teacher",
+      "consentNeeded": "Recording needs a grown-up's permission. You can still send the request without audio.",
+      "noRecording": "Sent without a recording."
+    },
+    "quran": {
+      "title": "Qurʾān",
+      "subtitle": "Your pages, drawn in the ink you have earned.",
+      "page": "Page {page}",
+      "openPage": "Open page {page}",
+      "memoryView": "Memory",
+      "readView": "Read",
+      "readNotice": "Reading view: full ink, nothing hidden, nothing recorded.",
+      "memoryNotice": "Memory view: the ink is as deep as the evidence you have given.",
+      "notYetRecorded": {
+        "title": "This page is not in the package yet",
+        "body": "The muṣḥaf layout for this page has not been loaded, so there is nothing to draw. Nothing is missing from your memory."
+      },
+      "empty": {
+        "title": "No pages yet",
+        "body": "Once something is set for you, your pages appear here."
+      },
+      "packedLines": "Lines are packed at a fixed width: this muṣḥaf's measured line breaks are not in the package yet."
+    },
+    "kids": {
+      "step": {
+        "listen": "Listen",
+        "rebuild": "Build it",
+        "oral_recitation": "Say it"
+      },
+      "start": "Start",
+      "wellDone": "Well done",
+      "lantern": "Your lantern",
+      "hear": "Hear it"
+    },
+    "sync": {
+      "pending": {
+        "one": "{count} attempt is waiting to sync",
+        "other": "{count} attempts are waiting to sync"
+      },
+      "offline": "You are offline. Your work is saved on this device and will be sent when you are back.",
+      "syncing": "Sending your work",
+      "failed": "Could not send yet — your work is still saved here.",
+      "notCounted": "Nothing is counted until the server has it.",
+      "send": "Send now"
+    },
+    "a11y": {
+      "primaryAction": "Today's next action",
+      "trayWord": "Word {index}",
+      "placedWord": "Placed word {index}",
+      "audio": "Recitation audio"
+    }
+  }
+}

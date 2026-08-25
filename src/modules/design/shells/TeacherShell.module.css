@@ -1,0 +1,112 @@
+/* TeacherShell — desktop-first: a persistent sidebar, a top bar naming the
+   class in front of the teacher, and a rail when the screen narrows. */
+
+.shell {
+  display: grid;
+  grid-template-areas:
+    "nav topbar"
+    "nav main";
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  block-size: var(--shell-block-size, 100dvh);
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.navArea {
+  grid-area: nav;
+  inline-size: 15rem;
+  min-inline-size: 0;
+}
+
+.shell[data-collapsed="true"] .navArea {
+  inline-size: 76px;
+}
+
+.topBar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-raised);
+  border-block-end: 1px solid var(--border);
+}
+
+.toggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--tap-min);
+  block-size: var(--tap-min);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  color: var(--text);
+}
+
+.toggleGlyph {
+  inline-size: 20px;
+  block-size: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.classLabel {
+  min-inline-size: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-inline-start: auto;
+}
+
+.main {
+  grid-area: main;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-5);
+}
+
+/* A phone in a teacher's hand still has to work. */
+@media (max-width: 699px) {
+  .shell {
+    grid-template-areas:
+      "topbar"
+      "main"
+      "nav";
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  .navArea,
+  .shell[data-collapsed="true"] .navArea {
+    inline-size: auto;
+  }
+  .toggle {
+    display: none;
+  }
+  .main {
+    padding: var(--space-4);
+  }
+}

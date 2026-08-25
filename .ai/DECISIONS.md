@@ -24,3 +24,427 @@ Format: D-nnn · date · decision · provenance.
   vendored text. [inferred:env-constraint]
 - **D-008** · 2026-08-23 · Toolchain pins: pnpm, Node 22, TypeScript 5.9 (not 7.x, for
   Next 16 compatibility), Prisma 6 (stable migration engine). [inferred:stability]
+- **D-009** · 2026-08-23 · Corpus edition. tanzil.net is unreachable from the
+  build network (proxy denies CONNECT). `fetch_quran.mjs` tries Tanzil first and
+  falls back to the King Fahd Glorious Qurʾān Printing Complex ʿUthmānī Ḥafṣ
+  edition (v13) via a public mirror. Verified: 114 sūrahs, 6236 āyahs, all
+  canonical per-sūrah counts, correct basmalah conventions at 2:1, 9:1, 27:30.
+  Four independent editions were compared and NONE agree byte-for-byte (they
+  differ in joining characters and pause marks), so "byte-exact" is defined
+  against one named edition and recorded in SOURCE.json. Bytes are stored
+  exactly as received — NFC is deliberately not applied. **Needs the user's
+  confirmation**, since the spec named Tanzil specifically.
+  [inferred:network-constraint]
+- **D-010** · 2026-08-23 · Muṣḥaf line breaks are `not_yet_recorded`. Page
+  boundaries are canonical (from Ḥafṣ metadata, verified against known
+  landmarks); no reachable source carries the 15-line layout. A guessed line
+  break is one a learner would memorise, so it is recorded as absent.
+  [inferred:honesty-rule]
+- **D-011** · 2026-08-23 · Word timings are measured or absent. No timing source
+  was reachable; all seven reciters are recorded `not_yet_recorded` and the
+  product plays audio without a highlight rather than interpolating one.
+  [inferred:honesty-rule]
+- **D-012** · 2026-08-23 · The tripwire matches on the CONSONANTAL SKELETON
+  (diacritics, alef forms and joining marks stripped), so a passage retyped from
+  a different edition or with vowels removed is still caught. A byte-identical
+  check would have caught almost nothing. Arabic prose is permitted in declared
+  interface-copy files and refused in source code. [inferred:threat-model]
+- **D-013** · 2026-08-23 · Erasure is a named path through the append-only log,
+  not an exception to it: a transaction must declare `app.erasure_request_id`,
+  and every removed row is recorded in `erasure_log`. Found by testing — the
+  append-only trigger initially made GDPR erasure impossible. TRUNCATE stays
+  absolutely refused. [discovered:testing]
+- **D-014** · 2026-08-23 · Two database roles. `itqan` owns the schema and holds
+  BYPASSRLS for migrations and audited maintenance; `itqan_app` serves every
+  request and never has it. Role attributes are provisioning
+  (`prisma/provision.sql`), not schema — a migration cannot grant itself
+  privileges it lacks. [discovered:testing]
+- **D-015** · 2026-08-23 · Correction taxonomy splits into memory and
+  articulation families. Only memory errors lapse a unit: a tajwīd slip is not
+  forgetting, and treating it as such would bury a learner in reviews for
+  something they know. [specified:T0 + inferred]
+- **D-016** · 2026-08-23 · FSRS-4.5 with published weights, a 365-day interval
+  cap and post-lapse stability capped at 0.9× prior; Itqān layers an evidence
+  weight and a retrieval-strength factor per exercise on top. BKT defaults
+  pInit 0.15 / pTransit 0.22 / pSlip 0.10 / pGuess 0.20. The weak-join margin
+  must stay below (1 − targetRetention) or it can never fire.
+  [inferred:memory-engine]
+- **D-017** · 2026-08-23 · Toolchain: ESLint pinned to 9 (eslint-plugin-react is
+  incompatible with ESLint 10 and crashed every lint run); vitest transforms JSX
+  via `esbuild.tsconfigRaw` rather than per-directory tsconfig files.
+  [discovered:testing]
+
+- **D-018** · 2026-08-23 · Ḥifẓ exercise ladder is an *evidence* order, not a difficulty order:
+  listen → recall_first → rebuild → gap_fill → next_ayah_cue → connect_chain →
+  oral_recitation, with strengths 0.05 … 1.0 rising strictly along it. It deliberately
+  ranks `gap_fill` above `rebuild` where the memory engine's `evidenceWeights` do the
+  reverse: a rebuild happens with every word on screen, a gap fill does not. Ladder
+  strengths gate exercises; the memory weights stay the scheduler's confidence dial.
+  [inferred:pedagogy]
+- **D-019** · 2026-08-23 · Grading applies ceilings before penalties. A rung's ceiling (listen ≤ hard,
+  rebuild ≤ good), the scaffold's ceiling (full_text ≤ hard, first_letters ≤ good) and
+  observation ceilings (a revealed answer ≤ hard) are applied first; hint, rescramble,
+  latency and break penalties are applied last, so a penalty can never be absorbed by a
+  ceiling. [inferred:evidence-rule]
+- **D-020** · 2026-08-23 · `gradeAttempt` has three answers, two of which are not grades: `graded`,
+  `requires_human` (always, for oral_recitation — the ear-gate) and
+  `insufficient_evidence`. Unusable observations are never defaulted to "again". The
+  evidence union has no score/grade/mastery field and its zod schemas are strict, so a
+  client-asserted result is rejected at the boundary rather than ignored downstream.
+  [specified:T0 evidence-rule]
+- **D-021** · 2026-08-23 · `verified` is reachable only through a `human_verdict` event; a property test
+  drives the machine with a seeded PRNG over random exercise outcomes, ticks and
+  requests (400 runs × 40 events) and asserts it is never reached. A verdict is accepted
+  from any state, including `not_started`: a teacher who sat and listened outranks the
+  app's record of practice. [specified:T0 evidence-rule]
+- **D-022** · 2026-08-23 · Mastery is ear-gated with four levels — not_yet_recorded / learning / held /
+  maintained — and every rate carries its denominator (`Rate` from the memory engine).
+  A unit with no evidence returns `not_yet_recorded`, never 0%; `summariseMastery`
+  keeps unstarted units out of the confirmed denominator. [specified:T0 honesty-rule]
+- **D-023** · 2026-08-23 · Word sync never interpolates: absent timings return `no_timings`, words are
+  active over half-open `[startMs, endMs)`, `validateTimings` proves monotonicity,
+  non-overlap and containment, and lookup is a binary search. `reciteDiff` is typed
+  `advisory: true`, contains no Arabic, takes the caller's `normalize` (empty string =
+  ignored token) for ḥarakah precision and waqf tolerance, and never grades.
+  [specified:T0 sacred-content + evidence rules]
+- **D-024** · 2026-08-23 · Session planning clamps the budget to a tier ceiling (kids 10 minutes, teen 30,
+  adult 60, unknown tier 60) rather than trusting the caller's number, always names one
+  first action, and returns an honest empty plan distinguishing `nothing_due` from
+  `budget_too_small`. New material is the first thing withheld. [specified:T0 premium
+  + honesty rules]
+- **D-025** · 2026-08-23 · Ink depth is applied as the ALPHA of `--mushaf-ink` (`color-mix(in srgb, var(--mushaf-ink)
+  calc(var(--ink-strength) * 100%), transparent)`), mapped from `data-depth` in CSS rather
+  than an inline style, so the ink never changes hue and no component can invent a depth
+  value. Depth 0 hides the glyph with `visibility: hidden` (the word's space and the line
+  metrics survive) and the button's accessible name becomes `a11y.wordInAyah` +
+  `a11y.inkDepth`, so a hidden word is announced as present and unearned rather than
+  silently dropped. `revealed` changes what is shown, never `data-earned`.
+  [specified:T0 sacred-content + honesty rules]
+- **D-026** · 2026-08-23 · Muṣḥaf words are real `<button>` elements and are deliberately exempt from the
+  `--tap-min` floor (WCAG 2.5.8 inline-target exception): enforcing 44px on a word would
+  destroy the page. `MushafPage` therefore owns a roving tabindex — one tab stop for the
+  whole page — with arrows following the PAGE's direction (right-to-left in every locale,
+  so ArrowLeft advances), Home/End per line and Ctrl+Home/End per page.
+  [inferred:premium-rule + WCAG-2.5.8]
+- **D-027** · 2026-08-23 · The muṣḥaf contract is proven twice: `src/modules/design/tests/tokens.test.ts` parses
+  `tokens/marginalia.css` and fails if any `--mushaf-*` or `--ink-depth-*` token is
+  declared inside a `[data-theme]`/`[data-tier]` block, if any `var()` in the design
+  system resolves to nothing, or if a `--text-*` step falls below 12px (15px under kids);
+  `e2e/catalogue.spec.ts` loads the real page in a browser and asserts the sheet's
+  computed background and colour are IDENTICAL in light and dark while the chrome behind
+  it changes. [specified:T0 premium-rule]
+- **D-028** · 2026-08-23 · Overlay focus traps take the container ELEMENT (via a state setter as `ref`), not a
+  ref object: an overlay rendered through a portal attaches one commit late, and a
+  ref-based trap silently never engaged. Focus is placed once, on open — the escape
+  handler lives in a ref so a re-render of the page behind the dialogue cannot yank the
+  cursor back to the first control. [inferred:defect-found-in-test]
+- **D-029** · 2026-08-23 · `Tile` is the only component licensed to use `--ease-tile-spring`. Its pick-up state is
+  carried by `aria-pressed` (never the deprecated `aria-grabbed`) and its live-region text
+  is DERIVED from `picked`/`slot`/`state` rather than stored, so the announcement cannot
+  fall out of step with the tile. Putting a tile down and cancelling are announced by
+  `aria-pressed` alone. [inferred:react-hooks/set-state-in-effect + ARIA 1.2]
+- **D-030** · 2026-08-23 · `PaneLayout` chooses 1/2/3 panes from the CONTAINER's inline size (700px / 1100px
+  container queries), not the viewport, so the learner geometry is still correct inside a
+  teacher's split view. Every pane is bounded and scrolls inside itself and each shell is
+  `block-size: var(--shell-block-size, 100dvh)`: the document never scrolls during
+  practice, and the catalogue can still frame a shell in a box. [specified:T0 premium-rule]
+- **D-031** · 2026-08-23 · The catalogue's surface comes only from the URL (`?theme=&tier=&locale=`), stamped onto
+  <html> by a client component in the catalogue layout, which also flags
+  `data-surface-ready` for the visual-regression suite to wait on. Its own labels are code
+  identifiers (folder and component names), never prose, because the catalogue may not add
+  keys to `messages/*.json`. The representative page reads the vendored corpus and the
+  madani-15 layout server-side (the layout still records `lines: "not_yet_recorded"`, so
+  words are packed, not justified) and renders the honest empty state when either is
+  absent — it never types Arabic. [specified:T0 sacred-content + honesty rules]
+
+- **D-032** · 2026-08-23 · Reading (Qāʿidah) makhārij follow the classical **seventeen makhārij in
+  five regions** of Ibn al-Jazarī's *al-Muqaddimah al-Jazariyyah* — the scheme taught with the
+  Ḥafṣ ʿan ʿĀṣim reading this platform follows. Every letter has exactly one PRIMARY makhraj
+  (`validateLattice` proves the partition): alif alone in al-jawf, wāw at ash-shafatān and yāʾ at
+  wasaṭ al-lisān (their madd resonance in al-jawf is modelled by the madd concepts, not by dual
+  membership). Al-khayshūm carries no primary letter — it is the makhraj of the *ghunnah*, so its
+  `letterCodepoints` is empty and `rule.ghunnah` points at it. Hamzah is a 29th letter concept
+  outside the 28-letter alphabet. [specified:al-Jazariyyah]
+- **D-033** · 2026-08-23 · Reading concept ids use **Unicode Arabic-block character names** for the
+  letter segment (`letter.beh`, `letter.theh`, `letter.hah`, `letter.heh`) rather than a
+  transliteration: ASCII, stable, and collision-free where ḥāʾ/hāʾ, tāʾ/ṭāʾ and dhāl/ẓāʾ/zāy all
+  collide. Display names come only from `labelKey`. [inferred:collision-free-ids]
+- **D-034** · 2026-08-23 · Letter FORM concepts are emitted only for the positions a letter actually
+  takes: four for connectors, `isolated`+`final` for the six non-connecting letters, `isolated`
+  alone for hamzah. Emitting four for all would invent skills a learner can neither practise nor
+  fail. [inferred:honesty rule]
+- **D-035** · 2026-08-23 · Solo self-confirmation is modelled as its own evidence kind
+  (`self_confirmed`), never as a weaker teacher verdict. With `hasTeacher: true` the in-person rung
+  accepts `teacher_observed` only and a self-confirmation is counted under
+  `unacceptedEvidence`; solo, it advances the rung and `LadderState` keeps
+  `finalRungEvidenceKind` / `teacherVerified` / `selfConfirmed` / `verificationLabelKey` as
+  separate fields so no projection can render it as verification. SmartScore excludes it (and
+  `advisory_only`) from the BKT posterior: it raises `confidence` and the denominator, never the
+  score. [specified:T0 evidence + honesty rules]
+- **D-036** · 2026-08-23 · SmartScore is `number | null`, capped to **1..99**. `null` is the sole
+  encoding of "not yet recorded" (0% is a claim); 100 would assert a certainty no finite run of
+  observations buys — the same principle that keeps BKT's probabilities inside (0, 1). The score's
+  own denominator travels beside it as `scoredAttempts`. [inferred:honesty rule]
+- **D-037** · 2026-08-23 · The in-person ladder rung is gated by the observer's MOST RECENT verdict
+  (`latestMustBeCorrect`), not by an accuracy threshold: a human's latest word is the word, in both
+  directions. [inferred:evidence rule]
+- **D-038** · 2026-08-23 · Talqīn assets are a discriminated union on `provenance`
+  (`human` | `studio_synth_reviewed` | `library`) with no unlabelled member, and the synthesized
+  variant structurally requires `reviewedByPersonId` + `reviewedAt`. `resolveTalqin` walks
+  teacher → studio → library → `{kind:"not_yet_recorded"}`; there is no synthesized floor, so a
+  machine voice is never a silent fallback. [specified:T0 sacred-content + honesty rules]
+- **D-039** · 2026-08-23 · "No hearts, timers or streak penalties" is enforced by type, not by
+  convention: `ActivityEvaluation.penalty` has type `null` and `PracticeGuarantees` is four literal
+  `false`s, validated at the boundary by `practiceGuaranteesSchema`. A wrong answer returns a
+  `correction` message key describing what to notice. [specified:T0 premium rule]
+
+- **D-027** · 2026-08-23 · Fonts are self-hosted and imported before anything that
+  uses them. They were installed as packages but never imported, so no
+  `@font-face` rule existed and the muṣḥaf rendered in a system serif lacking
+  Quranic marks — empty boxes inside scripture, with all 741 tests passing.
+  `scripts/check_mushaf_glyphs.mjs` now proves in a real browser that every
+  corpus codepoint has a glyph, by comparing rendered ink against a bare carrier
+  letter (combining marks have no advance width, so measuring width proves
+  nothing). [discovered:looking at the product]
+- **D-028** · 2026-08-23 · CSP uses a nonce, not `unsafe-inline`, and therefore
+  every route renders per request. `strict-dynamic` is deliberately absent: it
+  makes a browser ignore `'self'`, which refused all ten of Next's chunk
+  scripts. The policy must also be set on the REQUEST headers or Next never
+  stamps the nonce — the first attempt set perfect headers and produced a dead
+  HTML shell that curl reported as healthy. Forcing dynamic rendering costs
+  nothing: no page in Itqān has HTML that is the same for two people.
+  [discovered:browser testing]
+- **D-029** · 2026-08-23 · The application role holds no write privilege on
+  `erasure_log`, and `ALTER DEFAULT PRIVILEGES` is removed entirely. A red-team
+  test found the app could delete the record of erasures — so an attacker able
+  to erase a child's data could erase the evidence of it. Default privileges had
+  silently made a table writable that nobody granted. Grants are now explicit
+  per table; `learning_event` is INSERT and SELECT only. [discovered:red team]
+- **D-030** · 2026-08-23 · Message bundles are split one file per product surface
+  (`messages/{en,ar}/<surface>.json`) so parallel work on the learner, teacher
+  and family apps never collides, and a missing translation is a missing file.
+  [inferred:parallel build]
+- **D-031** · 2026-08-23 · Studio refuses three things by construction: re-asking
+  about an approved asset, a rejection with no reason, and approving synthesis
+  without naming who heard it. Lesson edits are overlays on a versioned base and
+  a learner stays on the version they started until they finish.
+  [specified:T0 + inferred]
+- **D-032** · 2026-08-23 · `main` was created at this branch's root commit so a
+  pull request could have a merge base; the repository previously held three
+  unrelated histories and no trunk. [inferred:repo state]
+
+## Family & School (2026-08-23)
+
+- **A claim is a row, not a permission.** `claimChild` writes `Relationship.state = "claimed"`
+  unless the learner has no approved teacher, in which case there is nobody to ask and it is
+  approved on the spot. The two outcomes carry different message keys so the UI cannot show one
+  reassuring sentence for both. Provenance: CLAUDE.md privacy rule + `can()`'s
+  `claim_not_yet_approved` branch.
+- **Home tasks cannot become evidence, structurally.** Family activity uses `FAMILY_EVENT_TYPES`,
+  which is disjoint from `EVENT_TYPES`; `appendEvent` validates against that enum, and the memory
+  projection folds only over the learning stream. A home task therefore has no path into memory
+  state, present or future. Proven by unit test. Provenance: evidence rule.
+- **A tutoring guardian goes through the teacher's verdict path.** `approveRecitation` checks that
+  the verification request names an assignment the guardian created, then delegates to
+  `recordVerdict`. No second, softer verdict path exists; reports name the approver's capacity via
+  `approverLabelKey`, and a guardian is never rendered as a teacher.
+- **WhatsApp is planned, never hoped.** `planChannel` resolves to send / manual_fallback / refused
+  at the moment of sending — the 24-hour window and template approval decide which. Nothing is
+  queued that cannot go, and `deliveryStateOf` has no "pending". Provenance: honesty rule.
+- **Reports are jobs.** `/tonight` reads the `ReportRun` written by `report.nightly_family`, which
+  fires at each family's local evening (`LearnerProfile.timezone`, hourly job + `isLocalEvening`).
+  A missing run says "not built yet"; a failed one says "failed".
+- **Erasure only through the audited path.** `runDataErasure` sets `app.erasure_request_id` inside
+  a maintenance transaction, so the database trigger records every removed row in `erasure_log`.
+  Integration test `tests/integration/privacy.test.ts` proves both the deletion and the log.
+
+## Learner core
+
+- **Ink depth is 0, or 1–5, and never anything in between.** `inkDepthOf` returns 0 only when there
+  is no row or no reps — "not yet recorded" — and never returns 0 for a unit that has evidence,
+  because depth 0 blanks the word's space on the page and would erase real work. A passage takes
+  the depth of its WEAKEST recorded unit. Provenance: honesty rule + `mushaf/README.md` §3.
+  Proven by `src/modules/hifz/ui/ink-depth.test.ts`.
+- **Reading is never testing.** The `read` view forces depth 5 for every word regardless of memory
+  state, and records nothing. `wordDepthFor` is the single point where that override happens.
+- **The learner's copy lives in its own namespace.** The engines emit `{key, params}` reasons in
+  `memory.*` / `hifz.*`; `reason-copy.ts` maps them into `learner.why.*`. Two surfaces therefore
+  cannot fight over one message file, and an unmapped reason falls back to a general line rather
+  than leaking an engine identifier onto a screen. Provenance: i18n contract + honesty rule.
+- **The client reports what happened, never what it was worth.** Every rung of the workspace ends
+  in `submitOrQueue` with observations only; the submission schema is strict and has no field a
+  grade could travel in. `oral_recitation` is rendered as "your teacher will listen", never a pass.
+  Provenance: evidence rule.
+- **Queue first, then the network.** `submitOrQueue` writes the attempt to IndexedDB with its
+  idempotency key BEFORE trying the server, so a connection that dies mid-flight costs nothing and
+  a replay is recognised. A queued attempt is reported as "waiting to sync", never as recorded.
+- **No highlight without measured timings.** `content/timings/STATUS.json` records every reciter as
+  `not_yet_recorded`, so `ayahTimings()` returns nothing and the player says why. There is
+  deliberately no interpolation path: a highlight that drifts teaches the wrong rhythm.
+- **Word boundaries, not word edits.** The KFGQPC corpus writes an open tanwīn and its alif with a
+  space between them. `segmentWords` rejoins that fragment so word counts, tiles and the page are
+  right; every returned string is a contiguous substring of the corpus, proven over all 6236 āyāt.
+  Provenance: sacred-content rule.
+- **Speech synthesis takes a message KEY, never a string.** `SpokenPrompt` can therefore speak only
+  interface copy from the learner bundle — there is no parameter through which scripture could
+  reach a synthetic voice, even by mistake. Provenance: sacred-content rule.
+- **Tier arrives as a prop from the server.** `LearnerSurface` takes `tier` from the layout, which
+  reads it from the account; only `theme` honours a URL override. A child cannot promote themselves
+  to the adult surface by editing a URL.
+
+## Reading (Qāʿidah) learner surface
+
+- **The activity id IS the activity.** `encodeActivityId` writes form, concept, presentation,
+  sitting and index into one parseable id; `buildRecognitionActivity` is a pure function of that
+  id, so the server rebuilds the exact activity — distractors, order and answer — when the
+  submission arrives. That is what lets the client be handed choices with no key: `ActivityPayload`
+  has no `answerChoiceId` field, and a test asserts the serialized payload never contains one.
+  Provenance: evidence rule. Proven by `ui/activity-id.test.ts`, `ui/session-plan.test.ts`.
+- **Reading writes the same events as ḥifẓ.** One event vocabulary, not a private one:
+  `submitActivity` appends `attempt.recorded` with `unitKind: "reading_concept"`, `unitId`
+  `c:<conceptId>`, and folds it into memory state in the SAME transaction — without which the
+  reading scheduler would be frozen exactly as ḥifẓ's would. Provenance: `submit-attempt.ts`.
+- **Three fields a stored row does not carry are recovered, never invented.** `evidence-shape.ts`
+  reads the evidence kind off the retrieval type (`recognition` / `production` /
+  `oral_recitation` — all three already in `RETRIEVAL_TYPES`); *replays* the presentation by
+  asking the ladder which rung each attempt was built at, using the one function the builder also
+  calls, so the two agree by construction; and derives a sitting from a stated 30-minute gap, so
+  the "sessions" denominator has a rule that travels with it. Provenance: honesty rule.
+- **A client cannot claim a teacher heard it.** The submission schema carries a verdict but no
+  observer: evidence from the learner surface is `machine_checked` or `self_confirmed`, always. A
+  teacher's ear enters through a verdict from a teacher's console. The ladder therefore keeps
+  `teacherVerified` and `selfConfirmed` distinct on screen, and the self-confirmation note says
+  whose word it is. Provenance: evidence rule.
+- **Foundations the lessons depend on but do not list are attached, not assumed.** The primer
+  teaches `letter.alef.fathah` without listing `harakah.fathah`, which the lattice makes a
+  prerequisite; left alone, sukūn, tanwīn and madd would stay locked forever.
+  `withPrerequisiteFoundations` attaches such a concept to the first lesson that needs it, and a
+  test proves no concept in the installed package stands on an untaught prerequisite.
+- **Lesson ids and lattice ids are joined by codepoint.** The lesson files say `letter.baa`, the
+  lattice says `letter.beh`; transliterations collide and Unicode names do not, so the join is made
+  on the codepoint. An element that does not resolve is dropped AND counted
+  (`unresolvedElements`), never silently lost. Provenance: honesty rule.
+- **Narration speaks English; Arabic terms are shown, never synthesized.** `Narration` reads the
+  manifest's English prose with the Web Speech API and renders the lexicon's Arabic terms as text.
+  No synthesized voice ever produces recitation, and `TalqinPlayer` renders "not yet recorded"
+  with an offer to ask a teacher rather than substituting a machine voice. Provenance:
+  sacred-content rule.
+- **A concept's name is composed, not authored 259 times.** `conceptLabel` builds "bāʾ with
+  fatḥah" from three keys. Where a concept id is also a namespace (`tanwin` and `tanwin.fath`),
+  its own name lives at `.name` — one convention, in one function.
+
+## D-034 — Pixel baselines are opt-in (`VISUAL=1`)
+
+**Decision.** The catalogue's screenshot comparisons run only when `VISUAL=1`.
+Every assertion that does not depend on rasterisation runs always.
+
+**Why.** A screenshot is a test only when the image that produced the baseline
+reproduces it. Baselines captured in this development container and committed
+would fail on a CI runner over subpixel font rasterisation, and the usual cure —
+regenerate until green — turns the check into a record of whatever was rendered
+last. Provenance: found when the specs were run for the first time; 12 of 14
+catalogue tests were writing new baselines rather than comparing.
+
+## D-035 — Journeys mint sessions; the sign-in form is exercised once
+
+**Decision.** End-to-end journeys whose subject is not sign-in create a real
+Session row and encode the real cookie rather than driving the form.
+
+**Why.** Sign-in is rate limited per identifier, correctly. A suite in which
+every spec signs the same person in fails its later specs with "too many tries",
+for reasons unrelated to what they test. Authorisation is still exercised
+exactly as in production; only the credential exchange is skipped. Provenance:
+the first full-suite run.
+
+## D-036 — Keyboard focus is asked with a key, on the pointer project
+
+**Decision.** The focus-ring check presses Tab rather than calling
+`element.focus()`, and runs on the desktop project only.
+
+**Why.** `:focus-visible` is the browser's judgement that someone is navigating
+by keyboard; a programmatic focus may legitimately match nothing. In the
+touch-emulated project a keystroke does not reliably reach a page when several
+are open in one worker, which produced a failure about page focus rather than
+about focus rings. Provenance: passed on one viewport and failed on the other
+with the same markup.
+
+## D-037 — A guardian's tutoring gets the teacher's console, not a lesser one
+
+**Decision.** `/tutor` reuses `VerificationConsole`, `recordVerdict` and the
+correction taxonomy unchanged.
+
+**Why.** `canTutor` already meant "may hear this child and record a verdict",
+and the verdict action already enforced it. A second, simpler console would
+have been a second bar for the same claim — and the evidence rule does not
+admit two standards of evidence. Provenance: the permission had existed since
+the authorisation module with no surface behind it.
+
+## D-038 — `AudioAsset` carries the learner whose voice it is
+
+**Decision.** A `learnerUserId` column, null for a reciter's or the studio's
+audio. Erasure and consent withdrawal both scope by it.
+
+**Why.** The column did not exist, so "purge this child's recordings" was not
+expressible; what was written instead matched the organisation and every human
+recording in it. One family exercising their right to erasure destroyed every
+other family's recordings, under a function named `purgeAudioForSubject` whose
+subject was used only for logging. Provenance: found by an audit that read the
+code; the integration test fails against the old filter.
+
+## D-039 — A cron tick fans out; `withTenant` refuses a non-string
+
+**Decision.** Scheduled per-organisation jobs are scheduled as `*.tick` queues
+that enqueue one job per organisation. `withTenant` rejects anything that is
+not a string.
+
+**Why.** The worker scheduled every job with an empty payload, so handlers ran
+with `organizationId` undefined. `RegExp.test` coerces, so the guard's
+`test(undefined)` was `test("undefined")` — a match. The tenant was set to the
+literal string "undefined", RLS matched nothing, and every job reported success
+having done nothing: no nightly report was ever built, and the 90-day retention
+purge never ran. Provenance: same audit; a schedule test now refuses to let a
+schedule name a job nothing works.
+
+## D-040 — The server derives which units a verdict decides
+
+**Decision.** `unitIds` is not a client input. `recordVerdict` derives the units
+from the request's own `unitScope`.
+
+**Why.** The ids arrived from the client and were folded into memory state with
+`verifiedAt` set, without ever being compared to the request — whose scope was
+not even selected. Any verifier could mark any unit verified for that learner,
+and the history would say a person had listened to a passage nobody recited.
+Validating the list would have closed the hole; deriving it keeps it closed,
+because there is no claim left to forget to check.
+
+## D-041 — Asking to be heard creates a request, and tells someone
+
+**Decision.** An oral recitation opens a `VerificationRequest`, idempotent by
+(learner, passage), and notifies the learner's approved teacher and any
+guardian trusted to tutor them.
+
+**Why.** Nothing in the product created a ḥifẓ request. The screen said "your
+teacher will listen" and nobody was told; the teacher's queue could only be
+filled by a fixture; `learn:requestVerification` had no enforcement site. The
+ear-gate is the centre of the product and it had no entrance.
+
+## D-042 — A tutoring guardian hears their own work, or the learner's own asking
+
+**Decision.** `recordVerdict` refuses a request naming an assignment created by
+someone else, when the actor's authority is a guardian link. A request naming no
+assignment is the learner's own and may be answered.
+
+**Why.** The invariant was already written in `guardianOwnsRequest` and guarded
+a path that could never succeed, since no creator wrote the `assignmentId` it
+required. Meanwhile the tutoring screen offered a guardian anything pending for
+their child. One rule now, on the server, for every path.
+
+## D-043 — The projection cursor reads by `recordedAt`, not by id
+
+**Decision.** The sweep orders by `(recordedAt, id)` behind a one-minute commit
+lag, and the checkpoint stores `recordedAt`.
+
+**Why.** Ids are cuids assigned at construction; rows become visible at commit.
+A slower transaction's lower id sat permanently behind an id cursor — never
+applied, and nothing said so. The sweep exists to catch what the inline fold
+missed, which made ordering by id blind to its own purpose.

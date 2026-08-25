@@ -1,0 +1,124 @@
+.scroller {
+  inline-size: 100%;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background-color: var(--surface-raised);
+}
+
+.table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--text);
+  /* Figures line up column-wise: a ledger, not a leaflet. */
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  padding-block: var(--space-3);
+  padding-inline: var(--space-4);
+  text-align: start;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--z-sticky);
+  background-color: var(--surface-raised);
+}
+
+.headerCell {
+  padding: 0;
+  border-block-end: 1px solid var(--border-strong);
+  text-align: start;
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-block-size: var(--tap-min);
+  padding-block: var(--space-2);
+  padding-inline: var(--space-4);
+}
+
+/* The whole header cell is the target, never a 12px caret. */
+.sortButton {
+  appearance: none;
+  inline-size: 100%;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: color var(--motion-fast) var(--ease-standard);
+}
+.sortButton:hover {
+  color: var(--text);
+}
+.sortButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+  border-radius: var(--radius-control);
+}
+
+.sortMark {
+  flex: none;
+  inline-size: var(--space-3);
+  block-size: var(--space-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--text-muted);
+}
+.sortMarkActive {
+  color: var(--accent);
+}
+
+.row {
+  border-block-end: 1px solid var(--rule);
+}
+.row:last-child {
+  border-block-end: 0;
+}
+
+.cell {
+  padding-block: var(--space-3);
+  padding-inline: var(--space-4);
+  text-align: start;
+  vertical-align: top;
+}
+
+/* Figures sit on the end edge — right in LTR, left in RTL. */
+.numeric {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.numeric .headerContent,
+.headerCell.numeric .headerContent {
+  justify-content: flex-end;
+}
+
+.emptyCell {
+  padding: 0;
+}

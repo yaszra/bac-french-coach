@@ -1,0 +1,123 @@
+/* PageFrame — the muṣḥaf chrome: ruled margins, the sūrah-header band, the
+   page number in the lower margin, juzʾ/ḥizb marks in the outer margin.
+   Its structure is borrowed from the muṣḥaf itself. It frames the text and
+   never competes with it.
+
+   Every colour here is a FIXED --mushaf-* token, so the sheet is byte-for-byte
+   the same paper in light and dark, kids and adult. The only theme-aware value
+   is the shadow that lifts the sheet off the chrome behind it. */
+
+.frame {
+  display: flex;
+  justify-content: center;
+  inline-size: 100%;
+}
+
+.sheet {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  inline-size: 100%;
+  max-inline-size: 46rem;
+  padding-block: var(--space-6) var(--space-3);
+  padding-inline: var(--space-8);
+  background: var(--mushaf-paper);
+  color: var(--mushaf-ink);
+  border: 1px solid var(--mushaf-rule);
+  /* The page is a sheet, not a card: no tier radius, no tint, no animation. */
+  border-radius: 0;
+  box-shadow: var(--elevation-1);
+}
+
+/* The inner rule — the second line of a muṣḥaf frame. */
+.sheet::before {
+  content: "";
+  position: absolute;
+  inset: var(--space-2);
+  border: 1px solid var(--mushaf-rule);
+  pointer-events: none;
+}
+
+.sheet[data-dense="true"] {
+  gap: var(--space-4);
+  padding-block: var(--space-4) var(--space-2);
+  padding-inline: var(--space-5);
+}
+
+.headerBand {
+  padding-block: var(--space-3);
+  padding-inline: var(--space-4);
+  background: var(--mushaf-header-band);
+  border-block: 1px solid var(--mushaf-rule);
+  text-align: center;
+  font-family: var(--font-mushaf);
+  line-height: var(--leading-normal);
+}
+
+.body {
+  position: relative;
+  padding-inline-start: var(--space-10);
+  padding-inline-end: var(--space-2);
+}
+
+.sheet[data-dense="true"] .body {
+  padding-inline-start: var(--space-8);
+}
+
+/* The outer margin: juzʾ and ḥizb marks sit beside the text, never in it. */
+.margin {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  inline-size: var(--space-8);
+  color: var(--mushaf-marker);
+}
+
+.marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.markerGlyph {
+  inline-size: 14px;
+  block-size: 14px;
+  color: var(--mushaf-marker);
+}
+
+.markerFill {
+  fill: currentColor;
+}
+
+.markerOutline {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+
+.markerNumeral {
+  font-family: var(--font-mushaf);
+  font-size: var(--text-2xs);
+  line-height: 1;
+  color: var(--mushaf-marker);
+}
+
+.footer {
+  padding-block-start: var(--space-2);
+  border-block-start: 1px solid var(--mushaf-rule);
+  text-align: center;
+}
+
+.pageNumber {
+  font-family: var(--font-mushaf);
+  font-size: var(--text-2xs);
+  line-height: 1;
+  color: var(--mushaf-ink);
+  opacity: 0.72;
+}

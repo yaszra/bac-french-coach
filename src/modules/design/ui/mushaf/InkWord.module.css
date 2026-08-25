@@ -1,0 +1,125 @@
+/* InkWord — the progress primitive.
+   Ink depth is applied as the ALPHA of the one ink colour. The hue never
+   changes, so the page is never tinted. Only fixed --mushaf-* tokens here. */
+
+.slot {
+  /* The word and its screen-reader description share the line's layout. */
+  display: contents;
+}
+
+.word {
+  position: relative;
+  appearance: none;
+  margin: 0;
+  padding-inline: 0.04em;
+  padding-block: 0.06em;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-family: var(--font-mushaf);
+  color: color-mix(in srgb, var(--mushaf-ink) calc(var(--ink-strength) * 100%), transparent);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color var(--motion-base) var(--ease-standard);
+}
+
+/* Latin placeholders (catalogue only) never wear the muṣḥaf face. */
+.word[lang="en"] {
+  font-family: var(--font-ui);
+}
+
+/* Depth 0…5 → the alpha ladder. Nothing else may set --ink-strength. */
+.word[data-depth="0"] { --ink-strength: var(--ink-depth-0); }
+.word[data-depth="1"] { --ink-strength: var(--ink-depth-1); }
+.word[data-depth="2"] { --ink-strength: var(--ink-depth-2); }
+.word[data-depth="3"] { --ink-strength: var(--ink-depth-3); }
+.word[data-depth="4"] { --ink-strength: var(--ink-depth-4); }
+.word[data-depth="5"] { --ink-strength: var(--ink-depth-5); }
+
+.word:disabled {
+  cursor: default;
+}
+
+/* The muṣḥaf word is an inline target inside a line of scripture: the tap
+   floor that governs controls would break the page, so it is deliberately
+   exempt (WCAG 2.5.8 inline exception). Every word is also reachable by
+   keyboard through MushafPage's roving tabindex. */
+
+/* No hover glow. Ever. The page does not react to a passing cursor. */
+
+.glyph {
+  display: inline;
+}
+
+/* Depth 0: the word's space stays, the ink does not. */
+.word[data-hidden="true"] .glyph {
+  visibility: hidden;
+}
+
+/* The blank's rule — a place to be filled, not a decoration. */
+.word::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0.04em;
+  inset-block-end: 0.02em;
+  block-size: 0.045em;
+  background: var(--mushaf-ink);
+  opacity: 0;
+}
+.word[data-hidden="true"]::before {
+  opacity: 0.18;
+}
+
+/* Word-sync: the single moving mark allowed on the page — an ink underline. */
+.word::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.04em;
+  inset-block-end: 0.02em;
+  block-size: 0.07em;
+  background: var(--mushaf-ink);
+  opacity: 0;
+  transform: scaleX(0.4);
+  transform-origin: center;
+  transition:
+    opacity var(--motion-fast) var(--ease-standard),
+    transform var(--motion-fast) var(--ease-standard);
+}
+.word[data-state="active"]::after {
+  opacity: 0.85;
+  transform: scaleX(1);
+}
+
+/* Server-confirmed this pass: a faint ink ground. Ink, never a hue. */
+.word[data-state="correct"] {
+  background: color-mix(in srgb, var(--mushaf-ink) 6%, transparent);
+  border-radius: 0.06em;
+}
+
+/* Server-marked as slipped: a dotted ink underline. Ink, never a hue. */
+.word[data-state="lapsed"] {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 0.24em;
+}
+
+.srOnly {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word,
+  .word::after {
+    transition: none;
+  }
+}

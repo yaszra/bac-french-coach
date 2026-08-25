@@ -1,0 +1,14 @@
+/* The learner's outermost box.
+
+   It owns the viewport height so that a practice screen can hand a bounded
+   height down to PaneLayout — the document must never scroll while someone is
+   reciting, and a percentage height with no anchor at the top silently
+   collapses to auto. */
+.root {
+  block-size: 100dvh;
+  min-block-size: 100dvh;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  background: var(--surface);
+  color: var(--text);
+}

@@ -1,0 +1,101 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  box-sizing: border-box;
+  /* The track is small; the target never is. */
+  min-block-size: var(--tap-min);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  appearance: none;
+  color: var(--text);
+  font: inherit;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  text-align: start;
+  cursor: pointer;
+}
+
+.root:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.track {
+  position: relative;
+  flex: none;
+  inline-size: calc(var(--space-12) + var(--space-1));
+  block-size: var(--space-8);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background-color: var(--surface-sunken);
+  transition:
+    background-color var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard);
+}
+
+.root[aria-checked="true"] .track {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.thumb {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: var(--space-1);
+  display: grid;
+  place-items: center;
+  inline-size: var(--space-6);
+  block-size: var(--space-6);
+  border-radius: var(--radius-pill);
+  background-color: var(--surface-raised);
+  box-shadow: var(--elevation-1);
+  color: var(--text-muted);
+  translate: 0 -50%;
+  transition:
+    inset-inline-start var(--motion-base) var(--ease-standard),
+    color var(--motion-base) var(--ease-standard);
+}
+
+.root[aria-checked="true"] .thumb {
+  inset-inline-start: calc(100% - var(--space-6) - var(--space-1));
+  color: var(--accent);
+}
+
+/* State is never carried by colour alone: on is a tick, off is a bar. */
+.mark {
+  inline-size: var(--space-3);
+  block-size: var(--space-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.description {
+  font-size: var(--text-2xs);
+  color: var(--text-muted);
+}
+
+.root:disabled {
+  cursor: not-allowed;
+  color: var(--text-muted);
+}
+.root:disabled .track {
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
+}
+.root:disabled[aria-checked="true"] .track {
+  background-color: var(--border-strong);
+  border-color: var(--border-strong);
+}

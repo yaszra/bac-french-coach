@@ -1,0 +1,22 @@
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--caution);
+  border-radius: var(--radius-card);
+  background: var(--caution-quiet);
+  color: var(--text);
+}
+
+.text {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.line {
+  margin: 0;
+  font-size: var(--text-sm);
+}

@@ -1,0 +1,90 @@
+/* PaneLayout — the practice geometry.
+   ONE rule above all: the document never scrolls during practice. Every pane
+   is bounded and scrolls inside itself, so the page a learner is reciting from
+   cannot slide away under their thumb.
+
+   Panes are chosen by the CONTAINER's inline size, not the viewport, so the
+   same layout is correct inside a teacher's split view:
+     < 700px   1 pane   page above the tray, sticky action row
+     ≥ 700px   2 panes  page beside the exercise
+     ≥ 1100px  3 panes  page · exercise · context */
+
+.layout {
+  container-type: inline-size;
+  container-name: panes;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  block-size: 100%;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.panes {
+  display: grid;
+  min-block-size: 0;
+  overflow: hidden;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.pane {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.context {
+  display: none;
+}
+
+/* Explicit panes={1|2|3} pins the layout — attribute beats container query. */
+.panes[data-panes="1"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.panes[data-panes="1"] .context { display: none; }
+
+.panes[data-panes="2"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  grid-template-rows: minmax(0, 1fr);
+}
+.panes[data-panes="2"] .context { display: none; }
+
+.panes[data-panes="3"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem) minmax(0, 18rem);
+  grid-template-rows: minmax(0, 1fr);
+}
+.panes[data-panes="3"] .context { display: block; }
+
+@container panes (min-width: 700px) {
+  .panes[data-panes="auto"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+@container panes (min-width: 1100px) {
+  .panes[data-panes="auto"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem) minmax(0, 18rem);
+  }
+  .panes[data-panes="auto"] .context {
+    display: block;
+  }
+}
+
+.actionRow {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: var(--z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  padding-block-end: max(var(--space-3), env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-block-start: 1px solid var(--border);
+}

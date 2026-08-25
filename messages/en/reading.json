@@ -1,0 +1,433 @@
+{
+  "reading": {
+    "title": "Reading",
+    "subtitle": "The Qāʿidah: the letters, their sounds, and where each one is made",
+    "action": {
+      "backToPath": "Back to Reading"
+    },
+    "path": {
+      "heading": "Your path",
+      "recorded": "{done} of {total} concepts have evidence",
+      "nothingRecorded": "Nothing recorded yet",
+      "conceptsIn": {
+        "one": "{total} concept",
+        "other": "{total} concepts"
+      },
+      "secureCount": "{secure} of {total} secure",
+      "dueHere": {
+        "one": "{count} due for review",
+        "other": "{count} due for review"
+      },
+      "packageMissing": {
+        "title": "The Qāʿidah lessons are not installed",
+        "body": "This build has no lesson package, so there is no path to show. Nothing has been lost — your evidence is kept in the record."
+      }
+    },
+    "next": {
+      "heading": "Next",
+      "review": {
+        "title": "Review what has come round",
+        "body": "{count} concepts are due. Review comes before anything new."
+      },
+      "lesson": {
+        "title": "Continue the Qāʿidah",
+        "body": "Work through it at your own pace. Nothing here is timed.",
+        "open": "Continue"
+      },
+      "nothingDue": {
+        "title": "Nothing is due",
+        "body": "Every concept you have evidence for is resting. You may still open the letters and listen."
+      }
+    },
+    "lessonState": {
+      "not_yet_recorded": "Not yet recorded",
+      "in_progress": "In progress",
+      "secure": "Secure",
+      "locked": "Opens after {lesson}"
+    },
+    "lesson": {
+      "letters": {
+        "group1": "The first seven letters",
+        "group2": "The second seven letters",
+        "group3": "The third seven letters",
+        "group4": "The last seven letters",
+        "forms": "Letters in their positions"
+      },
+      "harakat": {
+        "fathah": "Fatḥah",
+        "kasrah": "Kasrah",
+        "dammah": "Ḍammah"
+      },
+      "sukun": "Sukūn",
+      "shaddah": "Shaddah",
+      "tanwin": "Tanwīn",
+      "madd": {
+        "tabii": "Natural madd"
+      },
+      "unknown": "This lesson",
+      "empty": {
+        "all_prerequisites_pending": "Its earlier lessons are not finished yet.",
+        "no_concepts_assigned": "This lesson has nothing in it for you right now.",
+        "no_time_budgeted": "There are no minutes left in this sitting.",
+        "nothing_due": "Nothing here has come round yet."
+      },
+      "reason": {
+        "due_for_review": "Due for review",
+        "new_concept": "New in this lesson",
+        "still_emerging": "Still settling"
+      },
+      "withheld": {
+        "new_concept_cap": "Held back: enough new material for one sitting",
+        "prerequisites_not_met": "Held back: what it stands on is not secure yet",
+        "session_budget": "Held back: it did not fit in the minutes"
+      }
+    },
+    "smartscore": {
+      "heading": "Where this stands",
+      "state": {
+        "not_yet_recorded": "Not yet recorded",
+        "emerging": "Emerging",
+        "secure": "Secure"
+      },
+      "denominator": "{answers} across {sittings}",
+      "answers": {
+        "one": "{count} answer",
+        "other": "{count} answers"
+      },
+      "sittings": {
+        "one": "{count} sitting",
+        "other": "{count} sittings"
+      },
+      "noEvidence": "No evidence recorded for this yet",
+      "reason": {
+        "not_yet_recorded": "Nothing has been recorded for this concept.",
+        "no_mastery_bearing_evidence": "What is recorded here does not carry mastery on its own.",
+        "emerging": "Answered {scoredAttempts} times across {sessions} sittings.",
+        "secure": "Answered {scoredAttempts} times across {sessions} sittings."
+      }
+    },
+    "ladder": {
+      "heading": "The three rungs",
+      "workingOn": "Working on",
+      "met": "Closed",
+      "notMet": "Open",
+      "progress": "{correct} right of {attempts}, in {sessions} sittings",
+      "noAttempts": "Nothing attempted on this rung yet",
+      "rung": {
+        "ordered": {
+          "title": "In order",
+          "body": "The letters as the lesson teaches them, in their taught order.",
+          "evidence": "Closed by answers checked against the lesson."
+        },
+        "randomized": {
+          "title": "Out of order",
+          "body": "The same letters, shuffled, so recognition is not the order remembered.",
+          "evidence": "Closed by answers checked against the lesson."
+        },
+        "in_person": {
+          "title": "Read aloud",
+          "body": "You say it, and someone who can hear you says whether it was clear.",
+          "evidence": "Closed by a teacher who heard it."
+        }
+      },
+      "verification": {
+        "not_yet_verified": "Not yet verified",
+        "self_confirmed": "You confirmed this yourself",
+        "teacher_verified": "A teacher heard this and confirmed it"
+      },
+      "selfConfirmedNote": "This is your own word about your own reading. It is recorded as that, and a teacher's confirmation is still open.",
+      "awaitingTeacher": "Waiting for your teacher to hear this",
+      "missing": {
+        "accuracy": "More of the answers need to be right.",
+        "correct_answers": "More correct answers are needed.",
+        "previous_rung": "The rung below is still open.",
+        "sessions": "It needs to hold across more sittings.",
+        "teacher_verdict_required": "Your teacher has to hear this one."
+      },
+      "reason": {
+        "advanced": "This rung is closed.",
+        "advanced_on_self_confirmation": "Closed on your own confirmation.",
+        "complete_self_confirmed": "All three rungs, the last on your own word.",
+        "complete_teacher_verified": "All three rungs, the last heard by a teacher.",
+        "in_progress": "In progress.",
+        "not_yet_eligible": "Not open yet.",
+        "not_yet_started": "Not started.",
+        "rung_met": "This rung is met.",
+        "rung_not_yet_met": "This rung is not met yet."
+      }
+    },
+    "intro": {
+      "heading": "Meet this letter",
+      "madeAt": "Made at: {place}",
+      "region": "In {region}",
+      "listen": "Listen",
+      "narrate": "Read this aloud to me",
+      "stop": "Stop",
+      "terms": "Terms in this explanation",
+      "noNarration": "No narration is recorded for this lesson.",
+      "voiceNote": "The explanation is read by a synthesized voice. Recitation is never synthesized — only a person recites.",
+      "animationOff": "Motion is reduced, so this is shown still."
+    },
+    "diagram": {
+      "throat": "throat",
+      "lips": "lips"
+    },
+    "talqin": {
+      "heading": "Model pronunciation",
+      "play": "Hear it",
+      "provenance": {
+        "human": "Recorded by a person",
+        "library": "From the reciters' library",
+        "studio_synth_reviewed": "Studio audio, reviewed by a person"
+      },
+      "notYetRecorded": {
+        "title": "Not yet recorded",
+        "body": "No one has recorded this letter for you yet, and no machine voice will stand in for a reciter. Ask your teacher to record it.",
+        "action": "Ask my teacher"
+      },
+      "reason": {
+        "resolved": "Resolved from {source}.",
+        "not_yet_recorded": "Searched {searched}, and found nothing."
+      }
+    },
+    "practice": {
+      "heading": "Practice",
+      "recognitionPrompt": "Which sound is this?",
+      "productionPrompt": "Say this aloud.",
+      "step": "Step {index} of {total}",
+      "itemLabel": "Choose {label}",
+      "right": "That is it",
+      "notThisOne": "Not this one — look again",
+      "next": "Next",
+      "finish": "Finish",
+      "saidItClearly": "I said it clearly",
+      "needsMoreWork": "It needs more work",
+      "notObserved": "Nobody heard it",
+      "selfConfirmNote": "You are confirming your own reading. It is recorded as your word, not as a teacher's.",
+      "teacherNote": "Your teacher closes this rung. What you record here is your own reading, kept beside it.",
+      "noPenalties": "No timer, no hearts, nothing lost for a wrong answer.",
+      "recorded": "Recorded",
+      "notRecorded": "Nothing was recorded for that",
+      "offline": "That did not reach the server. Try again when you are back online.",
+      "done": {
+        "title": "That is the sitting",
+        "body": "Everything you did was recorded as evidence."
+      },
+      "empty": {
+        "title": "Nothing to practise here right now",
+        "body": "The planner found nothing due and nothing new that fits."
+      }
+    },
+    "review": {
+      "title": "Review",
+      "body": "Concepts that have come round again, scheduled by the same engine as ḥifẓ.",
+      "none": {
+        "title": "Nothing is due for review",
+        "body": "Reading concepts come round on their own schedule. Nothing has yet."
+      }
+    },
+    "letters": {
+      "title": "Every letter, by makhraj",
+      "body": "The alphabet arranged by where in the mouth each letter is made, from the deepest throat to the two lips.",
+      "open": "Open the letters",
+      "letterCount": {
+        "one": "{count} letter",
+        "other": "{count} letters"
+      },
+      "noLetters": "No letter belongs to this place on its own.",
+      "unicode": "Unicode {unicode}"
+    },
+    "region": {
+      "jawf": "the empty space",
+      "halq": "the throat",
+      "lisan": "the tongue",
+      "shafatan": "the lips",
+      "khayshum": "the nose"
+    },
+    "makhraj": {
+      "unknown": "an unrecorded place",
+      "jawf": "The empty space of the mouth and throat",
+      "halq": {
+        "aqsa": "The deepest part of the throat",
+        "wasat": "The middle of the throat",
+        "adna": "The nearest part of the throat"
+      },
+      "lisan": {
+        "aqsa_lahat": "The back of the tongue, at the soft palate",
+        "aqsa_hanak": "The back of the tongue, at the hard palate",
+        "wasat": "The middle of the tongue",
+        "haffah_adras": "The edge of the tongue, at the molars",
+        "adna_haffah": "The nearest edge of the tongue",
+        "taraf_noon": "The tip of the tongue, above the front teeth",
+        "taraf_ra": "The tip of the tongue, at the gum",
+        "nita": "The tip of the tongue, at the gum ridge",
+        "safir": "The tip of the tongue, between the front teeth",
+        "lithah": "The tip of the tongue, at the gums"
+      },
+      "shafatan": {
+        "batn_shafah": "The inside of the lower lip, at the front teeth",
+        "shafatayn": "The two lips together"
+      },
+      "khayshum": "The nasal passage"
+    },
+    "label": {
+      "letterHarakah": "{letter} with {harakah}",
+      "letterForm": "{letter}, {form}"
+    },
+    "correction": {
+      "heading": "What to notice",
+      "notice_the_dots": "These two share a shape and differ only in their dots. Look at the dots.",
+      "notice_the_shape": "Look again at the shape of the letter.",
+      "notice_the_makhraj": "These two are made close together in the mouth. Listen for where.",
+      "notice_the_vowel": "The letter is right; the vowel on it is not.",
+      "known_pair": "These two are often taken for each other.",
+      "look_again": "Look again.",
+      "production_needs_work": "Listen once more for where it is made, then try it again."
+    },
+    "confusion": {
+      "reason": {
+        "emphatic_counterpart": "one is the emphatic of the other",
+        "interdental_and_sibilant": "one is interdental, the other a whistling letter",
+        "neighbouring_makhraj": "their places of articulation are neighbours",
+        "same_letter_different_vowel": "the same letter carrying a different vowel",
+        "same_makhraj": "they share a place of articulation",
+        "same_skeleton_different_dots": "the same shape, different dots",
+        "same_skeleton_dots_moved": "the same shape, the dots moved",
+        "similar_mark": "the marks look alike",
+        "similar_shape": "the shapes look alike",
+        "throat_depth": "they sit at different depths of the throat"
+      }
+    },
+    "activity": {
+      "reason": {
+        "production_not_yet_observed": "Nobody heard this one, so nothing was recorded.",
+        "production_observed": "A spoken answer was recorded.",
+        "recognition_matched_key": "The answer matched.",
+        "recognition_did_not_match_key": "The answer did not match.",
+        "response_does_not_match_activity": "That answer did not belong to this item."
+      }
+    },
+    "concept": {
+      "letter": {
+        "hamza": "hamzah",
+        "alef": "ʾalif",
+        "beh": "bāʾ",
+        "teh": "tāʾ",
+        "theh": "thāʾ",
+        "jeem": "jīm",
+        "hah": "ḥāʾ",
+        "khah": "khāʾ",
+        "dal": "dāl",
+        "thal": "dhāl",
+        "reh": "rāʾ",
+        "zain": "zāy",
+        "seen": "sīn",
+        "sheen": "shīn",
+        "sad": "ṣād",
+        "dad": "ḍād",
+        "tah": "ṭāʾ",
+        "zah": "ẓāʾ",
+        "ain": "ʿayn",
+        "ghain": "ghayn",
+        "feh": "fāʾ",
+        "qaf": "qāf",
+        "kaf": "kāf",
+        "lam": "lām",
+        "meem": "mīm",
+        "noon": "nūn",
+        "heh": "hāʾ",
+        "waw": "wāw",
+        "yeh": "yāʾ"
+      },
+      "harakah": {
+        "fathah": "fatḥah",
+        "dammah": "ḍammah",
+        "kasrah": "kasrah"
+      },
+      "harakah_on_letter": {
+        "fathah": "a letter with fatḥah",
+        "dammah": "a letter with ḍammah",
+        "kasrah": "a letter with kasrah"
+      },
+      "form": {
+        "isolated": "standing alone",
+        "initial": "at the beginning",
+        "medial": "in the middle",
+        "final": "at the end"
+      },
+      "sukun": "sukūn",
+      "shaddah": "shaddah",
+      "tanwin": {
+        "name": "tanwīn",
+        "fath": "tanwīn with fatḥ",
+        "damm": "tanwīn with ḍamm",
+        "kasr": "tanwīn with kasr"
+      },
+      "madd": {
+        "tabii": "natural madd",
+        "iwad": "madd of substitution",
+        "badal": "madd of exchange",
+        "silah": "madd of connection"
+      },
+      "rule": {
+        "ghunnah": "ghunnah",
+        "qalqalah": "qalqalah",
+        "noon_sakinah": {
+          "izhar": "iẓhār",
+          "idgham_bighunnah": "idghām with ghunnah",
+          "idgham_bila_ghunnah": "idghām without ghunnah",
+          "iqlab": "iqlāb",
+          "ikhfa": "ikhfāʾ"
+        },
+        "meem_sakinah": {
+          "izhar_shafawi": "iẓhār of the lips",
+          "ikhfa_shafawi": "ikhfāʾ of the lips",
+          "idgham_mithlayn": "idghām of two like letters"
+        },
+        "reh": {
+          "tafkhim_tarqiq": "heavy and light rāʾ"
+        },
+        "lam": {
+          "jalalah": "the lām of the Name"
+        }
+      }
+    },
+    "a11y": {
+      "letterGlyph": "The letter {label}",
+      "mouthDiagram": "A side view of the mouth, marking where {label} is made",
+      "choiceGroup": "Choose the sound of the letter shown"
+    },
+    "anomaly": {
+      "title": "Worth a look",
+      "help": "Patterns in recorded answers. Each one is a reason to look, never a judgement — and each carries what it was counted from.",
+      "none": "Nothing stands out in what has been recorded",
+      "noneHelp": "That is a real answer, not an empty screen: no learner in this class has a pattern above the floor these checks require.",
+      "severity": {
+        "notice": "Worth a look",
+        "attention": "Look sooner"
+      },
+      "kind": {
+        "possible_guessing": "Answers arriving faster than the prompt can be read",
+        "regression": "Accuracy below this learner's own earlier sessions",
+        "systematic_confusion": "Errors concentrated on one other letter",
+        "long_gap": "No reading evidence recorded for a while",
+        "stalled_near_threshold": "Close to the next rung for several sittings"
+      },
+      "reason": {
+        "answers_faster_than_plausible": "{fast} of {timed} timed answers arrived in under {fasterThanMs}ms.",
+        "accuracy_lower_than_earlier_sessions": "{latestCorrect} of {latestAttempts} correct lately, against {priorCorrect} of {priorAttempts} before.",
+        "errors_concentrated_on_one_concept": "{towardCount} of {errors} errors chose the same other letter, out of {distinctChoices} choices offered.",
+        "no_evidence_recorded_recently": "Nothing recorded for {days} days; this check looks past {thresholdDays}.",
+        "near_rung_threshold_for_several_sessions": "{correct} of {requiredCorrect} needed on this rung, across {sessions} sittings."
+      },
+      "fromAttempts": {
+        "one": "from {count} answer",
+        "other": "from {count} answers"
+      },
+      "acrossSessions": {
+        "one": "across {count} sitting",
+        "other": "across {count} sittings"
+      }
+    }
+  }
+}

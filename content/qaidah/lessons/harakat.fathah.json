@@ -1,0 +1,76 @@
+{
+  "id": "harakat.fathah",
+  "order": 6,
+  "kind": "letter_harakah",
+  "titleKey": "lesson.harakat.fathah",
+  "prerequisites": [
+    "letters.forms"
+  ],
+  "elements": [
+    {
+      "conceptId": "letter_harakah.alif.fathah",
+      "letter": "ا",
+      "harakah": "َ",
+      "combined": "اَ",
+      "sound": "ʾa"
+    },
+    {
+      "conceptId": "letter_harakah.baa.fathah",
+      "letter": "ب",
+      "harakah": "َ",
+      "combined": "بَ",
+      "sound": "ba"
+    },
+    {
+      "conceptId": "letter_harakah.taa.fathah",
+      "letter": "ت",
+      "harakah": "َ",
+      "combined": "تَ",
+      "sound": "ta"
+    },
+    {
+      "conceptId": "letter_harakah.thaa.fathah",
+      "letter": "ث",
+      "harakah": "َ",
+      "combined": "ثَ",
+      "sound": "ta"
+    },
+    {
+      "conceptId": "letter_harakah.jeem.fathah",
+      "letter": "ج",
+      "harakah": "َ",
+      "combined": "جَ",
+      "sound": "ja"
+    },
+    {
+      "conceptId": "letter_harakah.haa_h.fathah",
+      "letter": "ح",
+      "harakah": "َ",
+      "combined": "حَ",
+      "sound": "ḥa"
+    },
+    {
+      "conceptId": "letter_harakah.khaa.fathah",
+      "letter": "خ",
+      "harakah": "َ",
+      "combined": "خَ",
+      "sound": "ka"
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.harakat.fathah"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

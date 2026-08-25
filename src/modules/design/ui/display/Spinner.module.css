@@ -1,0 +1,59 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: inherit;
+}
+
+.ring {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  fill: none;
+}
+
+.track {
+  stroke: var(--border);
+  stroke-width: 2px;
+}
+
+/* The arc inherits the surrounding ink, so a Spinner inside a filled Button
+   reads on the accent, and on paper it reads as ink. */
+.arc {
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  /* geometry, not a design constant: ~20% of the circumference */
+  stroke-dasharray: 12 44;
+  transform-origin: 50% 50%;
+  /* --motion-slow is the longest calm step; a spinner needs a longer cycle. */
+  animation: marginalia-spin calc(var(--motion-slow) * 3) linear infinite;
+}
+
+@keyframes marginalia-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* Reduced motion collapses the motion tokens to ~1ms, which would strobe.
+   The ring stops entirely and the live region carries the meaning instead. */
+@media (prefers-reduced-motion: reduce) {
+  .arc {
+    animation: none;
+  }
+}
+
+.sm {
+  inline-size: var(--space-4);
+  block-size: var(--space-4);
+}
+.md {
+  inline-size: var(--space-5);
+  block-size: var(--space-5);
+}
+.lg {
+  inline-size: var(--space-6);
+  block-size: var(--space-6);
+}

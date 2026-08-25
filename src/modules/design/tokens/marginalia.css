@@ -1,16 +1,328 @@
-/* Marginalia tokens — seeded here; the full token system is built in the design wave.
-   The muṣḥaf tokens are fixed in every theme and must never be overridden (tested). */
-:root {
-  --paper: #faf6ee;
-  --ink: #1f1b16;
-  --lapis: #23459c;
-  --gold: #a2792c;
-  --slate: #23272e;
-  /* muṣḥaf — fixed */
-  --mushaf-paper: #faf6ee;
-  --mushaf-ink: #1f1b16;
+/* ─────────────────────────────────────────────────────────────────────────────
+   MARGINALIA — the Itqān design language.
+   "The interface is the margin of the page."
+
+   Materials: paper (ivory), ink (warm near-black), lapis (the one accent — the
+   blue of Qurʾānic illumination), gold leaf (milestones only), slate (dark chrome).
+
+   Theme axis:  [data-theme="light" | "dark"]     (light is the default)
+   Tier axis:   [data-tier="kids" | "teen" | "adult"]  (adult is the default)
+
+   THE MUṢḤAF CONTRACT (binding, enforced by test):
+   Every token prefixed --mushaf-* is FIXED. It is identical in every theme and
+   every tier. The page a learner recites from is never decorated, tinted,
+   inverted or animated. Nothing in this file, and nothing downstream, may
+   redefine a --mushaf-* token inside a [data-theme] or [data-tier] block.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@layer marginalia.tokens {
+  :root {
+    /* ── Materials (raw) ─────────────────────────────────────────────────── */
+    --paper-100: #fdfbf6;
+    --paper-200: #faf6ee;
+    --paper-300: #f3ece0;
+    --paper-400: #e8dfd982;
+
+    --ink-900: #1c1814;
+    --ink-800: #2a241d;
+    --ink-700: #463f36;
+    --ink-500: #6d655a;
+    --ink-300: #9c948a;
+    --ink-100: #d9d2c7;
+
+    --lapis-700: #16306e;
+    --lapis-600: #1d3d8a;
+    --lapis-500: #23459c;
+    --lapis-400: #4a68b8;
+    --lapis-200: #b9c6e4;
+    --lapis-050: #eef1f9;
+
+    --gold-600: #8a6520;
+    --gold-500: #a2792c;
+    --gold-300: #d4b978;
+    --gold-100: #f3e8cd;
+
+    --slate-900: #16191d;
+    --slate-800: #1c2026;
+    --slate-700: #23272e;
+    --slate-600: #2f343c;
+    --slate-500: #3d434d;
+
+    /* Restrained status hues — used for state, never for decoration. */
+    --sage-600: #3f6b52;
+    --sage-100: #e3ece6;
+    --clay-600: #8c4a34;
+    --clay-100: #f3e3de;
+    --amber-600: #8a6520;
+    --amber-100: #f5ead2;
+
+    /* ── Semantic roles — LIGHT (default) ────────────────────────────────── */
+    --surface: var(--paper-200);
+    --surface-raised: var(--paper-100);
+    --surface-sunken: var(--paper-300);
+    --surface-inverse: var(--slate-800);
+
+    --text: var(--ink-900);
+    --text-secondary: var(--ink-700);
+    --text-muted: var(--ink-500);
+    --text-inverse: var(--paper-100);
+    --text-on-accent: var(--paper-100);
+
+    --border: #e2d9cb;
+    --border-strong: #cec2ae;
+    --rule: #e8e0d2;
+
+    --accent: var(--lapis-500);
+    --accent-hover: var(--lapis-600);
+    --accent-quiet: var(--lapis-050);
+    --accent-border: var(--lapis-200);
+
+    --milestone: var(--gold-500);
+    --milestone-quiet: var(--gold-100);
+
+    --success: var(--sage-600);
+    --success-quiet: var(--sage-100);
+    --caution: var(--amber-600);
+    --caution-quiet: var(--amber-100);
+    --danger: var(--clay-600);
+    --danger-hover: #733b29;
+    --danger-quiet: var(--clay-100);
+    --text-on-danger: var(--paper-100);
+
+    --focus-ring: var(--lapis-500);
+    --focus-ring-color-behind: var(--surface);
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+    /* Hairlines are a material, not a number: one token so a rule is a rule. */
+    --hairline: 1px;
+    --hairline-strong: 2px;
+    --overlay: #1c181466;
+
+    /* ── The muṣḥaf page — FIXED IN EVERY THEME AND TIER ─────────────────── */
+    --mushaf-paper: #faf6ee;
+    --mushaf-ink: #1f1b16;
+    --mushaf-rule: #e6dcc9;
+    --mushaf-marker: #8a6520;      /* āyah rosette, juzʾ/ḥizb marks */
+    --mushaf-header-band: #f3ece0; /* sūrah-header band ground */
+    --mushaf-font-size: 1.75rem;
+    --mushaf-leading: 2.5;
+    --mushaf-word-gap: 0.22em;
+    /* Ink depth — the single progress language. Depth 0 = not yet earned
+       (blank), 1 = due/faded, 5 = held crisply. Opacity only: the ink never
+       changes hue, so the page is never "tinted". */
+    --ink-depth-0: 0;
+    --ink-depth-1: 0.22;
+    --ink-depth-2: 0.4;
+    --ink-depth-3: 0.58;
+    --ink-depth-4: 0.78;
+    --ink-depth-5: 1;
+
+    /* ── Type ────────────────────────────────────────────────────────────── */
+    --font-ui: "Instrument Sans Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-display: "Newsreader Variable", Georgia, "Times New Roman", serif;
+    --font-arabic: "IBM Plex Sans Arabic", system-ui, sans-serif;
+    /* KFGQPC Uthmanic Script HAFS is licensed and installed at deploy time;
+       Amiri Quran is the vendored fallback. Both are ʿUthmānī-faithful. */
+    --font-mushaf: "KFGQPC Uthmanic Script HAFS", "Amiri Quran", serif;
+
+    /* Scale — no step is below 12px, ever. */
+    --text-2xs: 0.75rem;   /* 12px — the floor */
+    --text-xs: 0.8125rem;  /* 13 */
+    --text-sm: 0.875rem;   /* 14 */
+    --text-base: 1rem;     /* 16 */
+    --text-md: 1.125rem;   /* 18 */
+    --text-lg: 1.375rem;   /* 22 */
+    --text-xl: 1.75rem;    /* 28 */
+    --text-2xl: 2.25rem;   /* 36 */
+    --text-3xl: 2.875rem;  /* 46 */
+
+    --leading-tight: 1.2;
+    --leading-normal: 1.5;
+    --leading-arabic: 1.8;
+    --leading-mushaf: 2.5;
+
+    --tracking-eyebrow: 0.08em;
+    --weight-regular: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+
+    /* ── Space — 4px grid ────────────────────────────────────────────────── */
+    --space-0: 0px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --space-20: 80px;
+
+    /* ── Radii ───────────────────────────────────────────────────────────── */
+    --radius-control: 10px;
+    --radius-card: 14px;
+    --radius-sheet: 20px;
+    --radius-pill: 999px;
+
+    /* ── Elevation — 5 steps, warm shadows (never blue-grey) ─────────────── */
+    --elevation-0: none;
+    --elevation-1: 0 1px 2px #1c18140f;
+    --elevation-2: 0 2px 6px #1c181414, 0 1px 2px #1c18140a;
+    --elevation-3: 0 6px 16px #1c18141a, 0 2px 4px #1c18140f;
+    --elevation-4: 0 12px 32px #1c181421, 0 4px 8px #1c181414;
+    --elevation-5: 0 24px 56px #1c18142b, 0 8px 16px #1c181414;
+
+    /* ── Motion ──────────────────────────────────────────────────────────── */
+    --motion-fast: 120ms;
+    --motion-base: 200ms;
+    --motion-slow: 320ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0.13, 1);
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    /* Spring is licensed for tiles only — nothing else in Itqān bounces. */
+    --ease-tile-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
+    /* For anything that repeats while waiting. Long and unhurried on purpose:
+       a spinner that races makes a slow connection feel like a fault. */
+    --motion-loop: 1400ms;
+
+    /* ── Targets ─────────────────────────────────────────────────────────── */
+    --tap-min: 44px;
+    --tap-comfortable: 48px;
+
+    /* ── Layers ──────────────────────────────────────────────────────────── */
+    --z-base: 0;
+    --z-sticky: 10;
+    --z-nav: 20;
+    --z-overlay: 30;
+    --z-sheet: 40;
+    --z-dialog: 50;
+    --z-menu: 60;
+    --z-toast: 70;
+    --z-tooltip: 80;
+  }
+
+  /* ── DARK — slate chrome. The muṣḥaf page keeps its paper. ─────────────── */
+  :root[data-theme="dark"] {
+    --surface: var(--slate-800);
+    --surface-raised: var(--slate-700);
+    --surface-sunken: var(--slate-900);
+    --surface-inverse: var(--paper-200);
+
+    --text: #ede7dc;
+    --text-secondary: #c8c0b4;
+    --text-muted: #968d81;
+    --text-inverse: var(--ink-900);
+    --text-on-accent: #f4f1ea;
+
+    --border: #343a43;
+    --border-strong: #4a515c;
+    --rule: #2c313a;
+
+    --accent: #7d97d8;
+    --accent-hover: #97acdf;
+    --accent-quiet: #232a3a;
+    --accent-border: #3d4a68;
+
+    --milestone: var(--gold-300);
+    --milestone-quiet: #33291a;
+
+    --success: #7fae94;
+    --success-quiet: #1e2a23;
+    --caution: #d0ab6a;
+    --caution-quiet: #2e2718;
+    --danger: #d08d78;
+    --danger-hover: #dda491;
+    --danger-quiet: #2f211c;
+    --text-on-danger: var(--ink-900);
+
+    --focus-ring: #97acdf;
+    --focus-ring-color-behind: var(--surface);
+    --overlay: #0c0e11a8;
+
+    --elevation-1: 0 1px 2px #00000052;
+    --elevation-2: 0 2px 6px #00000061, 0 1px 2px #00000042;
+    --elevation-3: 0 6px 16px #0000006b, 0 2px 4px #00000052;
+    --elevation-4: 0 12px 32px #00000075, 0 4px 8px #00000061;
+    --elevation-5: 0 24px 56px #0000008a, 0 8px 16px #00000061;
+  }
+
+  /* ── TEEN — restrained "cool": slightly tighter, deeper lapis. ─────────── */
+  :root[data-tier="teen"] {
+    --accent: var(--lapis-600);
+    --accent-hover: var(--lapis-700);
+  }
+  :root[data-theme="dark"][data-tier="teen"] {
+    --accent: #8ba4de;
+    --accent-hover: #a3b8e6;
+  }
+
+  /* ── KIDS — same materials, larger, rounder, warmer. No new colours. ───── */
+  :root[data-tier="kids"] {
+    --surface: var(--paper-300);
+    --surface-raised: var(--paper-100);
+
+    /* Type two steps larger; the 12px floor rises to 15px for children. */
+    --text-2xs: 0.9375rem; /* 15px */
+    --text-xs: 1rem;
+    --text-sm: 1.125rem;
+    --text-base: 1.25rem;
+    --text-md: 1.4375rem;
+    --text-lg: 1.75rem;
+    --text-xl: 2.25rem;
+    --text-2xl: 2.875rem;
+    --text-3xl: 3.5rem;
+
+    --radius-control: 14px;
+    --radius-card: 18px;
+    --radius-sheet: 24px;
+
+    --tap-min: 56px;
+    --tap-comfortable: 64px;
+  }
+  :root[data-theme="dark"][data-tier="kids"] {
+    --surface: var(--slate-700);
+    --surface-raised: var(--slate-600);
+  }
+
+  /* ── Reduced motion: the calm default becomes the only default. ────────── */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-fast: 1ms;
+      --motion-base: 1ms;
+      --motion-slow: 1ms;
+      --ease-tile-spring: linear;
+      /* Loops do not collapse to 1ms — that would strobe. They simply stop,
+         and each component renders its resting state instead. */
+      --motion-loop: 0ms;
+    }
+  }
 }
-body {
-  background: var(--paper);
-  color: var(--ink);
+
+@layer marginalia.base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    font-variant-numeric: tabular-nums;
+  }
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+  :lang(ar) {
+    font-family: var(--font-arabic);
+    line-height: var(--leading-arabic);
+  }
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+  ::selection {
+    background: var(--accent-quiet);
+    color: var(--text);
+  }
 }

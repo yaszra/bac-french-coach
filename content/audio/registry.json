@@ -1,0 +1,4 @@
+{
+  "note": "Every audio asset the product may play. Bytes live in object storage; this registry carries provenance and approval. An asset with no entry here is never played, and synthesis is never unlabelled.",
+  "assets": []
+}

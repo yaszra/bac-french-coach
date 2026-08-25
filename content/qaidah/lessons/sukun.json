@@ -1,0 +1,32 @@
+{
+  "id": "sukun",
+  "order": 9,
+  "kind": "sukun",
+  "titleKey": "lesson.sukun",
+  "prerequisites": [
+    "harakat.dammah"
+  ],
+  "elements": [
+    {
+      "conceptId": "sukun",
+      "mark": "ْ",
+      "codepoint": "U+0652"
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.sukun"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

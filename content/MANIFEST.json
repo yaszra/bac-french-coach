@@ -1,0 +1,24 @@
+{
+  "version": "0.1.0",
+  "files": {
+    "content/audio/registry.json": "bf9270822c9e24b08948056d191ffd8a73a7839a52c54ab1d795199f7da3b93b",
+    "content/mushaf/madani-15.json": "79cf038d1b0b62a8cea11b1b261f3e0792f77bc6dbf60a588f687029e823294f",
+    "content/qaidah/lessons/harakat.dammah.json": "7431137d8b7585f978f2386fa99bebe395a7f6092b897fbdb5d6e433d096b859",
+    "content/qaidah/lessons/harakat.fathah.json": "76ce74ceed86b953d7fae6c972edf7ee9e91b5f612a610104fa9fcf26ad18aa7",
+    "content/qaidah/lessons/harakat.kasrah.json": "6500cd079b12c6e6c13a2f2904aa5a4b43a96d0d019cdacdb5c2c8b50fd7232e",
+    "content/qaidah/lessons/letters.forms.json": "08879d40f18144f1d233b3eb32f0daeedd457d1fc2ecba2308e4977f4b46b7e7",
+    "content/qaidah/lessons/letters.group1.json": "6cc8f6ed4cfd03e9685c837bf8cb6d783576a3144724d2f9cd59d26171ce6cda",
+    "content/qaidah/lessons/letters.group2.json": "bb9675780b006f980ba4b42c35f51ff3b03067e0ee92418c7aef092fc5a3d0d9",
+    "content/qaidah/lessons/letters.group3.json": "9d391ae209c201539064ed1c583facef928acd31dd2cb619a4ccf5dbbc6f2113",
+    "content/qaidah/lessons/letters.group4.json": "1050266c3d339288c4bc8989688e84c0374a1cb7ec7a2aa7984ccac3e38836b1",
+    "content/qaidah/lessons/madd.tabii.json": "f24274da4ed612e3ccb6beccffacd86a32a6ec92af23211a2be57d824cdb9c85",
+    "content/qaidah/lessons/shaddah.json": "b24060d1720eb0c70fac24ac0b15deadb216f670a6d63515f82a6715a9c35144",
+    "content/qaidah/lessons/sukun.json": "a6941f81f51522182d270d8cb689d68fe33d83ac2028fc589e57b8173018b4dd",
+    "content/qaidah/lessons/tanwin.json": "ee183036e7e5f488f3f2e199a02bb56ca106b7fa289cfcbdf7c67936f5378fcf",
+    "content/qaidah/lexicon.json": "472f7e650c8019105de303a2dc4918baa885aebe903521f77f0ba8b12ab6c2ec",
+    "content/qaidah/narration/letters.group1.json": "5f82417c4bc6e4da5bc2d7a50f02c971092cdb2db8623d60c6f178bf9d0d016f",
+    "content/quran/quran-uthmani.json": "82c4e695c11c90a36fba9c8180884fd40f0ba96924f9f2c9a5e01eac2009bc0f",
+    "content/quran/SOURCE.json": "de99c72b3d7536bc13fa4828d5e4ba99c46f86247c5b955541a478a29847215d",
+    "content/timings/STATUS.json": "d9f6ad33b677064295949adfbac44e7a4bdeda97455beb0de4f39511cdaa9eff"
+  }
+}

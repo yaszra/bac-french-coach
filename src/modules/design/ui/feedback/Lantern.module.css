@@ -1,0 +1,51 @@
+/* Lantern — the children's reading of ink depth.
+   The SAME 0–5 ladder, the same opacity discipline: the light's alpha is the
+   depth. Gold appears only at full strength, because that is a milestone.
+   Calm: no flicker, no bounce, nothing to watch. */
+
+.lantern {
+  display: block;
+  color: var(--text-muted);
+  --lantern-light: var(--accent);
+  --light-strength: var(--ink-depth-0);
+}
+
+.lantern[data-size="sm"] { inline-size: 24px; block-size: 34px; }
+.lantern[data-size="md"] { inline-size: 34px; block-size: 48px; }
+.lantern[data-size="lg"] { inline-size: 48px; block-size: 68px; }
+
+.lantern[data-depth="0"] { --light-strength: var(--ink-depth-0); }
+.lantern[data-depth="1"] { --light-strength: var(--ink-depth-1); }
+.lantern[data-depth="2"] { --light-strength: var(--ink-depth-2); }
+.lantern[data-depth="3"] { --light-strength: var(--ink-depth-3); }
+.lantern[data-depth="4"] { --light-strength: var(--ink-depth-4); }
+/* Full strength: the milestone. The only gold in the component. */
+.lantern[data-depth="5"] {
+  --light-strength: var(--ink-depth-5);
+  --lantern-light: var(--milestone);
+}
+
+.housing {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.glass {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.light {
+  fill: color-mix(in srgb, var(--lantern-light) calc(var(--light-strength) * 100%), transparent);
+  transition: fill var(--motion-slow) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light {
+    transition: none;
+  }
+}

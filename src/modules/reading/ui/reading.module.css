@@ -1,0 +1,470 @@
+/* Reading (Qāʿidah).
+
+   Logical properties throughout: this surface is read in Arabic as often as in
+   English, and a margin that only knows "left" is a margin that breaks in one of
+   them. Nothing here sets a colour that is not a token, and nothing animates the
+   muṣḥaf — the letter card is a teaching card, not a page of scripture. */
+
+.page {
+  block-size: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.inner {
+  inline-size: min(52rem, 100%);
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-4) var(--space-12);
+  display: grid;
+  gap: var(--space-5);
+  align-content: start;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.heading {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.lede {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  max-inline-size: 44ch;
+}
+
+.note {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.quiet {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* The one card that carries the screen. */
+.primary {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-2);
+}
+
+.primaryTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* ── The path ─────────────────────────────────────────────────────────────── */
+
+.lessons {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.lesson {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  color: inherit;
+  text-decoration: none;
+}
+
+a.lesson:hover {
+  border-color: var(--accent-border);
+}
+
+.lesson[data-locked="true"] {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+
+.lessonIndex {
+  inline-size: 2rem;
+  block-size: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.lesson[data-state="secure"] .lessonIndex {
+  background: var(--success-quiet);
+  color: var(--success);
+}
+
+.lessonName {
+  display: grid;
+  gap: var(--space-1);
+  min-inline-size: 0;
+}
+
+.lessonTitle {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+/* ── Letters by makhraj ───────────────────────────────────────────────────── */
+
+.regions {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.places {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.place {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-inline-start: 2px solid var(--rule);
+}
+
+.letterGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.letterCard {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: center;
+  padding: var(--space-3);
+  min-inline-size: 5.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+
+.glyph {
+  font-family: var(--font-arabic);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-arabic);
+  color: var(--text);
+}
+
+.glyphLarge {
+  font-family: var(--font-arabic);
+  font-size: clamp(3.5rem, 18vw, 6rem);
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.letterName {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.letterMeta {
+  font-size: var(--text-2xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The concept stage: one letter, and where it is made ──────────────────── */
+
+.stage {
+  display: grid;
+  gap: var(--space-4);
+  align-items: stretch;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 44rem) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.stageGlyph {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-sunken);
+}
+
+/* A slow, single settle. No bounce, no loop, no confetti. */
+.stageGlyph .glyphLarge {
+  animation: settle var(--motion-slow) var(--ease-standard) both;
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.diagram {
+  inline-size: 100%;
+  block-size: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-sunken);
+}
+
+.mouthOutline {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 2;
+}
+
+.mouthTongue {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 2;
+}
+
+.articulation {
+  fill: var(--accent);
+}
+
+.articulationHalo {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  opacity: 0.45;
+  transform-origin: center;
+  animation: breathe var(--motion-loop) var(--ease-standard) infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stageGlyph .glyphLarge,
+  .articulationHalo {
+    animation: none;
+  }
+  .articulationHalo {
+    opacity: 0.35;
+  }
+}
+
+/* ── Practice ─────────────────────────────────────────────────────────────── */
+
+.runner {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.prompt {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+
+.promptLabel {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.choices {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+:root[data-tier="kids"] .choices {
+  grid-template-columns: 1fr;
+}
+
+.correction {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--caution);
+  border-radius: var(--radius-card);
+  background: var(--caution-quiet);
+  font-size: var(--text-sm);
+}
+
+.affirm {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--success);
+  border-radius: var(--radius-card);
+  background: var(--success-quiet);
+  font-size: var(--text-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+/* ── The ladder ───────────────────────────────────────────────────────────── */
+
+.rungs {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.rung {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  align-items: start;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.rung[data-working="true"] {
+  border-color: var(--accent-border);
+  background: var(--surface-raised);
+}
+
+.rungTitle {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+.rungBody {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.terms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.term {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+}
+
+.termArabic {
+  font-family: var(--font-arabic);
+  font-size: var(--text-md);
+}
+
+.segments {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.segment {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.segment[data-speaking="true"] {
+  color: var(--accent);
+}
+
+/* Available to a screen reader, invisible to everyone else. */
+.srOnly {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The two ends of the mouth diagram, named in words. */
+.diagramLabel {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  fill: var(--text-muted);
+}

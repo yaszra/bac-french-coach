@@ -1,0 +1,35 @@
+/* The typeset area of the page. Only fixed --mushaf-* tokens set its
+   material: paper, ink, leading, word gap. Nothing here varies by theme or
+   tier — the page a learner recites from is the same page everywhere. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mushaf);
+  font-size: var(--mushaf-font-size);
+  line-height: var(--mushaf-leading);
+  color: var(--mushaf-ink);
+  text-align: center;
+  /* Scripture never reflows into a scrollbar of its own. */
+  inline-size: 100%;
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: var(--mushaf-word-gap);
+  min-block-size: calc(1em * var(--mushaf-leading));
+}
+
+/* Honesty rule: no page, no invention. */
+.empty {
+  font-family: var(--font-ui);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-normal);
+  color: var(--mushaf-ink);
+  opacity: 0.6;
+  text-align: center;
+  padding-block: var(--space-16);
+}

@@ -1,0 +1,93 @@
+/* The shell carries the border and the focus ring; the field itself is bare,
+   so a prefix or suffix sits inside the same frame as the text. */
+
+.shell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: var(--tap-min);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background-color: var(--surface-raised);
+  color: var(--text);
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard);
+}
+
+.shell:hover:not(.disabled) {
+  border-color: var(--text-muted);
+}
+
+.shell:focus-within {
+  border-color: var(--accent);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.sm {
+  min-block-size: var(--tap-min);
+  font-size: var(--text-sm);
+}
+.md {
+  min-block-size: var(--tap-min);
+  font-size: var(--text-base);
+}
+.lg {
+  min-block-size: var(--tap-comfortable);
+  font-size: var(--text-md);
+}
+
+.field {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  appearance: none;
+  color: inherit;
+  font: inherit;
+  font-family: var(--font-ui);
+}
+
+/* The shell already draws the ring, so the inner field must not draw a second. */
+.field:focus,
+.field:focus-visible {
+  outline: none;
+}
+
+.field::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+.affix {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: var(--text-2xs);
+}
+
+.invalid {
+  border-color: var(--danger);
+  background-color: var(--danger-quiet);
+}
+.invalid:hover:not(.disabled) {
+  border-color: var(--danger);
+}
+
+.disabled {
+  cursor: not-allowed;
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+.disabled .field {
+  cursor: not-allowed;
+}

@@ -1,9 +1,25 @@
 name: CI
 
 on:
+  # Only trunk runs on push. Branch work is covered by its pull request, so a
+  # commit is not built twice — the concurrency group cannot collapse those two,
+  # because a push and a pull_request event carry different refs for the same
+  # commit.
   push:
-    branches: [main, "claude/**"]
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Two roles, exactly as production has them, because a single superuser
+  # connection would silently bypass row-level security and turn every tenancy
+  # test into a test of nothing.
+  DIRECT_DATABASE_URL: postgresql://itqan:itqan@localhost:5432/itqan_test
+  DATABASE_URL: postgresql://itqan_app:itqan_app@localhost:5432/itqan_test
+  SESSION_SECRET: ci-only-secret-not-production-0123456789abcdef
 
 jobs:
   quality:
@@ -12,15 +28,12 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: itqan
-          POSTGRES_PASSWORD: itqan
-          POSTGRES_DB: itqan_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
-    env:
-      DATABASE_URL: postgresql://itqan:itqan@localhost:5432/itqan_test
-      SESSION_SECRET: ci-only-secret-not-production
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -29,14 +42,44 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+
+      # Before anything typechecks. Without a generated client every Prisma
+      # callback parameter is an implicit `any` and the model types do not
+      # exist — which passes locally, where node_modules already holds a
+      # generated client from an earlier run, and fails on a clean runner.
+      - name: Generate the Prisma client
+        run: pnpm db:generate
+
+      # Role attributes are provisioning, not schema: a migration cannot grant
+      # itself privileges it does not hold, so this runs as the superuser first.
+      - name: Provision database roles
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -f prisma/provision.sql
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "ALTER ROLE itqan PASSWORD 'itqan'; ALTER ROLE itqan_app PASSWORD 'itqan_app';"
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE itqan_test OWNER itqan;"
+
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
-      - run: pnpm db:generate && pnpm prisma migrate deploy
+
+      - name: Migrate
+        env:
+          # Migrations run as the owning role, never as the application role.
+          DATABASE_URL: ${{ env.DIRECT_DATABASE_URL }}
+        run: pnpm exec prisma migrate deploy
+
       - run: pnpm test:integration
+
+      - name: Install Chromium for the muṣḥaf glyph check
+        run: pnpm exec playwright install --with-deps chromium
       - name: Content gates
         run: pnpm gates
+
       - run: pnpm build
+      - name: Performance budget
+        run: node scripts/check_budgets.mjs
       - run: pnpm audit --prod --audit-level high || true
 
   e2e:
@@ -46,15 +89,13 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: itqan
-          POSTGRES_PASSWORD: itqan
-          POSTGRES_DB: itqan_e2e
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
         ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: postgresql://itqan:itqan@localhost:5432/itqan_e2e
-      SESSION_SECRET: ci-only-secret-not-production
       CI: "true"
     steps:
       - uses: actions/checkout@v4
@@ -64,6 +105,29 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm db:generate && pnpm prisma migrate deploy && pnpm exec tsx scripts/seed_dev.ts
+
+      - name: Provision database roles
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -f prisma/provision.sql
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "ALTER ROLE itqan PASSWORD 'itqan'; ALTER ROLE itqan_app PASSWORD 'itqan_app';"
+          psql -h localhost -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE itqan_test OWNER itqan;"
+
+      - name: Migrate and seed
+        env:
+          DATABASE_URL: ${{ env.DIRECT_DATABASE_URL }}
+        run: |
+          pnpm db:generate
+          pnpm exec prisma migrate deploy
+          pnpm exec tsx scripts/seed_dev.ts
+          pnpm exec tsx scripts/seed_demo.ts --days 30
+
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

@@ -1,0 +1,22 @@
+{
+  "state": "vendored",
+  "sourceId": "kfgqpc-uthmani-hafs-v13",
+  "label": "ʿUthmānī Ḥafṣ, version 13",
+  "publisher": "King Fahd Glorious Qurʾān Printing Complex (qurancomplex.gov.sa)",
+  "url": "https://raw.githubusercontent.com/fawazahmed0/quran-api/1/editions/ara-quranuthmanihaf.json",
+  "fetchedAt": "2026-08-23",
+  "downloadSha256": "66dadae2f7c7bb762aaf77603489951da4fe555fcee9f0106bfddae860e89cb4",
+  "corpusSha256": "82c4e695c11c90a36fba9c8180884fd40f0ba96924f9f2c9a5e01eac2009bc0f",
+  "ayahCount": 6236,
+  "suraCount": 114,
+  "normalisation": "none — bytes are stored exactly as received; NFC is deliberately NOT applied",
+  "attempts": [
+    {
+      "sourceId": "tanzil-uthmani",
+      "url": "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2&agree=true",
+      "outcome": "unreachable",
+      "error": "HTTP 403"
+    }
+  ],
+  "note": "tanzil.net was unreachable from the build network; this edition is the fallback and is a DIFFERENT digital edition from Tanzil's file. Editions differ in invisible joining characters and pause marks, so a corpus fetched from another source will not be byte-identical to this one."
+}

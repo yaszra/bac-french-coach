@@ -1,0 +1,53 @@
+/* LearnerShell — one screen, one next action.
+   The shell owns the viewport: it is exactly 100dvh and never scrolls. What
+   scrolls is inside a pane. */
+
+.shell {
+  display: grid;
+  grid-template-areas:
+    "main"
+    "nav";
+  grid-template-rows: minmax(0, 1fr) auto;
+  block-size: var(--shell-block-size, 100dvh);
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--text);
+}
+
+@media (min-width: 700px) {
+  .shell {
+    grid-template-areas: "nav main";
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+.navArea {
+  grid-area: nav;
+  min-inline-size: 0;
+}
+
+.main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-block-end: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.content {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

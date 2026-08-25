@@ -1,17 +1,32 @@
 {
   "project": "itqan",
-  "phase": "foundation",
-  "updatedAt": "2026-08-23",
+  "phase": "hardening and review",
+  "updatedAt": "2026-08-25",
   "note": "AI-ENGINEERING-OS scripts (~/.ai-engineering-os) were not available in the build environment; .ai/ memory is maintained by hand to the same contract.",
   "currentBranch": "claude/itqan-platform-build-79fqtx",
-  "done": [],
+  "done": [
+    "repo + CI + module skeleton",
+    "platform: RLS tenancy, append-only events, authz, sessions, jobs, storage, flags, offline queue",
+    "identity: session resolution and sign-in",
+    "assessment: correction taxonomy and verdict engine",
+    "analytics: honest denominators and daily report",
+    "content package: corpus, layout, four gates, loader",
+    "memory engine (pure domain)",
+    "design system: tokens and control/display primitives",
+    "studio review pipeline",
+    "release infrastructure: health, restore drill, load test, budgets",
+    "red-team pass (one real hole found and fixed)",
+    "evidence-chain integration proof",
+    "a11y and resilience e2e",
+    "reading (Qāʿidah) learner surface",
+    "learner core, teacher console, family + school surfaces",
+    "e2e journeys run and green (86 tests, both viewports)",
+    "guardian tutoring surface",
+    "code audit: six claim/code mismatches found and fixed (erasure scoping, job fan-out, verdict scope, ear-gate entrance, projection cursor, table captions)",
+    "guardian tutoring surface and the reading anomalies surface"
+  ],
   "next": [
-    "content package + gates",
-    "marginalia design system",
-    "identity/tenancy + platform services",
-    "memory engine",
-    "learner core",
-    "teacher/family/school/studio",
-    "release hardening"
+    "final review",
+    "await CI on the head"
   ]
 }

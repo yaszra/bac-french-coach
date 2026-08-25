@@ -1,0 +1,132 @@
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  padding-block: var(--space-1);
+  padding-inline: var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  background: none;
+  appearance: none;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+}
+
+/* Only interactive chips carry the tap floor; a static chip is a label. */
+.interactive {
+  min-block-size: var(--tap-min);
+  cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+
+.interactive:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* A removable chip is a group: the body and the remove control are siblings,
+   because a button inside a button is not a thing. The group wears the tone;
+   the body inside it is bare. */
+.group {
+  gap: var(--space-1);
+  min-block-size: var(--tap-min);
+  padding-inline: var(--space-3) var(--space-1);
+}
+
+.groupBody {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  appearance: none;
+  color: inherit;
+  font: inherit;
+}
+
+.groupBody.interactive {
+  min-block-size: var(--tap-min);
+}
+
+/* The selected mark: a tick, so selection survives greyscale. */
+.mark {
+  flex: none;
+  inline-size: var(--space-3);
+  block-size: var(--space-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.neutral {
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+.neutral.interactive:hover {
+  background-color: color-mix(in oklab, var(--surface-sunken) 88%, var(--text));
+}
+
+.accent {
+  background-color: var(--accent-quiet);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+.accent.interactive:hover {
+  background-color: color-mix(in oklab, var(--accent-quiet) 88%, var(--accent));
+}
+
+.success {
+  background-color: var(--success-quiet);
+  border-color: var(--success);
+  color: var(--success);
+}
+.success.interactive:hover {
+  background-color: color-mix(in oklab, var(--success-quiet) 88%, var(--success));
+}
+
+.caution {
+  background-color: var(--caution-quiet);
+  border-color: var(--caution);
+  color: var(--caution);
+}
+.caution.interactive:hover {
+  background-color: color-mix(in oklab, var(--caution-quiet) 88%, var(--caution));
+}
+
+.danger {
+  background-color: var(--danger-quiet);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.danger.interactive:hover {
+  background-color: color-mix(in oklab, var(--danger-quiet) 88%, var(--danger));
+}
+
+.selected {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
+}
+.selected.interactive:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.root:disabled {
+  cursor: not-allowed;
+  background-color: var(--surface-sunken);
+  border-color: var(--border);
+  color: var(--text-muted);
+}

@@ -1,0 +1,76 @@
+{
+  "id": "harakat.kasrah",
+  "order": 7,
+  "kind": "letter_harakah",
+  "titleKey": "lesson.harakat.kasrah",
+  "prerequisites": [
+    "harakat.fathah"
+  ],
+  "elements": [
+    {
+      "conceptId": "letter_harakah.alif.kasrah",
+      "letter": "ا",
+      "harakah": "ِ",
+      "combined": "اِ",
+      "sound": "ʾi"
+    },
+    {
+      "conceptId": "letter_harakah.baa.kasrah",
+      "letter": "ب",
+      "harakah": "ِ",
+      "combined": "بِ",
+      "sound": "bi"
+    },
+    {
+      "conceptId": "letter_harakah.taa.kasrah",
+      "letter": "ت",
+      "harakah": "ِ",
+      "combined": "تِ",
+      "sound": "ti"
+    },
+    {
+      "conceptId": "letter_harakah.thaa.kasrah",
+      "letter": "ث",
+      "harakah": "ِ",
+      "combined": "ثِ",
+      "sound": "ti"
+    },
+    {
+      "conceptId": "letter_harakah.jeem.kasrah",
+      "letter": "ج",
+      "harakah": "ِ",
+      "combined": "جِ",
+      "sound": "ji"
+    },
+    {
+      "conceptId": "letter_harakah.haa_h.kasrah",
+      "letter": "ح",
+      "harakah": "ِ",
+      "combined": "حِ",
+      "sound": "ḥi"
+    },
+    {
+      "conceptId": "letter_harakah.khaa.kasrah",
+      "letter": "خ",
+      "harakah": "ِ",
+      "combined": "خِ",
+      "sound": "ki"
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.harakat.kasrah"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}

@@ -1,0 +1,152 @@
+/* Sheet — the phone's answer to a dialogue, and the desktop drawer.
+   Everything is logical: the drawer enters from the inline start, which is the
+   right-hand side in Arabic without a single physical property. */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-sheet);
+  display: flex;
+  background: var(--overlay);
+  animation: sheet-backdrop var(--motion-base) var(--ease-standard);
+}
+
+.backdrop[data-variant="bottom"] {
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.backdrop[data-variant="inline-start"] {
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5) var(--space-6);
+  background: var(--surface-raised);
+  color: var(--text);
+  box-shadow: var(--elevation-5);
+  overscroll-behavior: contain;
+}
+
+.sheet[data-variant="bottom"] {
+  inline-size: 100%;
+  max-inline-size: 40rem;
+  max-block-size: 88dvh;
+  overflow-y: auto;
+  border-start-start-radius: var(--radius-sheet);
+  border-start-end-radius: var(--radius-sheet);
+  animation: sheet-up var(--motion-base) var(--ease-standard);
+  transition: transform var(--motion-base) var(--ease-standard);
+}
+
+.sheet[data-variant="bottom"][data-dragging="true"] {
+  transition: none;
+}
+
+.sheet[data-variant="inline-start"] {
+  block-size: 100%;
+  inline-size: min(22rem, 88vw);
+  overflow-y: auto;
+  border-start-end-radius: var(--radius-sheet);
+  border-end-end-radius: var(--radius-sheet);
+  animation: sheet-in var(--motion-base) var(--ease-standard);
+}
+
+.grabber {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--space-2);
+  margin-block-start: calc(var(--space-2) * -1);
+  touch-action: none;
+  cursor: grab;
+}
+
+.grabberBar {
+  inline-size: 36px;
+  block-size: 4px;
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--tap-min);
+  block-size: var(--tap-min);
+  margin-inline-end: calc(var(--space-2) * -1);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.close:hover { color: var(--text); }
+
+.closeGlyph {
+  inline-size: 18px;
+  block-size: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-block-size: 0;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+@keyframes sheet-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(var(--space-10)); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Logical entrance: margin-inline-start flips with the document direction. */
+@keyframes sheet-in {
+  from { margin-inline-start: -24rem; opacity: 0; }
+  to { margin-inline-start: 0; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .sheet {
+    animation: none;
+    transition: none;
+  }
+}

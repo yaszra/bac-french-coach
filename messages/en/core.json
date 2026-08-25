@@ -1,0 +1,88 @@
+{
+  "app": {
+    "name": "Itqān",
+    "tagline": "Mastery with precision"
+  },
+  "nav": {
+    "today": "Today",
+    "quran": "Qurʾān",
+    "reading": "Reading",
+    "practice": "Practice",
+    "me": "Me",
+    "students": "Students",
+    "assign": "Assign",
+    "verify": "Verify",
+    "triage": "Today · Triage",
+    "children": "Children",
+    "tonight": "Tonight",
+    "settings": "Settings",
+    "khatma": "Khatma",
+    "notifications": "Notifications",
+    "tutor": "Tutoring"
+  },
+  "action": {
+    "practiseJoin": "Hear the āyah before it, then ask for the next one",
+    "listenTogether": "Listen to it together once, then let them try"
+  },
+  "state": {
+    "loading": "Loading",
+    "notYetRecorded": "Not yet recorded",
+    "empty": "Nothing here yet",
+    "error": "Something went wrong",
+    "pendingSync": "Waiting to sync",
+    "offline": "Offline — your work is saved here"
+  },
+  "progress": {
+    "held": "Held",
+    "due": "Due for review",
+    "notEarned": "Not yet earned",
+    "ofReviewed": "{done} of {total}"
+  },
+  "a11y": {
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeDialog": "Close dialogue",
+    "loading": "Loading",
+    "wordInAyah": "Word {index} of āyah {ayah}",
+    "inkDepth": "Memory strength {depth} of 5",
+    "opensInNewTab": "Opens in a new tab"
+  },
+  "count": {
+    "dueReviews": {
+      "one": "{count} review due",
+      "other": "{count} reviews due"
+    },
+    "studentsNeedYou": {
+      "one": "{count} student needs you today",
+      "other": "{count} students need you today"
+    }
+  },
+  "correction": {
+    "hesitation": "Hesitated",
+    "prompted": "Needed a prompt",
+    "wrongWord": "Different word",
+    "skippedWord": "Word skipped",
+    "skippedAyah": "Āyah skipped",
+    "wrongJoin": "Went to a look-alike āyah",
+    "repeated": "Repeated a phrase",
+    "makhraj": "Articulation point",
+    "sifah": "Letter quality",
+    "maddLength": "Madd length",
+    "ghunnahIdgham": "Ghunnah / idghām"
+  },
+  "verdict": {
+    "notAttempted": "Not attempted",
+    "needsWork": "Needs more work",
+    "passedClean": "Recited cleanly"
+  },
+  "drill": {
+    "wrongJoin": "Practise the join to the next āyah",
+    "needsPrompt": "Connect the chain without a prompt",
+    "wordLevel": "Fill the missing words",
+    "articulation": "Listen and imitate"
+  },
+  "struggle": {
+    "weakJoin": "The join to the next āyah is not holding",
+    "repeatedLapse": "This āyah slipped more than once"
+  }
+}

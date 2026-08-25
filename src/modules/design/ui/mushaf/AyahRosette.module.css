@@ -1,0 +1,43 @@
+/* The āyah rosette — the mark that closes an āyah. Restrained: two rules and
+   the number. It is a marker, not an ornament. */
+
+.rosette {
+  display: inline-block;
+  vertical-align: -0.22em;
+  inline-size: 1.45em;
+  block-size: 1.45em;
+  margin-inline: 0.1em;
+  flex: none;
+  color: var(--mushaf-marker);
+}
+
+.rosette[data-size="sm"] {
+  inline-size: 1.1em;
+  block-size: 1.1em;
+  vertical-align: -0.14em;
+}
+
+.ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+
+.innerRing {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.6;
+  opacity: 0.55;
+}
+
+.numeral {
+  fill: currentColor;
+  font-family: var(--font-mushaf);
+  font-size: 17px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.numeral[data-long="true"] {
+  font-size: 13px;
+}

@@ -1,0 +1,52 @@
+/* Tooltip — a hint, never the only place a fact lives.
+   Touch devices get no tooltips at all: there is no hover to discover them,
+   so anything important must already be on the surface. */
+
+.root {
+  position: relative;
+  display: inline-flex;
+}
+
+.bubble {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  inline-size: max-content;
+  max-inline-size: 18rem;
+  padding-inline: var(--space-3);
+  padding-block: var(--space-2);
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+  border-radius: var(--radius-control);
+  box-shadow: var(--elevation-2);
+  font-family: var(--font-ui);
+  font-size: var(--text-2xs);
+  line-height: var(--leading-normal);
+  text-align: start;
+  pointer-events: none;
+  animation: tooltip-enter var(--motion-fast) var(--ease-standard);
+}
+
+.bubble[data-placement="block-start"] {
+  inset-block-end: calc(100% + var(--space-2));
+  inset-inline-start: 0;
+}
+
+.bubble[data-placement="block-end"] {
+  inset-block-start: calc(100% + var(--space-2));
+  inset-inline-start: 0;
+}
+
+@media (pointer: coarse) {
+  .bubble {
+    display: none;
+  }
+}
+
+@keyframes tooltip-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble { animation: none; }
+}

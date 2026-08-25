@@ -1,0 +1,93 @@
+{
+  "state": "not_yet_recorded",
+  "checkedAt": "2026-08-23",
+  "reciters": [
+    {
+      "id": "husary",
+      "name": "Maḥmūd Khalīl al-Ḥuṣarī",
+      "style": "murattal",
+      "timings": "not_yet_recorded"
+    },
+    {
+      "id": "husary_muallim",
+      "name": "Maḥmūd Khalīl al-Ḥuṣarī (muʿallim)",
+      "style": "teaching",
+      "timings": "not_yet_recorded"
+    },
+    {
+      "id": "minshawi",
+      "name": "Muḥammad Ṣiddīq al-Minshāwī",
+      "style": "murattal",
+      "timings": "not_yet_recorded"
+    },
+    {
+      "id": "minshawi_muallim",
+      "name": "Muḥammad Ṣiddīq al-Minshāwī (muʿallim)",
+      "style": "teaching",
+      "timings": "not_yet_recorded"
+    },
+    {
+      "id": "abdulbasit",
+      "name": "ʿAbd al-Bāsiṭ ʿAbd al-Ṣamad",
+      "style": "murattal",
+      "timings": "not_yet_recorded"
+    },
+    {
+      "id": "alafasy",
+      "name": "Mishary Rāshid al-ʿAfāsy",
+      "style": "murattal",
+      "timings": "not_yet_recorded"
+    },
+    {
+      "id": "sudais",
+      "name": "ʿAbd al-Raḥmān al-Sudays",
+      "style": "murattal",
+      "timings": "not_yet_recorded"
+    }
+  ],
+  "attempts": [
+    {
+      "reciterId": "husary",
+      "state": "unreachable",
+      "source": "quran-align",
+      "error": "HTTP 404"
+    },
+    {
+      "reciterId": "husary_muallim",
+      "state": "unreachable",
+      "source": "quran-align",
+      "error": "HTTP 404"
+    },
+    {
+      "reciterId": "minshawi",
+      "state": "unreachable",
+      "source": "quran-align",
+      "error": "HTTP 404"
+    },
+    {
+      "reciterId": "minshawi_muallim",
+      "state": "unreachable",
+      "source": "quran-align",
+      "error": "HTTP 404"
+    },
+    {
+      "reciterId": "abdulbasit",
+      "state": "unreachable",
+      "source": "quran-align",
+      "error": "HTTP 404"
+    },
+    {
+      "reciterId": "alafasy",
+      "state": "unreachable",
+      "source": "quran-align",
+      "error": "HTTP 404"
+    },
+    {
+      "reciterId": "sudais",
+      "state": "unreachable",
+      "source": "quran-align",
+      "error": "HTTP 404"
+    }
+  ],
+  "note": "Word timings are measured or absent. Nothing here is interpolated: a highlight that drifts teaches the wrong rhythm, so the product shows audio without a highlight rather than a highlight that is a guess."
+}

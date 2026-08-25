@@ -1,0 +1,36 @@
+{
+  "id": "madd.tabii",
+  "order": 12,
+  "kind": "madd",
+  "titleKey": "lesson.madd.tabii",
+  "prerequisites": [
+    "tanwin"
+  ],
+  "elements": [
+    {
+      "conceptId": "madd.tabii",
+      "letters": [
+        "ا",
+        "و",
+        "ي"
+      ],
+      "lengthCounts": 2
+    }
+  ],
+  "activities": [
+    "recognition",
+    "production"
+  ],
+  "narration": {
+    "manifestId": "narration.madd.tabii"
+  },
+  "talqin": {
+    "required": true,
+    "resolution": [
+      "teacher",
+      "studio",
+      "library",
+      "not_yet_recorded"
+    ]
+  }
+}
