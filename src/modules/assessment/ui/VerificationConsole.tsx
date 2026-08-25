@@ -38,7 +38,12 @@ export type VerificationView = {
   readonly requestId: string;
   readonly learnerUserId: string;
   readonly learnerName: string;
-  /** The unit ids this verdict decides. References, computed by the server. */
+  /**
+   * The unit ids this verdict decides — display only.
+   *
+   * They are NOT sent: the server derives them from the request's own scope,
+   * so a console cannot name a passage the learner was never asked to recite.
+   */
   readonly unitIds: readonly string[];
   readonly scopeLabel: string;
   /** The muṣḥaf page, already resolved from the content package. */
@@ -120,7 +125,6 @@ export function VerificationConsole({ view }: { readonly view: VerificationView 
         verificationRequestId: view.requestId,
         learnerUserId: view.learnerUserId,
         verdict,
-        unitIds: [...view.unitIds],
         // Positions and categories only. No text of any kind travels here.
         corrections: marks.map((mark) => ({
           category: mark.category,
@@ -139,7 +143,13 @@ export function VerificationConsole({ view }: { readonly view: VerificationView 
               ? "teacher.verify.alreadyDecided"
               : result.error === "not_allowed"
                 ? "teacher.verify.notAllowed"
-                : "teacher.verify.failed",
+                : result.error === "out_of_scope"
+                  ? // The server refused units outside what this request asked
+                    // about. A person reading this did nothing wrong; the page
+                    // and the request have drifted apart, and reloading is the
+                    // honest remedy rather than retrying the same claim.
+                    "teacher.verify.outOfScope"
+                  : "teacher.verify.failed",
           ),
         );
         return;

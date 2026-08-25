@@ -79,7 +79,6 @@ export async function recordReadingGate(input: unknown): Promise<ReadingGateResu
     verificationRequestId: requestId,
     learnerUserId,
     verdict: "passed",
-    unitIds: [unitId],
     corrections: [],
     ...(note === undefined ? {} : { note }),
   });

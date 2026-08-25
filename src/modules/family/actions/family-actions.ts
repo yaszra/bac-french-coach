@@ -125,7 +125,7 @@ const approveInput = z.strictObject({
   verificationRequestId: z.string().min(1),
   learnerUserId: z.string().min(1),
   verdict: z.enum(["passed", "needs_work", "not_attempted"]),
-  unitIds: z.array(z.string()).min(1),
+  // Which units are decided is the server's to know, from the request.
 });
 
 /**
@@ -160,7 +160,6 @@ export async function approveRecitation(input: unknown): Promise<SimpleResult> {
     verificationRequestId: parsed.data.verificationRequestId,
     learnerUserId: parsed.data.learnerUserId,
     verdict: parsed.data.verdict,
-    unitIds: parsed.data.unitIds,
     corrections: [],
   });
   if (!result.ok) {

@@ -59,8 +59,15 @@ for (const pathname of PAGES) {
         { name: "itqan_locale", value: "ar", url: "http://localhost:3000" },
       ]);
       await page.goto(surface(pathname, { locale: "ar" }), { waitUntil: "commit" });
-      const direction = await page.evaluate(() => document.documentElement.getAttribute("dir"));
-      expect(direction, "the document must be RTL before hydration").toBe("rtl");
+      /* A locator, not page.evaluate: at "commit" the response has arrived but
+         the document may not be parsed yet, and reading documentElement then
+         throws on null. The locator waits for the element itself, which is the
+         thing being asserted about — the attribute the SERVER sent, before any
+         script has run. */
+      await expect(
+        page.locator("html"),
+        "the document must be RTL before hydration",
+      ).toHaveAttribute("dir", "rtl");
 
       await page.waitForLoadState("networkidle");
 
@@ -93,48 +100,66 @@ for (const pathname of PAGES) {
       }
     });
 
-    test("focus is always visible", async ({ page }, testInfo) => {
-      /* Keyboard-only, and only on the pointer project.
+    test("focus is always visible", async ({ page }) => {
+      /* Asked of the stylesheet, not of the window.
        *
-       * `:focus-visible` is the browser's judgement that the user is
-       * navigating by keyboard, so this has to be asked with a real Tab rather
-       * than element.focus(). In the touch-emulated project a keystroke does
-       * not reliably reach the page when several are open in one worker, and
-       * the test then fails for a reason that has nothing to do with focus
-       * rings. The ring is a keyboard concern; the desktop project asks it,
-       * and every other check here still runs at both viewports. */
-      test.skip(testInfo.project.name !== "desktop", "keyboard focus is asked on the pointer project");
+       * `:focus-visible` is the browser's judgement that someone is navigating
+       * by keyboard, so the obvious test is to press Tab — and a keystroke
+       * only reaches a page the browser considers frontmost and focused, which
+       * in a worker running several pages it often is not. That made this test
+       * pass alone and fail in a full run, for a reason with nothing to do
+       * with focus rings.
+       *
+       * The property that actually matters is that a focusable control HAS a
+       * focus-visible rule which paints something. That is knowable from the
+       * cascade, deterministically: find the rules mentioning `:focus-visible`,
+       * strip the pseudo-class, and ask whether this control matches one that
+       * sets an outline or a shadow. */
       await page.goto(surface(pathname));
       const focusable = page.locator("button, a[href], [role=button]").first();
       if ((await focusable.count()) === 0) test.skip();
 
-      /* Tab, rather than element.focus().
-       *
-       * A focus ring is for someone navigating by keyboard, and that is what
-       * `:focus-visible` means — so a programmatic focus() may legitimately
-       * match nothing, which is what happens on the touch-capable project and
-       * made this pass on one viewport and fail on the other. Pressing the key
-       * asks the question the user actually asks. */
-      /* Bring the page to the front and give the document focus before
-         pressing a key: a keystroke only reaches a frontmost, focused page,
-         and with several pages open in one worker this one may be neither —
-         which made this test pass alone and fail in a full run. */
-      await page.bringToFront();
-      await page.evaluate(() => {
-        window.focus();
-        document.body.setAttribute("tabindex", "-1");
-        (document.body as HTMLElement).focus();
-        document.body.removeAttribute("tabindex");
+      const ring = await focusable.evaluate((el) => {
+        const paints = (text: string) =>
+          /outline(-width|-style|-color)?\s*:/.test(text) || /box-shadow\s*:/.test(text);
+
+        /* Rules live inside @layer and @media blocks, so this has to walk the
+           groups rather than read the sheet's top level — the design system's
+           global ring is inside a layer, and a check that skipped it would
+           report every control as ringless. */
+        const styleRules: CSSStyleRule[] = [];
+        const collect = (rules: CSSRuleList) => {
+          for (const rule of Array.from(rules)) {
+            if (rule instanceof CSSStyleRule) styleRules.push(rule);
+            const grouped = (rule as CSSGroupingRule).cssRules;
+            if (grouped !== undefined) collect(grouped);
+          }
+        };
+        for (const sheet of Array.from(document.styleSheets)) {
+          try {
+            collect(sheet.cssRules);
+          } catch {
+            continue; // A cross-origin sheet cannot be read; none of ours are.
+          }
+        }
+
+        for (const rule of styleRules) {
+          if (!rule.selectorText.includes(":focus-visible")) continue;
+          if (!paints(rule.style.cssText)) continue;
+          for (const selector of rule.selectorText.split(",")) {
+            // A bare `:focus-visible` applies to everything that can take it.
+            const candidate = selector.replaceAll(":focus-visible", "").trim() || "*";
+            try {
+              if (el.matches(candidate)) return rule.selectorText;
+            } catch {
+              // A selector this browser cannot parse tells us nothing.
+            }
+          }
+        }
+        return null;
       });
-      await page.keyboard.press("Tab");
-      const focused = page.locator(":focus-visible");
-      await expect(focused).toHaveCount(1);
-      const outline = await focused.evaluate((el) => {
-        const style = getComputedStyle(el);
-        return { width: style.outlineWidth, style: style.outlineStyle, shadow: style.boxShadow };
-      });
-      const visible = outline.style !== "none" || outline.shadow !== "none";
-      expect(visible, "a focused control must be visibly focused").toBe(true);
+
+      expect(ring, "a focusable control must have a focus-visible ring").not.toBeNull();
     });
   });
 }

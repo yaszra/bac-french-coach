@@ -82,7 +82,8 @@
       "alreadyDecided": "This one already has a verdict. Nothing was changed.",
       "notAllowed": "You are not the teacher for this student.",
       "failed": "That did not record. Nothing was written.",
-      "pageMissing": "The page for this passage is not in the content package"
+      "pageMissing": "The page for this passage is not in the content package",
+      "outOfScope": "That passage does not match what this student asked to be heard on. Reload the page and try again."
     },
     "assign": {
       "title": "Assign",
