@@ -153,17 +153,32 @@ export async function runDataErasure(data: PrivacyJobData): Promise<void> {
   }
 }
 
+/**
+ * This child's recordings, and only this child's.
+ *
+ * The filter used to be `{ organizationId, provenance: "human" }` — every
+ * child in the school — while the name, the call site and the log line all
+ * said "for subject". One family exercising their right to erasure destroyed
+ * every other family's recordings, and no test could see it because the
+ * subject was passed in and then used only for logging. `learnerUserId` is on
+ * the row now, so the promise is expressible; this is it being kept.
+ *
+ * The row goes with the bytes: an asset whose object is gone is a pointer to
+ * nothing, and leaving it would make the erasure look partial in every audit.
+ */
 async function purgeAudioForSubject(organizationId: string, subjectUserId: string): Promise<number> {
-  const keys = await withTenant(organizationId, async (tx) => {
-    const rows = await tx.audioAsset.findMany({
-      where: { organizationId, provenance: "human" },
+  const rows = await withTenant(organizationId, (tx) =>
+    tx.audioAsset.findMany({
+      where: { organizationId, provenance: "human", learnerUserId: subjectUserId },
       select: { id: true, objectKey: true },
-    });
-    return rows;
-  });
+    }),
+  );
   let purged = 0;
-  for (const row of keys) {
+  for (const row of rows) {
     await store.delete(row.objectKey).catch(() => undefined);
+    await withTenant(organizationId, (tx) => tx.audioAsset.delete({ where: { id: row.id } })).catch(
+      () => undefined,
+    );
     purged += 1;
   }
   logger.debug({ subjectUserId, purged }, "audio objects removed for erasure");

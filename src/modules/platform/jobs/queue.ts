@@ -19,6 +19,16 @@ export const JOBS = {
   audioPurge: "privacy.audio_purge",
   copilotSummary: "copilot.summary",
   backupVerify: "ops.backup_verify",
+
+  /* Ticks.
+   *
+   * A cron trigger has no organisation, and every job below it is
+   * per-organisation. Each tick is its own queue because a schedule belongs to
+   * a queue name, and its only work is to fan its job out to every school. */
+  reportDailyTick: "report.daily.tick",
+  reportNightlyFamilyTick: "report.nightly_family.tick",
+  reportSchoolWeeklyTick: "report.school_weekly.tick",
+  audioPurgeTick: "privacy.audio_purge.tick",
 } as const;
 export type JobName = (typeof JOBS)[keyof typeof JOBS];
 
@@ -44,6 +54,11 @@ const QUEUE_POLICY: Readonly<Record<JobName, "standard" | "short" | "stately">> 
   [JOBS.dataExport]: "standard",
   [JOBS.dataErasure]: "standard",
   [JOBS.copilotSummary]: "standard",
+  // A tick that is already queued needs no twin: it would fan out the same set.
+  [JOBS.reportDailyTick]: "short",
+  [JOBS.reportNightlyFamilyTick]: "short",
+  [JOBS.reportSchoolWeeklyTick]: "short",
+  [JOBS.audioPurgeTick]: "short",
 };
 
 let boss: PgBoss | null = null;

@@ -24,6 +24,8 @@ const db = new PrismaClient({ datasources: { db: { url: DIRECT } } });
 const ORG = "itest_privacy_org";
 const SUBJECT = "itest_privacy_learner";
 const GUARDIAN = "itest_privacy_guardian";
+/** A second child in the same school, whose recordings must survive. */
+const BYSTANDER = "itest_privacy_bystander";
 
 async function seed(): Promise<void> {
   await db.organization.upsert({
@@ -34,6 +36,7 @@ async function seed(): Promise<void> {
   for (const [id, name] of [
     [SUBJECT, "Subject"],
     [GUARDIAN, "Guardian"],
+    [BYSTANDER, "Bystander"],
   ] as const) {
     await db.user.upsert({
       where: { id },
@@ -77,6 +80,27 @@ async function seed(): Promise<void> {
     create: { organizationId: ORG, learnerUserId: SUBJECT, unitId: "b:78:1", unitKind: "ayah_body" },
     update: {},
   });
+  /* Two children's recordings, in one school. The erasure job used to match on
+     the organisation and delete both. */
+  for (const [id, learner] of [
+    ["itest_privacy_audio_subject", SUBJECT],
+    ["itest_privacy_audio_bystander", BYSTANDER],
+  ] as const) {
+    await db.audioAsset.upsert({
+      where: { id },
+      create: {
+        id,
+        organizationId: ORG,
+        objectKey: `itest/privacy/${id}.webm`,
+        sha256: id,
+        mimeType: "audio/webm",
+        provenance: "human",
+        learnerUserId: learner,
+      },
+      update: { learnerUserId: learner },
+    });
+  }
+
   await db.consentRecord.upsert({
     where: { learnerUserId_purpose: { learnerUserId: SUBJECT, purpose: "voice_recording" } },
     create: {
@@ -104,6 +128,7 @@ afterAll(async () => {
     await tx.user.deleteMany({ where: { organizationId: ORG } });
     await tx.organization.deleteMany({ where: { id: ORG } });
   });
+  await db.audioAsset.deleteMany({ where: { organizationId: ORG } });
   await db.$executeRawUnsafe(`DELETE FROM erasure_log WHERE "requestId" LIKE 'itest_privacy%'`);
   await db.$disconnect();
 });
@@ -138,6 +163,14 @@ describe("erasure through the audited path", () => {
     expect(await db.learningEvent.count({ where: { learnerUserId: SUBJECT } })).toBe(0);
     expect(await db.attempt.count({ where: { learnerUserId: SUBJECT } })).toBe(0);
     expect(await db.memoryState.count({ where: { learnerUserId: SUBJECT } })).toBe(0);
+
+    /* …this child's recordings are gone, and the child at the next desk still
+       has theirs. Erasure used to take every human recording in the school. */
+    expect(await db.audioAsset.count({ where: { learnerUserId: SUBJECT } })).toBe(0);
+    expect(
+      await db.audioAsset.count({ where: { learnerUserId: BYSTANDER } }),
+      "another child's recordings are not this child's to erase",
+    ).toBe(1);
     expect(await db.consentRecord.count({ where: { learnerUserId: SUBJECT } })).toBe(0);
 
     // …and the removal is itself a permanent record, written by the database.

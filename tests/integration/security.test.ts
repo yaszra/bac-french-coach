@@ -65,6 +65,20 @@ describe("tenant isolation, attacked", () => {
     }
   }, 60_000);
 
+  it("refuses a missing tenant instead of quietly scoping to nothing", async () => {
+    /* `RegExp.test` coerces its argument, so the guard's `test(undefined)` was
+       `test("undefined")` — which matches. A job invoked with no organisation
+       therefore passed validation, set the tenant to the literal string
+       "undefined", matched no rows under RLS, and completed successfully
+       having done nothing at all. Every scheduled job in the product was doing
+       exactly that. An absent tenant has to be loud. */
+    for (const missing of [undefined, null, 0, {}, []]) {
+      await expect(
+        withTenant(missing as unknown as string, async () => "reached"),
+      ).rejects.toThrow(/unexpected shape/);
+    }
+  }, 60_000);
+
   it("cannot read another organisation by guessing a row id", async () => {
     await app.query("BEGIN");
     await app.query(`SET LOCAL app.organization_id = '${ATTACKER}'`);

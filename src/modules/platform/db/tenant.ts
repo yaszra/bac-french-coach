@@ -24,9 +24,15 @@ export async function withTenant<T>(
   work: (tx: TenantClient) => Promise<T>,
   options?: { readonly timeoutMs?: number },
 ): Promise<T> {
-  // The id is interpolated into a SET LOCAL, so it is validated against a strict
-  // shape first. Prisma's parameter binding does not apply to SET.
-  if (!ORG_ID.test(organizationId)) {
+  /* The id is interpolated into a SET LOCAL, so it is validated against a
+     strict shape first — Prisma's parameter binding does not apply to SET.
+     The typeof check is not redundant: `RegExp.test` coerces its argument, so
+     `test(undefined)` is `test("undefined")`, which matches. A job invoked
+     with no organisation therefore passed this guard, set the tenant to the
+     literal string "undefined", matched no rows under RLS and completed
+     "successfully" having done nothing. A missing tenant must be an error,
+     loudly, not an empty result set. */
+  if (typeof organizationId !== "string" || !ORG_ID.test(organizationId)) {
     throw new Error("withTenant: organizationId has an unexpected shape");
   }
   return prisma.$transaction(

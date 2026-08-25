@@ -65,13 +65,19 @@ export async function setConsent(
       },
     });
 
-    // Withdrawal is not a preference change; it is a promise about bytes. The
-    // purge date on every recording already made moves to now.
+    /* Withdrawal is not a preference change; it is a promise about bytes. The
+       purge date on every recording already made of THIS CHILD moves to now.
+       Two things were wrong here and both mattered: the statement matched on
+       the organisation, so withdrawing consent for one child moved the purge
+       date on every child's recordings in the school; and `purgeAfter IS NOT
+       NULL` skipped exactly the recordings that had never been given a purge
+       date, which are the ones most in need of one. */
     if (!input.granted && input.purpose === "voice_recording") {
       await tx.$executeRawUnsafe(
-        `UPDATE audio_asset SET "purgeAfter" = $1 WHERE "organizationId" = $2 AND provenance = 'human' AND "purgeAfter" IS NOT NULL`,
+        `UPDATE audio_asset SET "purgeAfter" = $1 WHERE "organizationId" = $2 AND provenance = 'human' AND "learnerUserId" = $3`,
         now,
         organizationId,
+        input.learnerUserId,
       );
     }
 

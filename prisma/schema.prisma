@@ -485,9 +485,15 @@ model AudioAsset {
   createdAt       DateTime      @default(now())
   /// Child voice recordings are purged on this date unless exported/erased first.
   purgeAfter      DateTime?
+  /// Whose voice this is. Null for a reciter's or the studio's audio, which
+  /// belongs to no child. Without it, "purge this child's recordings" was not
+  /// expressible, and the erasure job deleted every human recording in the
+  /// school — so this column is what makes the privacy promise sayable.
+  learnerUserId   String?
 
   @@index([organizationId])
   @@index([approval])
+  @@index([learnerUserId])
   @@map("audio_asset")
 }
 
