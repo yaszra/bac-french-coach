@@ -8,13 +8,12 @@ import type { LearnerDestination } from "@/modules/design/shells";
  * — so this list is simply where each one goes. Keeping it here means two screens
  * can never disagree about where "Today" is.
  *
- * `reading` has no href yet: the Qāʿidah surface is not built, and a tab that
- * navigates to a missing page is worse than a tab that plainly does nothing.
+ * Every door now leads somewhere: `/reading` is the Qāʿidah surface.
  */
 export const LEARNER_NAV: readonly ShellNavItem<LearnerDestination>[] = [
   { id: "today", href: "/today" },
   { id: "quran", href: "/quran" },
-  { id: "reading" },
+  { id: "reading", href: "/reading" },
   { id: "practice", href: "/practice" },
   { id: "me", href: "/me" },
 ];
