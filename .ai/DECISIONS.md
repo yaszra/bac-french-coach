@@ -332,3 +332,49 @@ Format: D-nnn · date · decision · provenance.
 - **A concept's name is composed, not authored 259 times.** `conceptLabel` builds "bāʾ with
   fatḥah" from three keys. Where a concept id is also a namespace (`tanwin` and `tanwin.fath`),
   its own name lives at `.name` — one convention, in one function.
+
+## D-034 — Pixel baselines are opt-in (`VISUAL=1`)
+
+**Decision.** The catalogue's screenshot comparisons run only when `VISUAL=1`.
+Every assertion that does not depend on rasterisation runs always.
+
+**Why.** A screenshot is a test only when the image that produced the baseline
+reproduces it. Baselines captured in this development container and committed
+would fail on a CI runner over subpixel font rasterisation, and the usual cure —
+regenerate until green — turns the check into a record of whatever was rendered
+last. Provenance: found when the specs were run for the first time; 12 of 14
+catalogue tests were writing new baselines rather than comparing.
+
+## D-035 — Journeys mint sessions; the sign-in form is exercised once
+
+**Decision.** End-to-end journeys whose subject is not sign-in create a real
+Session row and encode the real cookie rather than driving the form.
+
+**Why.** Sign-in is rate limited per identifier, correctly. A suite in which
+every spec signs the same person in fails its later specs with "too many tries",
+for reasons unrelated to what they test. Authorisation is still exercised
+exactly as in production; only the credential exchange is skipped. Provenance:
+the first full-suite run.
+
+## D-036 — Keyboard focus is asked with a key, on the pointer project
+
+**Decision.** The focus-ring check presses Tab rather than calling
+`element.focus()`, and runs on the desktop project only.
+
+**Why.** `:focus-visible` is the browser's judgement that someone is navigating
+by keyboard; a programmatic focus may legitimately match nothing. In the
+touch-emulated project a keystroke does not reliably reach a page when several
+are open in one worker, which produced a failure about page focus rather than
+about focus rings. Provenance: passed on one viewport and failed on the other
+with the same markup.
+
+## D-037 — A guardian's tutoring gets the teacher's console, not a lesser one
+
+**Decision.** `/tutor` reuses `VerificationConsole`, `recordVerdict` and the
+correction taxonomy unchanged.
+
+**Why.** `canTutor` already meant "may hear this child and record a verdict",
+and the verdict action already enforced it. A second, simpler console would
+have been a second bar for the same claim — and the evidence rule does not
+admit two standards of evidence. Provenance: the permission had existed since
+the authorisation module with no surface behind it.

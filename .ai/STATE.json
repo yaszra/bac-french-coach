@@ -1,6 +1,6 @@
 {
   "project": "itqan",
-  "phase": "product surfaces",
+  "phase": "hardening and review",
   "updatedAt": "2026-08-25",
   "note": "AI-ENGINEERING-OS scripts (~/.ai-engineering-os) were not available in the build environment; .ai/ memory is maintained by hand to the same contract.",
   "currentBranch": "claude/itqan-platform-build-79fqtx",
@@ -18,13 +18,12 @@
     "red-team pass (one real hole found and fixed)",
     "evidence-chain integration proof",
     "a11y and resilience e2e",
-    "reading (Qāʿidah) learner surface"
+    "reading (Qāʿidah) learner surface",
+    "learner core, teacher console, family + school surfaces",
+    "e2e journeys run and green (86 tests, both viewports)",
+    "guardian tutoring surface"
   ],
   "next": [
-    "learner core (agent)",
-    "teacher console (agent)",
-    "family + school (agent)",
-    "e2e journeys green",
-    "final review"
+    "final review pass"
   ]
 }
