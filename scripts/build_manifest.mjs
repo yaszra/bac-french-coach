@@ -29,9 +29,13 @@ for await (const file of walk(CONTENT)) {
 }
 
 const ordered = Object.fromEntries(Object.entries(files).sort(([a], [b]) => a.localeCompare(b)));
+// Deliberately no generation timestamp. The manifest exists to say what the
+// content IS, and a date makes it change when nothing has — producing a diff on
+// every regeneration, which trains everyone to ignore diffs on the one file
+// whose diffs matter most.
 await writeFile(
   path.join(CONTENT, "MANIFEST.json"),
-  JSON.stringify({ version: "0.1.0", generatedAt: new Date().toISOString().slice(0, 10), files: ordered }, null, 2) + "\n",
+  JSON.stringify({ version: "0.1.0", files: ordered }, null, 2) + "\n",
   "utf8",
 );
 console.log(`[manifest] ${Object.keys(ordered).length} content files digested`);
