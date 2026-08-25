@@ -139,6 +139,24 @@ export function planDispatch(
   };
 }
 
+/**
+ * The context of someone we hold nothing but an account for.
+ *
+ * Most notifications in the product are in-app and nothing else: no address is
+ * known, no comms consent has been given, and none is needed. Naming that
+ * context means the in-app path goes through the same planner as every other
+ * channel rather than around it, so a row's delivery state is always something
+ * the planner decided.
+ */
+export const IN_APP_ONLY: ChannelContext = {
+  consents: {},
+  hasEmailAddress: false,
+  hasPushSubscription: false,
+  hasWhatsappNumber: false,
+  lastInboundAt: null,
+  templateApproval: "none",
+};
+
 /** The delivery state written on a Notification row, from a plan. Never "queued". */
 export function deliveryStateOf(plan: DeliveryPlan): "sent" | "manual_fallback" | "refused" {
   return plan.kind === "send" ? "sent" : plan.kind;

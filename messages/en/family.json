@@ -164,6 +164,19 @@
       "claimPending": "The teacher has not approved your link yet",
       "notTutoring": "The teacher has not asked you to tutor this child",
       "notYourAssignment": "You can only approve work you set yourself"
+    },
+    "tutor": {
+      "title": "Tutoring",
+      "queue": "Waiting to be heard",
+      "waitingFor": "{name} · waiting {hours}h",
+      "listen": "Listen now",
+      "notGranted": "You have not been asked to tutor",
+      "notGrantedHelp": "A teacher grants tutoring on a child's link. Until then, hearing them is their teacher's work.",
+      "noChildrenHelp": "Link a child first, and a teacher can then grant tutoring.",
+      "seeChildren": "See your children",
+      "nobodyWaiting": "Nobody is waiting to be heard",
+      "nobodyWaitingHelp": "{names} have not asked to recite. When they do, they appear here.",
+      "sameBar": "A verdict you record is a real verdict, held to the same bar as a teacher's, and recorded once under your name."
     }
   },
   "school": {

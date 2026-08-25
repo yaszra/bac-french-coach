@@ -3,14 +3,17 @@
 import type { ReactNode } from "react";
 import { ParentShell, type ParentDestination } from "@/modules/design/shells";
 import { useSurface } from "@/modules/design/theme/ThemeProvider";
+import { useTutoring } from "./FamilySurface";
 
-const ITEMS = [
+const BASE = [
   { id: "children" as const, href: "/children" },
   { id: "tonight" as const, href: "/tonight" },
-  { id: "settings" as const, href: "/settings" },
 ];
 
-/** The family's three destinations, phone-first, with the page's own title. */
+const TUTOR = { id: "tutor" as const, href: "/tutor" };
+const SETTINGS = { id: "settings" as const, href: "/settings" };
+
+/** The family's destinations, phone-first, with the page's own title. */
 export function FamilyFrame({
   active,
   titleKey,
@@ -21,8 +24,11 @@ export function FamilyFrame({
   readonly children: ReactNode;
 }) {
   const { t } = useSurface();
+  /* A guardian who tutors nobody never sees the tab. The pages behind it still
+     refuse them; this only keeps the app from offering what it would refuse. */
+  const items = useTutoring() ? [...BASE, TUTOR, SETTINGS] : [...BASE, SETTINGS];
   return (
-    <ParentShell active={active} items={ITEMS} header={t(titleKey)}>
+    <ParentShell active={active} items={items} header={t(titleKey)}>
       {children}
     </ParentShell>
   );

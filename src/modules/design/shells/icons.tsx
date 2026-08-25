@@ -20,6 +20,7 @@ export type ShellIconName =
   | "notifications"
   | "children"
   | "tonight"
+  | "tutor"
   | "settings";
 
 const PATHS: Readonly<Record<ShellIconName, readonly string[]>> = {
@@ -36,6 +37,7 @@ const PATHS: Readonly<Record<ShellIconName, readonly string[]>> = {
   notifications: ["M6 10a6 6 0 0 1 12 0v5l1.5 2.5h-15L6 15z", "M10 20.5h4"],
   children: ["M9 5a3.2 3.2 0 1 0 0 6.4A3.2 3.2 0 0 0 9 5Z", "M3 19.5a6 6 0 0 1 12 0", "M17.5 9.5a2.2 2.2 0 1 1 0 4.4M18 16a4.6 4.6 0 0 1 3 4"],
   tonight: ["M20 14.6A8.2 8.2 0 0 1 9.4 4 8.2 8.2 0 1 0 20 14.6Z"],
+  tutor: ["M12 4.5a2.6 2.6 0 0 1 2.6 2.6v4a2.6 2.6 0 0 1-5.2 0v-4A2.6 2.6 0 0 1 12 4.5Z", "M6.5 11.1a5.5 5.5 0 0 0 11 0", "M12 16.6v3"],
   settings: ["M4.5 8.5h8M16.5 8.5h3M4.5 15.5h3M11.5 15.5h8", "M14.5 6.4a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2Z", "M9.5 13.4a2.1 2.1 0 1 0 0 4.2 2.1 2.1 0 0 0 0-4.2Z"],
 };
 

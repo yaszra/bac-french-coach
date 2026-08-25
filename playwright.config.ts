@@ -18,6 +18,17 @@ function browser() {
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
+  /*
+   * One worker, deliberately.
+   *
+   * These journeys share one database and one seeded school: a learner's day
+   * is arranged by writing their rows, and two projects doing that at once
+   * fight over the same learner — the mobile run clearing today's attempts
+   * while the desktop run counts them. That failure looks exactly like a flake
+   * and is not one; the fixture is genuinely shared. Serialising costs about
+   * thirty seconds and removes the whole class of it.
+   */
+  workers: 1,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {

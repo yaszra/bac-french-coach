@@ -8,6 +8,7 @@ import { requireCaller } from "../../identity/actions/session-context";
 import { assertCan } from "../../platform/authz/can";
 import { appendEvent } from "../../platform/events/append";
 import { logger } from "../../platform/observability/logger";
+import { IN_APP_ONLY, deliveryStateOf, planChannel } from "../../family/domain/channels";
 
 /**
  * Creating an assignment.
@@ -80,12 +81,20 @@ export async function createAssignment(input: unknown): Promise<CreateAssignment
         },
         tx,
       );
+      /* Delivery is decided here, by the planner, rather than left at the
+         column default. A row that says "waiting to send" while nothing will
+         ever send it is precisely the dishonest state this product refuses —
+         and that is what every notification said until now. An in-app
+         notification IS the record, so the planner resolves it to sent. */
+      const plan = planChannel("in_app", IN_APP_ONLY, createdAt);
       await tx.notification.create({
         data: {
           organizationId: actor.organizationId,
           userId: learnerUserId,
           kind: "assignment_created",
           payload: { assignmentId: assignment.id, track },
+          channel: plan.channel,
+          deliveryState: deliveryStateOf(plan),
         },
       });
     }

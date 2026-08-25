@@ -243,7 +243,8 @@
         "guardian_claim": "وليٌّ طلب الربط",
         "assignment_completed": "أُنجز تكليف",
         "unknown": "تنبيه"
-      }
+      },
+      "refused": "لم تُرسَل عبر هذه القناة — لم يُوافَق عليها"
     },
     "onboarding": {
       "heading": "خطوات البداية",

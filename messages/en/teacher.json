@@ -243,7 +243,8 @@
         "guardian_claim": "A guardian asked to be linked",
         "assignment_completed": "An assignment was finished",
         "unknown": "Notification"
-      }
+      },
+      "refused": "Not sent on this channel — they have not agreed to it"
     },
     "onboarding": {
       "heading": "Getting set up",

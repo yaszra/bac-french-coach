@@ -6,6 +6,7 @@ import { Button } from "../../design/ui/controls";
 import { Badge, EmptyState } from "../../design/ui/display";
 import { useSurface } from "../../design/theme/ThemeProvider";
 import { markAllNotificationsRead, markNotificationRead } from "../actions/notifications";
+import { deliveryNoteKey } from "./notification-delivery";
 import styles from "./TeacherConsole.module.css";
 
 /**
@@ -65,8 +66,9 @@ export function NotificationList({ items }: { readonly items: readonly Notificat
             </Badge>
             <span className={styles.checkLabel}>
               {t(`teacher.notifications.kind.${KNOWN.has(item.kind) ? item.kind : "unknown"}`)}
-              {item.deliveryState === "pending" ? ` · ${t("teacher.notifications.pending")}` : ""}
-              {item.deliveryState === "failed" ? ` · ${t("teacher.notifications.failedDelivery")}` : ""}
+              {deliveryNoteKey(item.deliveryState) === null
+                ? ""
+                : ` · ${t(deliveryNoteKey(item.deliveryState) as string)}`}
             </span>
             {item.readAt === null ? (
               <Button

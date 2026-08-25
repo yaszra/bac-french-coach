@@ -5,8 +5,13 @@ import { ShellNav } from "./ShellNav";
 import type { ShellNavItem } from "./nav";
 import styles from "./ParentShell.module.css";
 
-export type ParentDestination = "children" | "tonight" | "settings";
+export type ParentDestination = "children" | "tonight" | "tutor" | "settings";
 
+/**
+ * The default order. "tutor" is deliberately not in it: a guardian who has not
+ * been granted tutoring should never see a tab for it, so the family app passes
+ * its own items and includes that one only when the link says they tutor.
+ */
 const DESTINATIONS: readonly ParentDestination[] = ["children", "tonight", "settings"];
 
 export type ParentShellProps = {
@@ -17,7 +22,7 @@ export type ParentShellProps = {
 };
 
 /**
- * The family's frame: three destinations, phone-first, generous spacing.
+ * The family's frame: a few destinations, phone-first, generous spacing.
  *
  * Layout only — what a parent may see about their child is decided by the
  * family module and its consent rules, never here.

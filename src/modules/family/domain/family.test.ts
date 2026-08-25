@@ -5,8 +5,10 @@ import {
   planDispatch,
   whatsappWindowOpen,
   deliveryStateOf,
+  IN_APP_ONLY,
   type ChannelContext,
 } from "./channels";
+import { deliveryNoteKey } from "../../classroom/ui/notification-delivery";
 import {
   FAMILY_EVENT_TYPES,
   HOME_TASKS,
@@ -155,6 +157,31 @@ describe("channels and their honest fallbacks", () => {
       .plans.map(deliveryStateOf);
     expect(states).not.toContain("pending");
     expect(new Set(states)).toEqual(new Set(["sent", "manual_fallback"]));
+  });
+
+  it("gives every state the planner can produce a note the inbox can render", () => {
+    /* The two vocabularies drifted apart once already: the planner wrote
+       "sent" while the inbox only knew "pending" and "failed", so a delivered
+       notification said "waiting to send" for ever. This test is the join. */
+    const produced = new Set<string>([
+      deliveryStateOf(planChannel("in_app", IN_APP_ONLY, NOW)),
+      ...planDispatch(["email", "whatsapp", "push"], base, NOW).plans.map(deliveryStateOf),
+      ...planDispatch(
+        ["email", "whatsapp", "push"],
+        { ...base, consents: {}, hasEmailAddress: false, hasWhatsappNumber: false, hasPushSubscription: false },
+        NOW,
+      ).plans.map(deliveryStateOf),
+    ]);
+    expect(produced.has("sent")).toBe(true);
+    for (const state of produced) {
+      // "sent" is the one state that says nothing extra: the row is the delivery.
+      if (state === "sent") expect(deliveryNoteKey(state)).toBeNull();
+      else expect(deliveryNoteKey(state)).not.toBeNull();
+    }
+  });
+
+  it("resolves an in-app notification to sent, so no row waits for a send that will never come", () => {
+    expect(deliveryStateOf(planChannel("in_app", IN_APP_ONLY, NOW))).toBe("sent");
   });
 
   it("treats a future inbound timestamp as no open window rather than an open one", () => {

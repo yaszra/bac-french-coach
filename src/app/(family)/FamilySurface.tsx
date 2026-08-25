@@ -1,11 +1,23 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { SurfaceProvider } from "@/modules/design/theme/ThemeProvider";
 import { ToastRegion } from "@/modules/design/ui/feedback";
 import { THEMES, type Theme } from "@/modules/design/theme/tier";
 import { directionOf, type Locale } from "@/modules/platform/i18n/types";
+
+/**
+ * Whether this guardian tutors anyone, resolved on the server once per request.
+ *
+ * Only the navigation reads it. It is not an authorisation decision and is
+ * never treated as one: every tutoring page checks `can()` for itself.
+ */
+const TutoringContext = createContext(false);
+
+export function useTutoring(): boolean {
+  return useContext(TutoringContext);
+}
 
 /**
  * The family surface.
@@ -18,10 +30,12 @@ import { directionOf, type Locale } from "@/modules/platform/i18n/types";
 export function FamilySurface({
   theme,
   locale,
+  tutoring = false,
   children,
 }: {
   readonly theme: Theme;
   readonly locale: Locale;
+  readonly tutoring?: boolean | undefined;
   readonly children: ReactNode;
 }) {
   const params = useSearchParams();
@@ -40,7 +54,9 @@ export function FamilySurface({
 
   return (
     <SurfaceProvider theme={active} tier="adult" locale={locale}>
-      <ToastRegion>{children}</ToastRegion>
+      <TutoringContext.Provider value={tutoring}>
+        <ToastRegion>{children}</ToastRegion>
+      </TutoringContext.Provider>
     </SurfaceProvider>
   );
 }
