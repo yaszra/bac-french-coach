@@ -86,7 +86,12 @@ export async function hasTeacher(
 ): Promise<boolean> {
   const read = async (client: TenantClient): Promise<boolean> => {
     const count = await client.relationship.count({
-      where: { learnerUserId, kind: "teacher_student", state: "approved" },
+      // A relationship links an adult (subject) to a learner (object). The
+      // learner is the OBJECT of the link, never its subject — reading it the
+      // other way round would ask "does this learner teach anyone", which for
+      // every child alive is false, and would quietly hand every one of them
+      // the solo self-confirmation path.
+      where: { objectUserId: learnerUserId, kind: "teacher_student", state: "approved" },
     });
     return count > 0;
   };
@@ -155,10 +160,20 @@ export function conceptStatesFrom(
   conceptIds: readonly ConceptId[],
   snapshot: ReadingSnapshot,
 ): readonly ConceptPlanState[] {
-  const secure = new Set<ConceptId>();
+  // Two passes on purpose: what is unlocked depends on what is secure, and that
+  // must not depend on the order the caller happened to list the concepts in.
+  const scores = new Map(
+    conceptIds.map((conceptId) => [
+      conceptId,
+      smartScore(conceptId, snapshot.observations, { now: snapshot.now }),
+    ]),
+  );
+  const secure = new Set<ConceptId>(
+    [...scores.entries()].filter(([, score]) => score.state === "secure").map(([id]) => id),
+  );
+
   const states = conceptIds.map((conceptId): ConceptPlanState => {
-    const score = smartScore(conceptId, snapshot.observations, { now: snapshot.now });
-    if (score.state === "secure") secure.add(conceptId);
+    const score = scores.get(conceptId) ?? smartScore(conceptId, snapshot.observations);
     return {
       conceptId,
       smartScore: score,
