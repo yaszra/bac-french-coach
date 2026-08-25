@@ -378,3 +378,73 @@ and the verdict action already enforced it. A second, simpler console would
 have been a second bar for the same claim — and the evidence rule does not
 admit two standards of evidence. Provenance: the permission had existed since
 the authorisation module with no surface behind it.
+
+## D-038 — `AudioAsset` carries the learner whose voice it is
+
+**Decision.** A `learnerUserId` column, null for a reciter's or the studio's
+audio. Erasure and consent withdrawal both scope by it.
+
+**Why.** The column did not exist, so "purge this child's recordings" was not
+expressible; what was written instead matched the organisation and every human
+recording in it. One family exercising their right to erasure destroyed every
+other family's recordings, under a function named `purgeAudioForSubject` whose
+subject was used only for logging. Provenance: found by an audit that read the
+code; the integration test fails against the old filter.
+
+## D-039 — A cron tick fans out; `withTenant` refuses a non-string
+
+**Decision.** Scheduled per-organisation jobs are scheduled as `*.tick` queues
+that enqueue one job per organisation. `withTenant` rejects anything that is
+not a string.
+
+**Why.** The worker scheduled every job with an empty payload, so handlers ran
+with `organizationId` undefined. `RegExp.test` coerces, so the guard's
+`test(undefined)` was `test("undefined")` — a match. The tenant was set to the
+literal string "undefined", RLS matched nothing, and every job reported success
+having done nothing: no nightly report was ever built, and the 90-day retention
+purge never ran. Provenance: same audit; a schedule test now refuses to let a
+schedule name a job nothing works.
+
+## D-040 — The server derives which units a verdict decides
+
+**Decision.** `unitIds` is not a client input. `recordVerdict` derives the units
+from the request's own `unitScope`.
+
+**Why.** The ids arrived from the client and were folded into memory state with
+`verifiedAt` set, without ever being compared to the request — whose scope was
+not even selected. Any verifier could mark any unit verified for that learner,
+and the history would say a person had listened to a passage nobody recited.
+Validating the list would have closed the hole; deriving it keeps it closed,
+because there is no claim left to forget to check.
+
+## D-041 — Asking to be heard creates a request, and tells someone
+
+**Decision.** An oral recitation opens a `VerificationRequest`, idempotent by
+(learner, passage), and notifies the learner's approved teacher and any
+guardian trusted to tutor them.
+
+**Why.** Nothing in the product created a ḥifẓ request. The screen said "your
+teacher will listen" and nobody was told; the teacher's queue could only be
+filled by a fixture; `learn:requestVerification` had no enforcement site. The
+ear-gate is the centre of the product and it had no entrance.
+
+## D-042 — A tutoring guardian hears their own work, or the learner's own asking
+
+**Decision.** `recordVerdict` refuses a request naming an assignment created by
+someone else, when the actor's authority is a guardian link. A request naming no
+assignment is the learner's own and may be answered.
+
+**Why.** The invariant was already written in `guardianOwnsRequest` and guarded
+a path that could never succeed, since no creator wrote the `assignmentId` it
+required. Meanwhile the tutoring screen offered a guardian anything pending for
+their child. One rule now, on the server, for every path.
+
+## D-043 — The projection cursor reads by `recordedAt`, not by id
+
+**Decision.** The sweep orders by `(recordedAt, id)` behind a one-minute commit
+lag, and the checkpoint stores `recordedAt`.
+
+**Why.** Ids are cuids assigned at construction; rows become visible at commit.
+A slower transaction's lower id sat permanently behind an id cursor — never
+applied, and nothing said so. The sweep exists to catch what the inline fold
+missed, which made ordering by id blind to its own purpose.
