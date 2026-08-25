@@ -162,8 +162,7 @@
       "invalid": "That did not look right",
       "notAllowed": "You are not allowed to do that",
       "claimPending": "The teacher has not approved your link yet",
-      "notTutoring": "The teacher has not asked you to tutor this child",
-      "notYourAssignment": "You can only approve work you set yourself"
+      "notTutoring": "The teacher has not asked you to tutor this child"
     },
     "tutor": {
       "title": "Tutoring",

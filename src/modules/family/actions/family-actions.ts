@@ -11,7 +11,6 @@ import { claimChild } from "../repo/family-repo";
 import { recordFamilyEntry } from "../repo/ledger-repo";
 import { assignHomeWork, guardianOwnsRequest } from "../repo/tutoring-repo";
 import { createDataRequest, setConsent } from "../repo/privacy-repo";
-import { recordVerdict } from "../../assessment/actions/record-verdict";
 import { enqueue, JOBS } from "../../platform/jobs/queue";
 import { logger } from "../../platform/observability/logger";
 
@@ -121,56 +120,18 @@ export async function assignWork(input: unknown): Promise<SimpleResult> {
   return { ok: true };
 }
 
-const approveInput = z.strictObject({
-  verificationRequestId: z.string().min(1),
-  learnerUserId: z.string().min(1),
-  verdict: z.enum(["passed", "needs_work", "not_attempted"]),
-  // Which units are decided is the server's to know, from the request.
-});
-
-/**
- * A tutoring guardian approving a recitation.
+/*
+ * `approveRecitation` was here.
  *
- * Two gates, in this order: it must be work they set, and then it goes through
- * `recordVerdict` — the same path a teacher's verdict takes, with the same
- * authorisation, the same immutable verdict row and the same audit entry. There
- * is no second, softer verdict path for parents.
+ * It was a second door into the ear-gate for a tutoring guardian, and nothing
+ * called it — but every exported function in a `"use server"` module is a
+ * reachable endpoint, so it was live surface with its own input schema. The
+ * tutoring screen goes through `recordVerdict` directly, the same action a
+ * teacher uses, which is where the scope derivation and the
+ * "work someone else set" rule now live. Two doors to one room means two
+ * schemas that can drift apart, and the one nobody looks at is the one that
+ * drifts. `guardianOwnsRequest` stays: the tutoring pages read it.
  */
-export async function approveRecitation(input: unknown): Promise<SimpleResult> {
-  const actor = await requireCaller();
-  const parsed = approveInput.safeParse(input);
-  if (!parsed.success) return { ok: false, errorKey: "family.error.invalid" };
-
-  const ownership = await guardianOwnsRequest(
-    actor.organizationId,
-    actor.userId,
-    parsed.data.verificationRequestId,
-  );
-  if (!ownership.ok) {
-    return {
-      ok: false,
-      errorKey:
-        ownership.reason === "unknown_request"
-          ? "family.error.invalid"
-          : "family.error.notYourAssignment",
-    };
-  }
-
-  const result = await recordVerdict({
-    verificationRequestId: parsed.data.verificationRequestId,
-    learnerUserId: parsed.data.learnerUserId,
-    verdict: parsed.data.verdict,
-    corrections: [],
-  });
-  if (!result.ok) {
-    return {
-      ok: false,
-      errorKey: result.error === "not_allowed" ? "family.error.notTutoring" : "family.error.invalid",
-    };
-  }
-  revalidatePath("/tonight");
-  return { ok: true };
-}
 
 const consentInput = z.strictObject({
   learnerUserId: z.string().min(1),
