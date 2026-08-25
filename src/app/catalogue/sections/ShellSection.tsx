@@ -14,7 +14,7 @@ import styles from "../catalogue.module.css";
  * box through --shell-block-size rather than letting it swallow the page.
  */
 export function ShellSection() {
-  const { t } = useSurface();
+  const { t, locale } = useSurface();
 
   const filler = <div className={styles.previewFill}>{t("state.notYetRecorded")}</div>;
 
@@ -40,9 +40,9 @@ export function ShellSection() {
               }
               exercise={
                 <div className={styles.stage}>
-                  <Tile text={t("nav.today")} lang="en" slot={1} ayah={1} />
-                  <Tile text={t("nav.quran")} lang="en" slot={2} ayah={1} />
-                  <Tile text={t("nav.reading")} lang="en" slot={3} ayah={1} />
+                  <Tile text={t("nav.today")} lang={locale} slot={1} ayah={1} />
+                  <Tile text={t("nav.quran")} lang={locale} slot={2} ayah={1} />
+                  <Tile text={t("nav.reading")} lang={locale} slot={3} ayah={1} />
                 </div>
               }
               context={filler}

@@ -51,10 +51,18 @@ for (const pathname of PAGES) {
       expect(tooSmall).toEqual([]);
     });
 
-    test("Arabic renders right to left and is marked as Arabic", async ({ page }) => {
-      await page.goto(surface(pathname, { locale: "ar" }));
+    test("Arabic renders right to left and is marked as Arabic", async ({ page, context }) => {
+      // Direction must be right on the FIRST paint, from the server — not
+      // corrected by an effect after hydration, which flips the layout under a
+      // reader and leaves anyone without JavaScript in an LTR frame for good.
+      await context.addCookies([
+        { name: "itqan_locale", value: "ar", url: "http://localhost:3000" },
+      ]);
+      await page.goto(surface(pathname, { locale: "ar" }), { waitUntil: "commit" });
       const direction = await page.evaluate(() => document.documentElement.getAttribute("dir"));
-      expect(direction).toBe("rtl");
+      expect(direction, "the document must be RTL before hydration").toBe("rtl");
+
+      await page.waitForLoadState("networkidle");
 
       // Every Arabic node must declare its language, or a screen reader will
       // read it with the wrong voice — which for scripture is not a small thing.

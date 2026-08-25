@@ -17,7 +17,7 @@ const TONES: readonly ToastTone[] = ["neutral", "success", "caution", "danger"];
  * chrome and the keyboard flow, nothing more.
  */
 export function FeedbackSection() {
-  const { t } = useSurface();
+  const { t, locale } = useSurface();
   const toasts = useToasts();
   const [picked, setPicked] = useState(false);
 
@@ -35,17 +35,21 @@ export function FeedbackSection() {
         <Lantern depth={3} size="lg" />
       </Specimen>
 
+      {/* The tile shows a UI label, not scripture, so it declares the surface
+          language rather than a fixed one: under an Arabic surface these words
+          ARE Arabic, and a hardcoded lang="en" would have a screen reader
+          voice them in the wrong language. */}
       <Specimen name="Tile · state">
-        <Tile text={t("nav.today")} lang="en" slot={1} ayah={1} />
-        <Tile text={t("nav.quran")} lang="en" slot={2} ayah={1} state="placed" />
-        <Tile text={t("nav.reading")} lang="en" slot={3} ayah={1} state="wrong" />
-        <Tile text={t("nav.practice")} lang="en" slot={4} ayah={1} state="disabled" />
+        <Tile text={t("nav.today")} lang={locale} slot={1} ayah={1} />
+        <Tile text={t("nav.quran")} lang={locale} slot={2} ayah={1} state="placed" />
+        <Tile text={t("nav.reading")} lang={locale} slot={3} ayah={1} state="wrong" />
+        <Tile text={t("nav.practice")} lang={locale} slot={4} ayah={1} state="disabled" />
       </Specimen>
 
       <Specimen name="Tile · picked">
         <Tile
           text={t("nav.me")}
-          lang="en"
+          lang={locale}
           slot={1}
           ayah={2}
           picked={picked}

@@ -29,6 +29,12 @@ export function AyahRosette({ ayah, text, label, size = "md" }: AyahRosetteProps
       data-size={size}
       viewBox="0 0 40 40"
       role="img"
+      // The numeral is Arabic-Indic whatever the interface language is, so the
+      // element declares its own language rather than relying on an Arabic
+      // ancestor. Outside one — a teacher's English console, the catalogue — a
+      // screen reader would otherwise voice these digits in the wrong language
+      // or skip them.
+      lang="ar"
       aria-label={label ?? numeral}
       focusable="false"
     >

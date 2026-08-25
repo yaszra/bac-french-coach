@@ -8,7 +8,6 @@ import {
   InkWord,
   MushafPage,
   PageFrame,
-  formatArabicNumber,
   type InkWordState,
 } from "@/modules/design/ui/mushaf";
 import { Family, Specimen } from "./Specimen";
@@ -19,13 +18,18 @@ const STATES: readonly InkWordState[] = ["idle", "active", "correct", "lapsed"];
  * The muṣḥaf family.
  *
  * SACRED-CONTENT RULE: there is no Arabic in this file. The ink specimens show
- * the depth ladder using NUMERALS produced by Intl — data, not scripture — and
- * are marked `lang="en"` so they never borrow the muṣḥaf face. The real page
- * lives at /catalogue/mushaf, where text comes from the content package or the
- * page honestly reports that nothing is recorded.
+ * the depth ladder using NUMERALS — data, not scripture — marked `lang="en"` so
+ * they never borrow the muṣḥaf face. The real page lives at /catalogue/mushaf,
+ * where text comes from the content package or the page honestly reports that
+ * nothing is recorded.
+ *
+ * The digits are deliberately LATIN, not localised. They were formatted through
+ * Intl, which in Arabic yields ٠١٢٣٤٥ — Arabic-Indic digits inside an element
+ * declaring English, which a screen reader would voice in the wrong language.
+ * A specimen that says it is English must be English.
  */
 export function MushafSection() {
-  const { locale, t } = useSurface();
+  const { t } = useSurface();
 
   return (
     <Family name="mushaf">
@@ -33,7 +37,7 @@ export function MushafSection() {
         {INK_DEPTHS.map((depth) => (
           <InkWord
             key={depth}
-            text={formatArabicNumber(locale, depth)}
+            text={String(depth)}
             depth={depth}
             index={depth + 1}
             ayah={1}
@@ -46,7 +50,7 @@ export function MushafSection() {
         {STATES.map((state, position) => (
           <InkWord
             key={state}
-            text={formatArabicNumber(locale, position + 1)}
+            text={String(position + 1)}
             depth={5}
             index={position + 1}
             ayah={2}
@@ -57,8 +61,8 @@ export function MushafSection() {
       </Specimen>
 
       <Specimen name="InkWord · revealed">
-        <InkWord text={formatArabicNumber(locale, 0)} depth={0} index={1} ayah={3} lang="en" />
-        <InkWord text={formatArabicNumber(locale, 0)} depth={0} index={2} ayah={3} lang="en" revealed />
+        <InkWord text={String(0)} depth={0} index={1} ayah={3} lang="en" />
+        <InkWord text={String(0)} depth={0} index={2} ayah={3} lang="en" revealed />
       </Specimen>
 
       <Specimen name="AyahRosette">
