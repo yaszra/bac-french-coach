@@ -18,6 +18,22 @@ import type { Translate } from "@/modules/platform/i18n/translate";
 import { conceptById, makhrajById, type ConceptId, type MakhrajGroup } from "../domain/concepts";
 import { facetsOf } from "../domain/confusion";
 
+/**
+ * Resolve one label key.
+ *
+ * A concept id can be both a name and a namespace — `tanwin` is a concept, and
+ * `tanwin.fath` is one of its three — and a nested message bundle cannot hold a string
+ * and an object at the same path. The convention is that such a concept keeps its own
+ * name under `.name`, and this is the single place that knows it. A key that resolves
+ * to nothing comes back as itself, which is visible in review rather than silent.
+ */
+export function label(t: Translate, key: string): string {
+  const direct = t(key);
+  if (direct !== key) return direct;
+  const named = t(`${key}.name`);
+  return named === `${key}.name` ? key : named;
+}
+
 /** The name of a bare letter, e.g. `reading.concept.letter.beh`. */
 export function letterLabelKey(letterId: ConceptId): string {
   return `reading.concept.${letterId}`;
@@ -33,7 +49,7 @@ export function formLabelKey(form: string): string {
 
 export function makhrajLabel(t: Translate, makhraj: MakhrajGroup): string {
   const definition = makhrajById(makhraj);
-  return definition === null ? t(`reading.makhraj.unknown`) : t(definition.labelKey);
+  return definition === null ? t("reading.makhraj.unknown") : label(t, definition.labelKey);
 }
 
 export function regionLabel(t: Translate, region: string): string {
@@ -53,21 +69,21 @@ export function conceptLabel(t: Translate, conceptId: ConceptId): string {
 
   if (facets.letter !== null && facets.harakah !== null) {
     return t("reading.label.letterHarakah", {
-      letter: t(letterLabelKey(facets.letter.id)),
-      harakah: t(harakahLabelKey(facets.harakah)),
+      letter: label(t, letterLabelKey(facets.letter.id)),
+      harakah: label(t, harakahLabelKey(facets.harakah)),
     });
   }
 
   if (facets.letter !== null && facets.form !== null) {
     return t("reading.label.letterForm", {
-      letter: t(letterLabelKey(facets.letter.id)),
-      form: t(formLabelKey(facets.form)),
+      letter: label(t, letterLabelKey(facets.letter.id)),
+      form: label(t, formLabelKey(facets.form)),
     });
   }
 
-  if (facets.letter !== null) return t(letterLabelKey(facets.letter.id));
-  if (concept !== null) return t(concept.labelKey);
-  return t(`reading.concept.${conceptId}`);
+  if (facets.letter !== null) return label(t, letterLabelKey(facets.letter.id));
+  if (concept !== null) return label(t, concept.labelKey);
+  return label(t, `reading.concept.${conceptId}`);
 }
 
 /**

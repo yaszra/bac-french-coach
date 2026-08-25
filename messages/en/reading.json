@@ -327,14 +327,18 @@
       },
       "sukun": "sukūn",
       "shaddah": "shaddah",
-      "tanwin": "tanwīn",
-      "tanwin.fath": "tanwīn with fatḥ",
-      "tanwin.damm": "tanwīn with ḍamm",
-      "tanwin.kasr": "tanwīn with kasr",
-      "madd.tabii": "natural madd",
-      "madd.iwad": "madd of substitution",
-      "madd.badal": "madd of exchange",
-      "madd.silah": "madd of connection",
+      "tanwin": {
+        "name": "tanwīn",
+        "fath": "tanwīn with fatḥ",
+        "damm": "tanwīn with ḍamm",
+        "kasr": "tanwīn with kasr"
+      },
+      "madd": {
+        "tabii": "natural madd",
+        "iwad": "madd of substitution",
+        "badal": "madd of exchange",
+        "silah": "madd of connection"
+      },
       "rule": {
         "ghunnah": "ghunnah",
         "qalqalah": "qalqalah",
