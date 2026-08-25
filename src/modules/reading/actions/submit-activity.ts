@@ -55,7 +55,11 @@ const productionSubmission = z.object({
   elapsedMs: z.number().int().min(0).max(3_600_000).optional(),
 });
 
-export const activitySubmissionSchema = z.discriminatedUnion("kind", [
+/**
+ * Not exported: a `"use server"` module may export only async functions, and this
+ * schema is the server's own boundary rather than anything a client needs.
+ */
+const activitySubmissionSchema = z.discriminatedUnion("kind", [
   recognitionSubmission,
   productionSubmission,
 ]);

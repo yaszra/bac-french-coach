@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { signInAs } from "./helpers";
 import { Client } from "pg";
 import { readFileSync } from "node:fs";
 
@@ -23,6 +24,8 @@ const LEARNER = "u_seed_teen";
 const EMAIL = "maryam@itqan.test";
 const PASSWORD = "itqan-dev-password";
 const UNIT = "b:78:1";
+/** Due, but never practised: the unit whose first rung is a listen. */
+const FRESH_UNIT = "b:78:2";
 
 const DB =
   process.env.DIRECT_DATABASE_URL ?? "postgresql://itqan:itqan@localhost:5432/itqan";
@@ -85,6 +88,22 @@ async function arrange(): Promise<void> {
       ["ms_e2e_learner", ORG, LEARNER, UNIT, lapsedAt, dueAt],
     );
 
+    // A second unit that is due and has never been practised, so the plan
+    // offers a first rung — a listen. /practice honours ?unit only for a unit
+    // the plan already contains (the URL never invents work), so a test about
+    // the listen rung has to arrange the unit into the day rather than ask for
+    // one that is not there.
+    await client.query(
+      `INSERT INTO memory_state
+         (id, "organizationId", "learnerUserId", "unitId", "unitKind", stability, difficulty,
+          reps, lapses, confidence, "dueAt", "updatedAt")
+       VALUES ($1,$2,$3,$4,'ayah_body',0,5,0,0,0,$5, now())
+       ON CONFLICT ("learnerUserId", "unitId") DO UPDATE
+         SET reps = 0, lapses = 0, stability = 0, confidence = 0,
+             "lastReviewAt" = NULL, "dueAt" = EXCLUDED."dueAt", "updatedAt" = now()`,
+      ["ms_e2e_learner_fresh", ORG, LEARNER, FRESH_UNIT, dueAt],
+    );
+
     // Today starts clean: attempts recorded by an earlier run would make the
     // day's count untestable.
     await client.query(
@@ -103,7 +122,12 @@ async function arrange(): Promise<void> {
   }
 }
 
-async function signIn(page: Page): Promise<void> {
+/**
+ * The real form, used once. Sign-in is rate limited per identifier, so the
+ * other journeys mint the session instead of spending an attempt on a screen
+ * they are not testing.
+ */
+async function signInThroughTheForm(page: Page): Promise<void> {
   await page.goto("/sign-in");
   await page.getByTestId("sign-in-email").fill(EMAIL);
   await page.getByTestId("sign-in-password").fill(PASSWORD);
@@ -117,7 +141,7 @@ test.describe("the learner's day", () => {
   });
 
   test("Today names one action, and the day's count follows the evidence", async ({ page }) => {
-    await signIn(page);
+    await signInThroughTheForm(page);
 
     // One obvious next action, with the reason the scheduler actually had.
     const card = page.getByLabel(/next action|عمل اليوم/i);
@@ -150,8 +174,8 @@ test.describe("the learner's day", () => {
     await expect(page.getByTestId("today-due")).toContainText(/1 of \d+ done today/i);
   });
 
-  test("the muṣḥaf offers a full-ink read, one tap from the memory view", async ({ page }) => {
-    await signIn(page);
+  test("the muṣḥaf offers a full-ink read, one tap from the memory view", async ({ page, context }) => {
+    await signInAs(context, LEARNER);
     await page.goto("/quran");
     await expect(page.getByTestId("quran-pages")).toBeVisible();
 
@@ -161,11 +185,11 @@ test.describe("the learner's day", () => {
     await expect(page.getByText(/Reading view|وضع القراءة/i)).toBeVisible();
   });
 
-  test("an unrecorded recitation is said plainly, never faked", async ({ page }) => {
-    await signIn(page);
+  test("an unrecorded recitation is said plainly, never faked", async ({ page, context }) => {
+    await signInAs(context, LEARNER);
     // A brand-new unit's first rung is a listen, and no reciter's audio is in
     // the package: the screen has to say so rather than show a dead player.
-    await page.goto("/practice?unit=b:78:2");
+    await page.goto(`/practice?unit=${FRESH_UNIT}`);
     await expect(page.getByTestId("listen-no-audio")).toBeVisible();
   });
 });

@@ -2,14 +2,22 @@
   "reading": {
     "title": "Reading",
     "subtitle": "The Qāʿidah: the letters, their sounds, and where each one is made",
+    "action": {
+      "backToPath": "Back to Reading"
+    },
     "path": {
       "heading": "Your path",
       "recorded": "{done} of {total} concepts have evidence",
       "nothingRecorded": "Nothing recorded yet",
-      "lessonCount": "{count} lessons",
-      "conceptsIn": "{total} concepts",
+      "conceptsIn": {
+        "one": "{total} concept",
+        "other": "{total} concepts"
+      },
       "secureCount": "{secure} of {total} secure",
-      "dueHere": "{count} due for review",
+      "dueHere": {
+        "one": "{count} due for review",
+        "other": "{count} due for review"
+      },
       "packageMissing": {
         "title": "The Qāʿidah lessons are not installed",
         "body": "This build has no lesson package, so there is no path to show. Nothing has been lost — your evidence is kept in the record."
@@ -23,7 +31,8 @@
       },
       "lesson": {
         "title": "Continue the Qāʿidah",
-        "body": "Open {lesson} and work through it at your own pace."
+        "body": "Work through it at your own pace. Nothing here is timed.",
+        "open": "Continue"
       },
       "nothingDue": {
         "title": "Nothing is due",
@@ -37,18 +46,24 @@
       "locked": "Opens after {lesson}"
     },
     "lesson": {
-      "letters.group1": "The first seven letters",
-      "letters.group2": "The second seven letters",
-      "letters.group3": "The third seven letters",
-      "letters.group4": "The last seven letters",
-      "letters.forms": "Letters in their positions",
-      "harakat.fathah": "Fatḥah",
-      "harakat.kasrah": "Kasrah",
-      "harakat.dammah": "Ḍammah",
+      "letters": {
+        "group1": "The first seven letters",
+        "group2": "The second seven letters",
+        "group3": "The third seven letters",
+        "group4": "The last seven letters",
+        "forms": "Letters in their positions"
+      },
+      "harakat": {
+        "fathah": "Fatḥah",
+        "kasrah": "Kasrah",
+        "dammah": "Ḍammah"
+      },
       "sukun": "Sukūn",
       "shaddah": "Shaddah",
       "tanwin": "Tanwīn",
-      "madd.tabii": "Natural madd",
+      "madd": {
+        "tabii": "Natural madd"
+      },
       "unknown": "This lesson",
       "empty": {
         "all_prerequisites_pending": "Its earlier lessons are not finished yet.",
@@ -74,7 +89,15 @@
         "emerging": "Emerging",
         "secure": "Secure"
       },
-      "denominator": "{attempts} answers across {sessions} sittings",
+      "denominator": "{answers} across {sittings}",
+      "answers": {
+        "one": "{count} answer",
+        "other": "{count} answers"
+      },
+      "sittings": {
+        "one": "{count} sitting",
+        "other": "{count} sittings"
+      },
       "noEvidence": "No evidence recorded for this yet",
       "reason": {
         "not_yet_recorded": "Nothing has been recorded for this concept.",
@@ -136,7 +159,7 @@
     "intro": {
       "heading": "Meet this letter",
       "madeAt": "Made at: {place}",
-      "region": "In the {region}",
+      "region": "In {region}",
       "listen": "Listen",
       "narrate": "Read this aloud to me",
       "stop": "Stop",
@@ -144,6 +167,10 @@
       "noNarration": "No narration is recorded for this lesson.",
       "voiceNote": "The explanation is read by a synthesized voice. Recitation is never synthesized — only a person recites.",
       "animationOff": "Motion is reduced, so this is shown still."
+    },
+    "diagram": {
+      "throat": "throat",
+      "lips": "lips"
     },
     "talqin": {
       "heading": "Model pronunciation",
@@ -203,7 +230,10 @@
       "title": "Every letter, by makhraj",
       "body": "The alphabet arranged by where in the mouth each letter is made, from the deepest throat to the two lips.",
       "open": "Open the letters",
-      "letterCount": "{count} letters",
+      "letterCount": {
+        "one": "{count} letter",
+        "other": "{count} letters"
+      },
       "noLetters": "No letter belongs to this place on its own.",
       "unicode": "Unicode {unicode}"
     },

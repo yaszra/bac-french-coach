@@ -1,6 +1,8 @@
 import { test, expect, type BrowserContext } from "@playwright/test";
 import { PrismaClient } from "@prisma/client";
 import { encodeSession } from "../src/modules/platform/session/cookie";
+import { runNightlyFamilyReports } from "../src/modules/platform/jobs/handlers/reports";
+import { isLocalEvening } from "../src/modules/platform/jobs/handlers/evening";
 
 /**
  * The family app, end to end, against the seeded school.
@@ -15,6 +17,8 @@ const canRun = Boolean(url && process.env.SESSION_SECRET);
 
 const ORG = "org_seed_madrasah";
 const GUARDIAN = "u_seed_parent";
+/** The approved link. The teen is claimed but not approved, on purpose. */
+const CHILD = "u_seed_kid";
 
 async function signIn(context: BrowserContext): Promise<void> {
   const db = new PrismaClient({ datasources: { db: { url: url as string } } });
@@ -44,10 +48,43 @@ async function signIn(context: BrowserContext): Promise<void> {
   }
 }
 
+/**
+ * Tonight's report is written by a job, not by the page — so a test that wants
+ * to read one has to run the job, at an hour that is actually evening for the
+ * family it belongs to. Faking a ReportRun row would test the renderer against
+ * a payload the product never produces.
+ */
+async function buildTonightReport(): Promise<void> {
+  const db = new PrismaClient({ datasources: { db: { url: url as string } } });
+  let timezone = "UTC";
+  try {
+    const profile = await db.learnerProfile.findUnique({
+      where: { userId: CHILD },
+      select: { timezone: true },
+    });
+    timezone = profile?.timezone ?? "UTC";
+  } finally {
+    await db.$disconnect();
+  }
+
+  const midnight = new Date();
+  midnight.setUTCHours(0, 0, 0, 0);
+  for (let hour = 0; hour < 24; hour++) {
+    const at = new Date(midnight.getTime() + hour * 3_600_000);
+    if (!isLocalEvening(timezone, at)) continue;
+    await runNightlyFamilyReports({ organizationId: ORG, at: at.toISOString() });
+    return;
+  }
+  throw new Error(`no evening hour found today for ${timezone}`);
+}
+
 test.describe("the family app", () => {
   test("tells a signed-out visitor nothing about any child", async ({ page }) => {
     await page.goto("/tonight");
-    await expect(page.getByText("Sign in to see your family")).toBeVisible();
+    // The heading, specifically: the sign-in button carries the same words.
+    await expect(
+      page.getByRole("heading", { name: "Sign in to see your family" }),
+    ).toBeVisible();
     await expect(page.getByText("Yūsuf")).toHaveCount(0);
   });
 
@@ -64,8 +101,9 @@ test.describe("the family app", () => {
   test("never presents a home task as progress", async ({ page, context }) => {
     test.skip(!canRun, "needs a seeded database and SESSION_SECRET");
     await signIn(context);
+    await buildTonightReport();
 
-    await page.goto("/tonight");
+    await page.goto(`/tonight?child=${CHILD}`);
     await expect(
       page.getByText("Doing this together is not marked as progress", { exact: false }),
     ).toBeVisible();

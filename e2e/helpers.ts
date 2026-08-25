@@ -1,4 +1,6 @@
 import type { Page, BrowserContext } from "@playwright/test";
+import { PrismaClient } from "@prisma/client";
+import { encodeSession } from "../src/modules/platform/session/cookie";
 
 /**
  * Shared journey helpers.
@@ -27,6 +29,53 @@ export async function signIn(page: Page, email: string, password = SEED.password
   await page.getByLabel(/password/i).fill(password);
   await page.getByRole("button", { name: /sign in|continue/i }).click();
   await page.waitForURL((url) => !url.pathname.includes("sign-in"), { timeout: 15_000 });
+}
+
+/**
+ * Sign in without going through the form.
+ *
+ * The sign-in form is rate limited, deliberately and per identifier — which is
+ * a feature of the product and a trap for a suite in which every spec signs the
+ * same person in. Run the whole suite and the later specs are told "too many
+ * tries" and fail for a reason that has nothing to do with what they test.
+ *
+ * So a journey whose subject is NOT sign-in mints the session it would have
+ * been given: a real Session row and the real cookie encoding, so authorisation
+ * is exercised exactly as in production. The form itself stays covered by the
+ * specs that are actually about signing in.
+ */
+export async function signInAs(
+  context: BrowserContext,
+  userId: string,
+  organizationId: string = SEED.organizationId,
+): Promise<void> {
+  const url = process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL;
+  if (!url) throw new Error("DATABASE_URL or DIRECT_DATABASE_URL is required to mint a session");
+  const db = new PrismaClient({ datasources: { db: { url } } });
+  try {
+    const sessionId = `e2e_${userId}_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+    const expiresAt = new Date(Date.now() + 3_600_000);
+    await db.session.create({
+      data: { id: sessionId, userId, organizationId, version: 1, issuedAt: new Date(), expiresAt },
+    });
+    await context.addCookies([
+      {
+        name: "itqan_session",
+        value: encodeSession({
+          sid: sessionId,
+          uid: userId,
+          org: organizationId,
+          v: 1,
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(expiresAt.getTime() / 1000),
+        }),
+        domain: "localhost",
+        path: "/",
+      },
+    ]);
+  } finally {
+    await db.$disconnect();
+  }
 }
 
 /** Render in a chosen surface without clicking through settings. */

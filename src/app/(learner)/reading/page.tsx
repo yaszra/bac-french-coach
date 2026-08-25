@@ -54,9 +54,9 @@ export default async function ReadingPage() {
     <div className={styles.page}>
       <div className={styles.inner} data-testid="reading-path">
         <header>
-          <p className={styles.eyebrow}>{t("reading.title")}</p>
-          <h1 className={styles.heading}>{t("reading.subtitle")}</h1>
-          <p className={styles.lede}>
+          <h1 className={styles.heading}>{t("reading.title")}</h1>
+          <p className={styles.lede}>{t("reading.subtitle")}</p>
+          <p className={styles.quiet} data-testid="reading-recorded">
             {view.path.recordedConcepts === 0
               ? t("reading.path.nothingRecorded")
               : t("reading.path.recorded", {
@@ -135,17 +135,15 @@ function NextAction({ view, t }: { readonly view: ReadingPathView; readonly t: T
   return (
     <div className={styles.primary} data-testid="reading-next-lesson">
       <p className={styles.eyebrow}>{t("reading.next.heading")}</p>
-      <p className={styles.primaryTitle}>{t("reading.next.lesson.title")}</p>
-      <p className={styles.note}>
-        {t("reading.next.lesson.body", { lesson: t(next.lesson.lesson.titleKey) })}
-      </p>
+      <p className={styles.primaryTitle}>{t(next.lesson.lesson.titleKey)}</p>
+      <p className={styles.note}>{t("reading.next.lesson.body")}</p>
       <div className={styles.actions}>
         <LinkButton
           href={lessonHref(next.lesson.lesson.id)}
           variant="primary"
           data-testid="reading-start"
         >
-          {t("reading.next.lesson.title")}
+          {t("reading.next.lesson.open")}
         </LinkButton>
       </div>
     </div>
@@ -172,7 +170,7 @@ function LessonRow({
         <span className={styles.lessonTitle}>{t(entry.lesson.titleKey)}</span>
         <span className={styles.quiet}>
           {entry.recorded === 0
-            ? t("reading.path.conceptsIn", { total: entry.total })
+            ? t("reading.path.conceptsIn", { total: entry.total, count: entry.total })
             : t("reading.path.secureCount", { secure: entry.secure, total: entry.total })}
         </span>
         {entry.unlocked ? null : (

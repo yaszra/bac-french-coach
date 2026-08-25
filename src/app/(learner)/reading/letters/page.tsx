@@ -95,7 +95,7 @@ export default async function LettersPage() {
 
           <div className={styles.actions}>
             <LinkButton href={readingHref()} variant="secondary">
-              {t("reading.title")}
+              {t("reading.action.backToPath")}
             </LinkButton>
           </div>
         </div>

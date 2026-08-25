@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type BrowserContext } from "@playwright/test";
+import { signInAs } from "./helpers";
 import { PrismaClient } from "@prisma/client";
 
 /**
@@ -17,6 +18,7 @@ import { PrismaClient } from "@prisma/client";
  */
 const ORG_ID = "org_seed_madrasah";
 const TEACHER = { email: "teacher@itqan.test", password: "itqan-dev-password" };
+const TEACHER_ID = "u_seed_teacher";
 const LEARNER_ID = "u_seed_teen";
 const REQUEST_ID = "vr_e2e_teacher";
 
@@ -33,7 +35,10 @@ if (existsSync(VENDORED_CHROMIUM)) {
 }
 
 async function withDb<T>(work: (db: PrismaClient) => Promise<T>): Promise<T> {
-  const db = new PrismaClient(url === undefined ? {} : { datasources: { db: { url } } });
+  const db =
+    url === undefined
+      ? new PrismaClient()
+      : new PrismaClient({ datasources: { db: { url } } });
   try {
     return await work(db);
   } finally {
@@ -67,19 +72,23 @@ test.afterEach(async () => {
   });
 });
 
-async function signIn(page: Page): Promise<void> {
-  await page.goto("/teacher/sign-in");
-  await page.getByLabel("Email").fill(TEACHER.email);
-  await page.getByLabel("Password").fill(TEACHER.password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForURL("**/teacher/today");
+/**
+ * The console's subject is triage and verdicts, not the login form — and the
+ * form is rate limited per identifier, so a suite that signs the same teacher
+ * in for every test eventually fails on "too many tries" instead of on
+ * anything it meant to check. The session is minted the way the server would
+ * have issued it.
+ */
+async function signIn(context: BrowserContext): Promise<void> {
+  await signInAs(context, TEACHER_ID);
 }
 
 test.describe("the teacher console", () => {
   test.skip(({ browserName }) => browserName !== "chromium", "one browser is enough here");
 
-  test("triage → verify → the inbox shrinks", async ({ page }) => {
-    await signIn(page);
+  test("triage → verify → the inbox shrinks", async ({ page, context }) => {
+    await signIn(context);
+    await page.goto("/teacher/today");
 
     /* The inbox names the person and the reason, and the reason is the one
        thing only a teacher can answer: someone is waiting to be heard.
@@ -136,14 +145,14 @@ test.describe("the teacher console", () => {
     ]);
   });
 
-  test("a verdict is recorded once, and the record says so", async ({ page }) => {
-    await signIn(page);
+  test("a verdict is recorded once, and the record says so", async ({ page, context }) => {
+    await signIn(context);
     await page.goto(`/teacher/verify/${REQUEST_ID}`);
     await expect(page.getByText("A verdict is your word, recorded once.")).toBeVisible();
   });
 
-  test("the assign wizard carries references, never text", async ({ page }) => {
-    await signIn(page);
+  test("the assign wizard carries references, never text", async ({ page, context }) => {
+    await signIn(context);
     await page.goto("/teacher/assign");
     await expect(page.getByRole("heading", { name: "New assignment" })).toBeVisible();
     await expect(page.getByText("Which students")).toBeVisible();

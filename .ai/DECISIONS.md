@@ -291,3 +291,44 @@ Format: D-nnn · date · decision · provenance.
 - **Tier arrives as a prop from the server.** `LearnerSurface` takes `tier` from the layout, which
   reads it from the account; only `theme` honours a URL override. A child cannot promote themselves
   to the adult surface by editing a URL.
+
+## Reading (Qāʿidah) learner surface
+
+- **The activity id IS the activity.** `encodeActivityId` writes form, concept, presentation,
+  sitting and index into one parseable id; `buildRecognitionActivity` is a pure function of that
+  id, so the server rebuilds the exact activity — distractors, order and answer — when the
+  submission arrives. That is what lets the client be handed choices with no key: `ActivityPayload`
+  has no `answerChoiceId` field, and a test asserts the serialized payload never contains one.
+  Provenance: evidence rule. Proven by `ui/activity-id.test.ts`, `ui/session-plan.test.ts`.
+- **Reading writes the same events as ḥifẓ.** One event vocabulary, not a private one:
+  `submitActivity` appends `attempt.recorded` with `unitKind: "reading_concept"`, `unitId`
+  `c:<conceptId>`, and folds it into memory state in the SAME transaction — without which the
+  reading scheduler would be frozen exactly as ḥifẓ's would. Provenance: `submit-attempt.ts`.
+- **Three fields a stored row does not carry are recovered, never invented.** `evidence-shape.ts`
+  reads the evidence kind off the retrieval type (`recognition` / `production` /
+  `oral_recitation` — all three already in `RETRIEVAL_TYPES`); *replays* the presentation by
+  asking the ladder which rung each attempt was built at, using the one function the builder also
+  calls, so the two agree by construction; and derives a sitting from a stated 30-minute gap, so
+  the "sessions" denominator has a rule that travels with it. Provenance: honesty rule.
+- **A client cannot claim a teacher heard it.** The submission schema carries a verdict but no
+  observer: evidence from the learner surface is `machine_checked` or `self_confirmed`, always. A
+  teacher's ear enters through a verdict from a teacher's console. The ladder therefore keeps
+  `teacherVerified` and `selfConfirmed` distinct on screen, and the self-confirmation note says
+  whose word it is. Provenance: evidence rule.
+- **Foundations the lessons depend on but do not list are attached, not assumed.** The primer
+  teaches `letter.alef.fathah` without listing `harakah.fathah`, which the lattice makes a
+  prerequisite; left alone, sukūn, tanwīn and madd would stay locked forever.
+  `withPrerequisiteFoundations` attaches such a concept to the first lesson that needs it, and a
+  test proves no concept in the installed package stands on an untaught prerequisite.
+- **Lesson ids and lattice ids are joined by codepoint.** The lesson files say `letter.baa`, the
+  lattice says `letter.beh`; transliterations collide and Unicode names do not, so the join is made
+  on the codepoint. An element that does not resolve is dropped AND counted
+  (`unresolvedElements`), never silently lost. Provenance: honesty rule.
+- **Narration speaks English; Arabic terms are shown, never synthesized.** `Narration` reads the
+  manifest's English prose with the Web Speech API and renders the lexicon's Arabic terms as text.
+  No synthesized voice ever produces recitation, and `TalqinPlayer` renders "not yet recorded"
+  with an offer to ask a teacher rather than substituting a machine voice. Provenance:
+  sacred-content rule.
+- **A concept's name is composed, not authored 259 times.** `conceptLabel` builds "bāʾ with
+  fatḥah" from three keys. Where a concept id is also a namespace (`tanwin` and `tanwin.fath`),
+  its own name lives at `.name` — one convention, in one function.

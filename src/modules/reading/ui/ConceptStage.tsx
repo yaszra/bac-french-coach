@@ -67,10 +67,12 @@ export function ConceptStage({
 }
 
 /**
- * A side view of the mouth: lips at the start of the line, throat at its end.
+ * A side view of the mouth: the throat at one end, the lips at the other.
  *
- * The coordinates are drawing coordinates, not anatomy, and the caption names the
- * makhraj in words so nothing rests on a reader interpreting a picture.
+ * The two ends are labelled in words, because a schematic that relies on the reader
+ * interpreting a shape teaches nothing. The mark sits at the letter's makhraj, taken
+ * from the lattice; the caption underneath names that makhraj, so the picture is a
+ * reinforcement of the words and never the only carrier of the meaning.
  */
 function MouthDiagram({
   label,
@@ -83,8 +85,8 @@ function MouthDiagram({
   readonly y: number;
   readonly t: Translate;
 }) {
-  const cx = 20 + x * 200;
-  const cy = 20 + y * 100;
+  const cx = 26 + x * 176;
+  const cy = 34 + y * 74;
 
   return (
     <svg
@@ -93,12 +95,26 @@ function MouthDiagram({
       role="img"
       aria-label={t("reading.a11y.mouthDiagram", { label })}
     >
-      {/* Palate and jaw: one open profile, lips on the right of the drawing. */}
-      <path className={styles.mouthOutline} d="M18 46c34-22 96-30 148-18 24 6 44 16 56 30" />
-      <path className={styles.mouthOutline} d="M18 118c34 18 96 24 148 12 24-6 44-14 56-26" />
-      <path className={styles.mouthTongue} d="M34 104c26-18 62-22 98-14 20 4 36 10 48 18" />
-      <circle className={styles.articulationHalo} cx={cx} cy={cy} r={12} />
+      {/* The palate, arching forward from the throat to behind the upper lip. */}
+      <path className={styles.mouthOutline} d="M22 40c14-14 44-22 84-22 40 0 74 8 100 20" />
+      {/* The lips, at the forward end. */}
+      <path className={styles.mouthOutline} d="M206 38c10 4 12 14 12 22s-2 18-12 22" />
+      {/* The jaw and the floor of the mouth. */}
+      <path className={styles.mouthOutline} d="M22 122c14 12 44 18 84 18 40 0 74-6 100-18" />
+      {/* The tongue: a low mound, deepest at the back. */}
+      <path className={styles.mouthTongue} d="M40 112c22-22 58-30 96-26 24 3 44 9 58 16" />
+      {/* The throat, at the deep end. */}
+      <path className={styles.mouthOutline} d="M22 40c-6 12-6 30 0 42" />
+
+      <circle className={styles.articulationHalo} cx={cx} cy={cy} r={13} />
       <circle className={styles.articulation} cx={cx} cy={cy} r={5} />
+
+      <text className={styles.diagramLabel} x={10} y={144} textAnchor="start">
+        {t("reading.diagram.throat")}
+      </text>
+      <text className={styles.diagramLabel} x={230} y={144} textAnchor="end">
+        {t("reading.diagram.lips")}
+      </text>
     </svg>
   );
 }

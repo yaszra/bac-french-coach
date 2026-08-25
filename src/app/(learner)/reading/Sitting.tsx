@@ -81,12 +81,17 @@ export function Sitting({
             <EmptyState
               variant="not-yet-recorded"
               title={emptyTitle}
+              // The planner's own reason is the better answer when it actually looked
+              // at something; when there was nothing to look at, the screen's own
+              // words are truer than "this lesson has nothing in it".
               description={
-                view.plan.emptyReason === null ? emptyBody : t(emptyKeyOf(view.plan.emptyReason.key))
+                view.plan.emptyReason === null || view.states.length === 0
+                  ? emptyBody
+                  : t(emptyKeyOf(view.plan.emptyReason.key))
               }
               action={
                 <LinkButton href={readingHref()} variant="secondary">
-                  {t("reading.title")}
+                  {t("reading.action.backToPath")}
                 </LinkButton>
               }
               data-testid="reading-sitting-empty"
@@ -107,7 +112,7 @@ export function Sitting({
             ? null
             : statesShown.map((state) => (
                 <section key={state.conceptId} className={styles.panel} data-testid="reading-concept-state">
-                  <p className={styles.panelTitle}>{conceptLabel(t, state.conceptId)}</p>
+                  <p className={styles.lessonTitle}>{conceptLabel(t, state.conceptId)}</p>
                   <ScoreLine score={state.smartScore} t={t} showNumber={policy.showsScores} />
                   <LadderTrack ladder={state.ladder} t={t} />
                 </section>

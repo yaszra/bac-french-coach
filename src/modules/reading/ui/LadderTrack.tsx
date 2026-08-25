@@ -87,9 +87,11 @@ export function ScoreLine({
   /** Children are never shown a number. Tier policy, not decoration. */
   readonly showNumber: boolean;
 }) {
+  // Two counts, so two plural forms: "1 answer" and "3 sittings" each pick their own,
+  // which one string with two numbers in it could never do correctly.
   const denominator = t("reading.smartscore.denominator", {
-    attempts: score.denominator.attempts,
-    sessions: score.denominator.sessions,
+    answers: t("reading.smartscore.answers", { count: score.denominator.attempts }),
+    sittings: t("reading.smartscore.sittings", { count: score.denominator.sessions }),
   });
 
   return (

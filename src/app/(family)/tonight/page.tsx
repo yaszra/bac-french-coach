@@ -35,7 +35,20 @@ export default async function TonightPage({
   const params = await searchParams;
   const requested = typeof params.child === "string" ? params.child : null;
   const children = await listChildren(actor.organizationId, actor.userId);
-  const child = children.find((c) => c.learnerUserId === requested) ?? children[0];
+  // Which child this page opens on, when the parent did not name one.
+  //
+  // The first child in the list is the wrong default: a parent with one
+  // approved link and one still waiting would open the report and be told they
+  // may not see anything, purely because of list order. So an unasked-for
+  // default falls to the first child this caller may actually view, and only
+  // then to the first child at all — which still shows the pending notice, but
+  // now because that is genuinely all there is.
+  const viewable = (learnerUserId: string) =>
+    can(actor, "family:viewChild", { type: "learner", id: learnerUserId }).allowed;
+  const child =
+    (requested === null ? undefined : children.find((c) => c.learnerUserId === requested)) ??
+    (requested === null ? children.find((c) => viewable(c.learnerUserId)) : undefined) ??
+    children[0];
 
   // A claim is not access. `can()` refuses first; the page then says why,
   // rather than rendering an empty report that looks like a quiet day.

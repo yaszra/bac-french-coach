@@ -2,14 +2,30 @@
   "reading": {
     "title": "القراءة",
     "subtitle": "القاعدة: الحروف وأصواتها ومخارجها",
+    "action": {
+      "backToPath": "العودة إلى القراءة"
+    },
     "path": {
       "heading": "مسارك",
       "recorded": "لديك دليل على {done} من {total} من المفاهيم",
       "nothingRecorded": "لم يُسجَّل شيء بعد",
-      "lessonCount": "{count} دروس",
-      "conceptsIn": "{total} مفاهيم",
+      "conceptsIn": {
+        "zero": "لا مفاهيم",
+        "one": "مفهوم واحد",
+        "two": "مفهومان",
+        "few": "{total} مفاهيم",
+        "many": "{total} مفهومًا",
+        "other": "{total} مفهوم"
+      },
       "secureCount": "{secure} من {total} راسخة",
-      "dueHere": "{count} للمراجعة",
+      "dueHere": {
+        "zero": "لا شيء للمراجعة",
+        "one": "واحد للمراجعة",
+        "two": "اثنان للمراجعة",
+        "few": "{count} للمراجعة",
+        "many": "{count} للمراجعة",
+        "other": "{count} للمراجعة"
+      },
       "packageMissing": {
         "title": "دروس القاعدة غير مثبَّتة",
         "body": "لا تحتوي هذه النسخة على حزمة الدروس، فلا يوجد مسار لعرضه. ولم يضِع شيء؛ فأدلّتك محفوظة في السجل."
@@ -23,7 +39,8 @@
       },
       "lesson": {
         "title": "تابِع القاعدة",
-        "body": "افتح {lesson} واعمل فيه على مهلك."
+        "body": "اعمل فيه على مهلك، فليس هنا شيء مؤقَّت.",
+        "open": "تابِع"
       },
       "nothingDue": {
         "title": "لا شيء مستحق الآن",
@@ -37,18 +54,24 @@
       "locked": "يُفتح بعد {lesson}"
     },
     "lesson": {
-      "letters.group1": "الحروف السبعة الأولى",
-      "letters.group2": "الحروف السبعة الثانية",
-      "letters.group3": "الحروف السبعة الثالثة",
-      "letters.group4": "الحروف السبعة الأخيرة",
-      "letters.forms": "الحروف في مواضعها",
-      "harakat.fathah": "الفتحة",
-      "harakat.kasrah": "الكسرة",
-      "harakat.dammah": "الضمة",
+      "letters": {
+        "group1": "الحروف السبعة الأولى",
+        "group2": "الحروف السبعة الثانية",
+        "group3": "الحروف السبعة الثالثة",
+        "group4": "الحروف السبعة الأخيرة",
+        "forms": "الحروف في مواضعها"
+      },
+      "harakat": {
+        "fathah": "الفتحة",
+        "kasrah": "الكسرة",
+        "dammah": "الضمة"
+      },
       "sukun": "السكون",
       "shaddah": "الشدة",
       "tanwin": "التنوين",
-      "madd.tabii": "المد الطبيعي",
+      "madd": {
+        "tabii": "المد الطبيعي"
+      },
       "unknown": "هذا الدرس",
       "empty": {
         "all_prerequisites_pending": "لم تكتمل دروسه السابقة بعد.",
@@ -74,7 +97,23 @@
         "emerging": "في الطريق",
         "secure": "راسخ"
       },
-      "denominator": "{attempts} إجابة في {sessions} جلسات",
+      "denominator": "{answers} في {sittings}",
+      "answers": {
+        "zero": "لا إجابات",
+        "one": "إجابة واحدة",
+        "two": "إجابتان",
+        "few": "{count} إجابات",
+        "many": "{count} إجابةً",
+        "other": "{count} إجابة"
+      },
+      "sittings": {
+        "zero": "لا جلسات",
+        "one": "جلسة واحدة",
+        "two": "جلستان",
+        "few": "{count} جلسات",
+        "many": "{count} جلسةً",
+        "other": "{count} جلسة"
+      },
       "noEvidence": "لا يوجد دليل مسجَّل على هذا بعد",
       "reason": {
         "not_yet_recorded": "لم يُسجَّل شيء لهذا المفهوم.",
@@ -145,6 +184,10 @@
       "voiceNote": "يقرأ الشرحَ صوتٌ مركَّب. أما التلاوة فلا تُركَّب أبدًا، ولا يتلو إلا إنسان.",
       "animationOff": "الحركة مخفَّفة، فعُرض هذا ساكنًا."
     },
+    "diagram": {
+      "throat": "الحلق",
+      "lips": "الشفتان"
+    },
     "talqin": {
       "heading": "التلقين",
       "play": "اسمعه",
@@ -203,7 +246,14 @@
       "title": "كل حرف بمخرجه",
       "body": "الحروف مرتَّبة بحسب موضع نطقها في الفم، من أقصى الحلق إلى الشفتين.",
       "open": "افتح الحروف",
-      "letterCount": "{count} حروف",
+      "letterCount": {
+        "zero": "لا حروف",
+        "one": "حرف واحد",
+        "two": "حرفان",
+        "few": "{count} حروف",
+        "many": "{count} حرفًا",
+        "other": "{count} حرف"
+      },
       "noLetters": "لا ينفرد بهذا الموضع حرف.",
       "unicode": "يونيكود {unicode}"
     },

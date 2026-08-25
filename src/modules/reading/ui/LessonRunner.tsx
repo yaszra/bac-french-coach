@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { useSurface } from "@/modules/design/theme/ThemeProvider";
 import { policyFor } from "@/modules/design/theme/tier";
@@ -45,7 +44,6 @@ type Answer =
  */
 export function LessonRunner(props: LessonRunnerProps) {
   const { t, tier } = useSurface();
-  const router = useRouter();
   const policy = policyFor(tier);
 
   const [index, setIndex] = useState(0);
@@ -83,9 +81,14 @@ export function LessonRunner(props: LessonRunnerProps) {
         result,
         choiceId: typeof submission.choiceId === "string" ? submission.choiceId : null,
       });
-      if (result.ok) router.refresh();
+      // Deliberately NO router.refresh() here. Refreshing re-runs the planner, which
+      // has just been given new evidence and would hand back a different list of
+      // items — changing the prompt under a learner who is still looking at the
+      // answer they gave. A sitting is planned once, at its start; the path and the
+      // ladder pick up the new evidence when the sitting ends and the learner
+      // navigates back.
     },
-    [props.learnerUserId, router],
+    [props.learnerUserId],
   );
 
   if (props.items.length === 0 || item === undefined) {
