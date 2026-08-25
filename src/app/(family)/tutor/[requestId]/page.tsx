@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getCaller } from "@/modules/identity/actions/session-context";
 import { can } from "@/modules/platform/authz/can";
 import { listChildren } from "@/modules/family/repo/family-repo";
+import { guardianOwnsRequest } from "@/modules/family/repo/tutoring-repo";
 import { pendingVerification, pendingVerifications } from "@/modules/assessment/repo/verification-repo";
 import { mushafViewFor, parseUnitScope } from "@/modules/classroom/repo/mushaf-view";
 import { VerificationConsole } from "@/modules/assessment/ui/VerificationConsole";
@@ -35,6 +36,14 @@ export default async function TutorOnePage({
     notFound();
   }
 
+  /* And whose work it is. A teacher who set a passage hears it themselves; a
+     request the learner opened for themselves has no such owner. The verdict
+     action refuses either way — this keeps the console off the screen when it
+     would only be refused. */
+  if (!(await guardianOwnsRequest(actor.organizationId, actor.userId, requestId)).ok) {
+    notFound();
+  }
+
   const scope = parseUnitScope(request.unitScope);
   const view =
     scope === null
@@ -51,7 +60,15 @@ export default async function TutorOnePage({
     .filter((child) => can(actor, "teach:verifyRecitation", { type: "learner", id: child.learnerUserId }).allowed)
     .map((child) => child.learnerUserId);
   const queue = await pendingVerifications(actor.organizationId, mine);
-  const rest = queue.filter((entry) => entry.id !== request.id);
+  const others = await Promise.all(
+    queue
+      .filter((entry) => entry.id !== request.id)
+      .map(async (entry) => ({
+        entry,
+        mine: (await guardianOwnsRequest(actor.organizationId, actor.userId, entry.id)).ok,
+      })),
+  );
+  const rest = others.filter((row) => row.mine).map((row) => row.entry);
   const next = rest[0] ?? null;
 
   const unitIds =

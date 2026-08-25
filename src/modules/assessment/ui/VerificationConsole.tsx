@@ -58,6 +58,30 @@ export type VerificationView = {
 
 type Verdict = "passed" | "needs_work" | "not_attempted";
 
+/**
+ * What to say when the server refuses.
+ *
+ * `out_of_scope` means the units did not match what this request asked about:
+ * the person reading it did nothing wrong, the page and the request have
+ * drifted apart, and reloading is the honest remedy rather than retrying the
+ * same claim. `not_your_assignment` means a teacher set this work, so a
+ * tutoring guardian is not the one who hears it.
+ */
+function verifyErrorKey(error: string): string {
+  switch (error) {
+    case "already_decided":
+      return "teacher.verify.alreadyDecided";
+    case "not_allowed":
+      return "teacher.verify.notAllowed";
+    case "not_your_assignment":
+      return "teacher.verify.notYourAssignment";
+    case "out_of_scope":
+      return "teacher.verify.outOfScope";
+    default:
+      return "teacher.verify.failed";
+  }
+}
+
 type MarkedPosition = { readonly ayah: number; readonly index: number };
 
 const MEMORY = CORRECTIONS.filter((c) => c.family === "memory");
@@ -139,17 +163,7 @@ export function VerificationConsole({ view }: { readonly view: VerificationView 
       if (!result.ok) {
         setError(
           t(
-            result.error === "already_decided"
-              ? "teacher.verify.alreadyDecided"
-              : result.error === "not_allowed"
-                ? "teacher.verify.notAllowed"
-                : result.error === "out_of_scope"
-                  ? // The server refused units outside what this request asked
-                    // about. A person reading this did nothing wrong; the page
-                    // and the request have drifted apart, and reloading is the
-                    // honest remedy rather than retrying the same claim.
-                    "teacher.verify.outOfScope"
-                  : "teacher.verify.failed",
+            verifyErrorKey(result.error),
           ),
         );
         return;

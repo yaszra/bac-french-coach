@@ -24,7 +24,12 @@ export type RecordVerdictResult =
   | { readonly ok: true; readonly eventId: string; readonly drills: number; readonly graphSignals: number }
   | {
       readonly ok: false;
-      readonly error: "invalid" | "not_allowed" | "already_decided" | "out_of_scope";
+      readonly error:
+        | "invalid"
+        | "not_allowed"
+        | "already_decided"
+        | "out_of_scope"
+        | "not_your_assignment";
     };
 
 export async function recordVerdict(input: unknown): Promise<RecordVerdictResult> {
@@ -46,6 +51,26 @@ export async function recordVerdict(input: unknown): Promise<RecordVerdictResult
       select: { id: true, state: true, learnerUserId: true, unitScope: true },
     });
     if (!request || request.learnerUserId !== parsed.data.learnerUserId) return "invalid" as const;
+
+    /* A guardian who tutors is not a second teacher.
+     *
+     * `can()` lets a tutoring guardian verify their child; it does not know
+     * WHOSE work a request is about. Work a teacher set is heard by that
+     * teacher — so a request naming an assignment somebody else created is not
+     * this guardian's to decide, however much their teacher trusts them. A
+     * request naming no assignment is the learner's own: they finished a
+     * passage and asked, and nobody else's judgement is being taken over. */
+    const isStaff = actor.grants.some((grant) => grant.role !== "guardian");
+    if (!isStaff) {
+      const assignmentId = (request.unitScope as { assignmentId?: unknown } | null)?.assignmentId;
+      if (typeof assignmentId === "string") {
+        const own = await tx.assignment.findFirst({
+          where: { id: assignmentId, createdByUserId: actor.userId },
+          select: { id: true },
+        });
+        if (!own) return "not_your_assignment" as const;
+      }
+    }
 
     /* A verdict decides what was asked about — and the server is the only
      * thing that knows what that was.
@@ -164,6 +189,7 @@ export async function recordVerdict(input: unknown): Promise<RecordVerdictResult
   if (result === "invalid") return { ok: false, error: "invalid" };
   if (result === "already_decided") return { ok: false, error: "already_decided" };
   if (result === "out_of_scope") return { ok: false, error: "out_of_scope" };
+  if (result === "not_your_assignment") return { ok: false, error: "not_your_assignment" };
 
   logger.info(
     { learner: parsed.data.learnerUserId, verdict: parsed.data.verdict, drills: result.drills },

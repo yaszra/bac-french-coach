@@ -2,6 +2,7 @@ import { getCaller } from "@/modules/identity/actions/session-context";
 import { can } from "@/modules/platform/authz/can";
 import { listChildren } from "@/modules/family/repo/family-repo";
 import { pendingVerifications } from "@/modules/assessment/repo/verification-repo";
+import { guardianOwnsRequest } from "@/modules/family/repo/tutoring-repo";
 import { parseUnitScope } from "@/modules/classroom/repo/mushaf-view";
 import { TutoringList } from "@/modules/family/ui/TutoringList";
 import { SignedOut } from "@/modules/family/ui/SignedOut";
@@ -38,13 +39,24 @@ export default async function TutorPage() {
       can(actor, "teach:verifyRecitation", { type: "learner", id: child.learnerUserId }).allowed,
   );
 
-  const waiting =
+  const queue =
     tutorable.length === 0
       ? []
       : await pendingVerifications(
           actor.organizationId,
           tutorable.map((child) => child.learnerUserId),
         );
+
+  /* Work a teacher set is heard by that teacher. The server refuses either
+     way, but offering a request only to refuse it would be a screen that
+     wastes a parent's evening. */
+  const decidable = await Promise.all(
+    queue.map(async (request) => ({
+      request,
+      mine: (await guardianOwnsRequest(actor.organizationId, actor.userId, request.id)).ok,
+    })),
+  );
+  const waiting = decidable.filter((entry) => entry.mine).map((entry) => entry.request);
 
   return (
     <FamilyFrame active="children" titleKey="family.tutor.title">

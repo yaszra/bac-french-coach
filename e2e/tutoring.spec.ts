@@ -107,6 +107,41 @@ test.describe("a guardian who tutors", () => {
     ]);
   });
 
+  test("does not hear work their child's teacher set", async ({ page, context }) => {
+    /* A guardian who tutors is not a second teacher. A request that names an
+       assignment somebody else created is heard by whoever set it — and a
+       request the learner opened for themselves has no such owner, which is
+       the one the queue above offers. */
+    const assignmentId = "as_e2e_tutor_teacher";
+    await withDb(async (db) => {
+      await db.assignment.upsert({
+        where: { id: assignmentId },
+        create: {
+          id: assignmentId,
+          organizationId: ORG,
+          createdByUserId: "u_seed_teacher",
+          track: "hifz",
+          scope: [{ sura: 78, ayahFrom: 1, ayahTo: 3 }],
+        },
+        update: {},
+      });
+      await db.verificationRequest.update({
+        where: { id: REQUEST_ID },
+        data: { unitScope: { sura: 78, ayahFrom: 1, ayahTo: 3, assignmentId } },
+      });
+    });
+
+    await signInAs(context, GUARDIAN);
+    await page.goto("/tutor");
+    await expect(page.locator(`a[href="/tutor/${REQUEST_ID}"]`)).toHaveCount(0);
+
+    await page.goto(`/tutor/${REQUEST_ID}`);
+    await expect(page.getByRole("heading", { name: "404" })).toBeVisible();
+    await expect(page.getByTestId("record-verdict")).toHaveCount(0);
+
+    await withDb((db) => db.assignment.deleteMany({ where: { id: assignmentId } }));
+  });
+
   test("cannot open a child they were never granted", async ({ page, context }) => {
     await signInAs(context, GUARDIAN);
 

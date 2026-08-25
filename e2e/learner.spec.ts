@@ -51,6 +51,17 @@ async function arrange(): Promise<void> {
     const lapsedAt = new Date(Date.now() - 24 * 3600 * 1000);
     const dueAt = new Date(Date.now() - 3600 * 1000);
 
+    /* This learner's memory is this spec's fixture.
+     *
+     * The seeded school is shared: the teacher console's journey records a
+     * verdict for this same student, which verifies units and reshuffles their
+     * day. The session plan is budgeted, so a unit this spec depends on can be
+     * pushed out of the stream by work another spec did — a failure that looks
+     * like flake and is really two specs owning one learner. Memory state is a
+     * projection, so clearing it costs nothing that the event log cannot
+     * rebuild. */
+    await client.query(`DELETE FROM memory_state WHERE "learnerUserId" = $1`, [LEARNER]);
+
     // The truth: one recorded attempt that went badly. Append-only, and keyed so
     // a re-run of this suite replays rather than piling up.
     await client.query(
@@ -160,6 +171,54 @@ async function arrange(): Promise<void> {
  * other journeys mint the session instead of spending an attempt on a screen
  * they are not testing.
  */
+/**
+ * Leave room in the day for the last rung.
+ *
+ * A session has a budget, and new work outranks a maintenance reading — so
+ * with the seeded assignment's āyāt still unlearned, the plan withholds
+ * `b:78:9` with `budget_spent`, which is the right answer to the wrong day.
+ * Settling that new work is what makes today the day this test is about: a
+ * learner with nothing new to learn, and one long-held passage nobody has
+ * heard in months.
+ */
+async function settleNewWork(): Promise<void> {
+  const client = new Client({ connectionString: DB });
+  await client.connect();
+  try {
+    const settled = new Date(Date.now() - 3 * 24 * 3600 * 1000);
+    const notDue = new Date(Date.now() + 20 * 24 * 3600 * 1000);
+    /* The seeded assignment covers 78:1–5, bodies and the seams between them.
+       Settling only part of it simply promotes the rest into the day. */
+    const units = [
+      ...[2, 3, 4, 5].map((ayah) => `b:78:${ayah}`),
+      ...[1, 2, 3, 4].map((from) => `t:78:${from}>78:${from + 1}`),
+    ];
+    for (const unitId of units) {
+      await client.query(
+        `INSERT INTO memory_state
+           (id, "organizationId", "learnerUserId", "unitId", "unitKind", stability, difficulty,
+            reps, lapses, "lastReviewAt", "lastRetrievalType", confidence, "dueAt", "updatedAt")
+         VALUES ($1,$2,$3,$4,$5,200,4,5,0,$6,'recall_first',0.9,$7, now())
+         ON CONFLICT ("learnerUserId", "unitId") DO UPDATE
+           SET stability = 200, reps = 5, confidence = 0.9,
+               "lastReviewAt" = EXCLUDED."lastReviewAt", "dueAt" = EXCLUDED."dueAt",
+               "updatedAt" = now()`,
+        [
+          `ms_e2e_settled_${unitId}`,
+          ORG,
+          LEARNER,
+          unitId,
+          unitId.startsWith("t:") ? "ayah_transition" : "ayah_body",
+          settled,
+          notDue,
+        ],
+      );
+    }
+  } finally {
+    await client.end();
+  }
+}
+
 async function signInThroughTheForm(page: Page): Promise<void> {
   await page.goto("/sign-in");
   await page.getByTestId("sign-in-email").fill(EMAIL);
@@ -222,6 +281,7 @@ test.describe("the learner's day", () => {
     page,
     context,
   }) => {
+    await settleNewWork();
     await signInAs(context, LEARNER);
 
     /* The screen has always said "your teacher will listen". Nothing in the

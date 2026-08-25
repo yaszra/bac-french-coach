@@ -1,4 +1,5 @@
 import { withTenant } from "../../platform/db/tenant";
+import { unitsInScope } from "../../assessment/domain/scope";
 
 /**
  * A tutoring guardian's own work, and the boundary around it.
@@ -94,9 +95,17 @@ export async function listGuardianAssignments(
 /**
  * May this guardian decide this verification request?
  *
- * Only when the request names an assignment they themselves created for this
- * learner. A guardian who tutors is not a second teacher: work someone else set
- * is heard by whoever set it.
+ * A guardian who tutors is not a second teacher: work someone else set is
+ * heard by whoever set it. So a request that names an assignment is theirs
+ * only if they created that assignment.
+ *
+ * A request that names no assignment is the learner's own — they finished a
+ * passage and asked to be heard. Nobody else set that work, so there is no
+ * one else whose judgement it belongs to, and a guardian the teacher trusted
+ * to tutor may answer it. (Until the ear-gate had an entrance, no such request
+ * could exist, and this function refused every request in the product: no
+ * creator wrote an `assignmentId` either, so the guardian approval path could
+ * never succeed at all.)
  */
 export async function guardianOwnsRequest(
   organizationId: string,
@@ -111,7 +120,9 @@ export async function guardianOwnsRequest(
     if (!request) return { ok: false, reason: "unknown_request" } as const;
 
     const assignmentId = (request.unitScope as { assignmentId?: unknown } | null)?.assignmentId;
-    if (typeof assignmentId !== "string") return { ok: false, reason: "not_your_assignment" } as const;
+    if (typeof assignmentId !== "string") {
+      return { ok: true, learnerUserId: request.learnerUserId } as const;
+    }
 
     const assignment = await tx.assignment.findFirst({
       where: { id: assignmentId, createdByUserId: guardianUserId },
@@ -149,7 +160,12 @@ export async function approvalsFor(
     const guardians = new Set(guardianLinks.map((g) => g.subjectUserId));
 
     return verdicts.map((verdict) => ({
-      unitCount: ((verdict.request.unitScope as { unitIds?: unknown } | null)?.unitIds as unknown[] | undefined)?.length ?? 1,
+      /* How many units the verdict covered, from the scope the request
+         recorded. This used to read `unitScope.unitIds`, which no writer has
+         ever set, so the fallback always won and every approval line told a
+         parent "1 unit" whatever had been approved — a number with no relation
+         to what happened, on the surface the honesty rule exists for. */
+      unitCount: unitsInScope(verdict.request.unitScope)?.size ?? 1,
       decidedByUserId: verdict.decidedByUserId,
       decidedByName: nameOf.get(verdict.decidedByUserId) ?? verdict.decidedByUserId,
       isGuardian: guardians.has(verdict.decidedByUserId),

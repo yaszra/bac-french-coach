@@ -83,7 +83,8 @@
       "notAllowed": "You are not the teacher for this student.",
       "failed": "That did not record. Nothing was written.",
       "pageMissing": "The page for this passage is not in the content package",
-      "outOfScope": "That passage does not match what this student asked to be heard on. Reload the page and try again."
+      "outOfScope": "That passage does not match what this student asked to be heard on. Reload the page and try again.",
+      "notYourAssignment": "This passage was set by their teacher, so their teacher hears it."
     },
     "assign": {
       "title": "Assign",
