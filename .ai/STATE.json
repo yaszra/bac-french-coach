@@ -21,9 +21,12 @@
     "reading (Qāʿidah) learner surface",
     "learner core, teacher console, family + school surfaces",
     "e2e journeys run and green (86 tests, both viewports)",
-    "guardian tutoring surface"
+    "guardian tutoring surface",
+    "code audit: six claim/code mismatches found and fixed (erasure scoping, job fan-out, verdict scope, ear-gate entrance, projection cursor, table captions)",
+    "guardian tutoring surface and the reading anomalies surface"
   ],
   "next": [
-    "final review pass"
+    "final review",
+    "await CI on the head"
   ]
 }
