@@ -1,1 +1,367 @@
-{}
+{
+  "reading": {
+    "title": "القراءة",
+    "subtitle": "القاعدة: الحروف وأصواتها ومخارجها",
+    "path": {
+      "heading": "مسارك",
+      "recorded": "لديك دليل على {done} من {total} من المفاهيم",
+      "nothingRecorded": "لم يُسجَّل شيء بعد",
+      "lessonCount": "{count} دروس",
+      "conceptsIn": "{total} مفاهيم",
+      "secureCount": "{secure} من {total} راسخة",
+      "dueHere": "{count} للمراجعة",
+      "packageMissing": {
+        "title": "دروس القاعدة غير مثبَّتة",
+        "body": "لا تحتوي هذه النسخة على حزمة الدروس، فلا يوجد مسار لعرضه. ولم يضِع شيء؛ فأدلّتك محفوظة في السجل."
+      }
+    },
+    "next": {
+      "heading": "التالي",
+      "review": {
+        "title": "راجِع ما حان وقته",
+        "body": "حان وقت مراجعة {count} من المفاهيم، والمراجعة تسبق كل جديد."
+      },
+      "lesson": {
+        "title": "تابِع القاعدة",
+        "body": "افتح {lesson} واعمل فيه على مهلك."
+      },
+      "nothingDue": {
+        "title": "لا شيء مستحق الآن",
+        "body": "كل مفهوم لديك دليل عليه في راحة الآن. ويمكنك مع ذلك أن تفتح الحروف وتستمع."
+      }
+    },
+    "lessonState": {
+      "not_yet_recorded": "لم يُسجَّل بعد",
+      "in_progress": "قيد التقدُّم",
+      "secure": "راسخ",
+      "locked": "يُفتح بعد {lesson}"
+    },
+    "lesson": {
+      "letters.group1": "الحروف السبعة الأولى",
+      "letters.group2": "الحروف السبعة الثانية",
+      "letters.group3": "الحروف السبعة الثالثة",
+      "letters.group4": "الحروف السبعة الأخيرة",
+      "letters.forms": "الحروف في مواضعها",
+      "harakat.fathah": "الفتحة",
+      "harakat.kasrah": "الكسرة",
+      "harakat.dammah": "الضمة",
+      "sukun": "السكون",
+      "shaddah": "الشدة",
+      "tanwin": "التنوين",
+      "madd.tabii": "المد الطبيعي",
+      "unknown": "هذا الدرس",
+      "empty": {
+        "all_prerequisites_pending": "لم تكتمل دروسه السابقة بعد.",
+        "no_concepts_assigned": "لا يحتوي هذا الدرس على شيء لك الآن.",
+        "no_time_budgeted": "لم تبقَ دقائق في هذه الجلسة.",
+        "nothing_due": "لم يحن وقت شيء هنا بعد."
+      },
+      "reason": {
+        "due_for_review": "حان وقت مراجعته",
+        "new_concept": "جديد في هذا الدرس",
+        "still_emerging": "ما زال يترسّخ"
+      },
+      "withheld": {
+        "new_concept_cap": "مؤجَّل: يكفي هذا القدر من الجديد في جلسة",
+        "prerequisites_not_met": "مؤجَّل: ما يقوم عليه لم يرسخ بعد",
+        "session_budget": "مؤجَّل: لم يتّسع له الوقت"
+      }
+    },
+    "smartscore": {
+      "heading": "موضع هذا المفهوم",
+      "state": {
+        "not_yet_recorded": "لم يُسجَّل بعد",
+        "emerging": "في الطريق",
+        "secure": "راسخ"
+      },
+      "denominator": "{attempts} إجابة في {sessions} جلسات",
+      "noEvidence": "لا يوجد دليل مسجَّل على هذا بعد",
+      "reason": {
+        "not_yet_recorded": "لم يُسجَّل شيء لهذا المفهوم.",
+        "no_mastery_bearing_evidence": "ما سُجِّل هنا لا يحمل الإتقان بنفسه.",
+        "emerging": "أُجيب عنه {scoredAttempts} مرة في {sessions} جلسات.",
+        "secure": "أُجيب عنه {scoredAttempts} مرة في {sessions} جلسات."
+      }
+    },
+    "ladder": {
+      "heading": "الدرجات الثلاث",
+      "workingOn": "تعمل الآن على",
+      "met": "أُغلقت",
+      "notMet": "مفتوحة",
+      "progress": "{correct} صحيحة من {attempts}، في {sessions} جلسات",
+      "noAttempts": "لم تُحاوَل هذه الدرجة بعد",
+      "rung": {
+        "ordered": {
+          "title": "بالترتيب",
+          "body": "الحروف كما يعلّمها الدرس، بترتيبها.",
+          "evidence": "تُغلق بإجابات تُقاس على الدرس."
+        },
+        "randomized": {
+          "title": "بغير ترتيب",
+          "body": "الحروف نفسها مخلوطة، حتى لا تكون المعرفة حفظًا للترتيب.",
+          "evidence": "تُغلق بإجابات تُقاس على الدرس."
+        },
+        "in_person": {
+          "title": "قراءة بصوتك",
+          "body": "تنطق به، ومن يسمعك يقول أكان واضحًا.",
+          "evidence": "تُغلق بشهادة معلّم سمعك."
+        }
+      },
+      "verification": {
+        "not_yet_verified": "لم يُوثَّق بعد",
+        "self_confirmed": "أنت من أكّد هذا بنفسك",
+        "teacher_verified": "سمعه معلّم وأكّده"
+      },
+      "selfConfirmedNote": "هذه شهادتك على قراءتك أنت، وقد سُجِّلت كذلك، وتأكيد المعلّم ما زال مفتوحًا.",
+      "awaitingTeacher": "في انتظار أن يسمعه معلّمك",
+      "missing": {
+        "accuracy": "يلزم أن يكون مزيد من الإجابات صحيحًا.",
+        "correct_answers": "يلزم مزيد من الإجابات الصحيحة.",
+        "previous_rung": "الدرجة التي تحتها ما زالت مفتوحة.",
+        "sessions": "يلزم أن يثبت عبر جلسات أكثر.",
+        "teacher_verdict_required": "لا بد أن يسمع هذا معلّمك."
+      },
+      "reason": {
+        "advanced": "أُغلقت هذه الدرجة.",
+        "advanced_on_self_confirmation": "أُغلقت بتأكيدك أنت.",
+        "complete_self_confirmed": "الدرجات الثلاث، وآخرها بشهادتك أنت.",
+        "complete_teacher_verified": "الدرجات الثلاث، وآخرها سمعه معلّم.",
+        "in_progress": "قيد التقدُّم.",
+        "not_yet_eligible": "لم تُفتح بعد.",
+        "not_yet_started": "لم تبدأ.",
+        "rung_met": "استُوفيت هذه الدرجة.",
+        "rung_not_yet_met": "لم تُستوفَ هذه الدرجة بعد."
+      }
+    },
+    "intro": {
+      "heading": "تعرَّف على هذا الحرف",
+      "madeAt": "مخرجه: {place}",
+      "region": "في {region}",
+      "listen": "استمع",
+      "narrate": "اقرأ لي هذا",
+      "stop": "أوقف",
+      "terms": "المصطلحات في هذا الشرح",
+      "noNarration": "لا يوجد سرد مسجَّل لهذا الدرس.",
+      "voiceNote": "يقرأ الشرحَ صوتٌ مركَّب. أما التلاوة فلا تُركَّب أبدًا، ولا يتلو إلا إنسان.",
+      "animationOff": "الحركة مخفَّفة، فعُرض هذا ساكنًا."
+    },
+    "talqin": {
+      "heading": "التلقين",
+      "play": "اسمعه",
+      "provenance": {
+        "human": "تسجيل بصوت إنسان",
+        "library": "من مكتبة القرّاء",
+        "studio_synth_reviewed": "صوت استوديو راجعه إنسان"
+      },
+      "notYetRecorded": {
+        "title": "لم يُسجَّل بعد",
+        "body": "لم يسجّل أحد هذا الحرف لك بعد، ولن ينوب صوت آلة عن قارئ. اطلب من معلّمك أن يسجّله.",
+        "action": "أطلب من معلّمي"
+      },
+      "reason": {
+        "resolved": "من {source}.",
+        "not_yet_recorded": "بُحث في {searched}، فلم يوجد شيء."
+      }
+    },
+    "practice": {
+      "heading": "التدريب",
+      "recognitionPrompt": "أيُّ صوتٍ هذا؟",
+      "productionPrompt": "انطق هذا بصوتك.",
+      "step": "الخطوة {index} من {total}",
+      "itemLabel": "اختر {label}",
+      "right": "هو ذاك",
+      "notThisOne": "ليس هذا، انظر مرة أخرى",
+      "next": "التالي",
+      "finish": "أنهِ",
+      "saidItClearly": "نطقته واضحًا",
+      "needsMoreWork": "يحتاج مزيد عمل",
+      "notObserved": "لم يسمعه أحد",
+      "selfConfirmNote": "أنت تؤكّد قراءتك بنفسك، وتُسجَّل بوصفها شهادتك لا شهادة معلّم.",
+      "teacherNote": "معلّمك هو من يُغلق هذه الدرجة. وما تسجّله هنا قراءتك أنت، تُحفَظ إلى جانبها.",
+      "noPenalties": "لا مؤقّت ولا قلوب، ولا يضيع شيء بإجابة خاطئة.",
+      "recorded": "سُجِّل",
+      "notRecorded": "لم يُسجَّل شيء عن ذلك",
+      "offline": "لم يصل ذلك إلى الخادم. أعد المحاولة عند عودة الاتصال.",
+      "done": {
+        "title": "انتهت الجلسة",
+        "body": "كل ما فعلته سُجِّل دليلًا."
+      },
+      "empty": {
+        "title": "لا شيء للتدريب هنا الآن",
+        "body": "لم يجد المخطِّط شيئًا مستحقًّا ولا جديدًا يتّسع له الوقت."
+      }
+    },
+    "review": {
+      "title": "المراجعة",
+      "body": "مفاهيم حان وقتها من جديد، يجدولها المحرك نفسه الذي يجدول الحفظ.",
+      "none": {
+        "title": "لا شيء مستحق للمراجعة",
+        "body": "مفاهيم القراءة تعود في مواعيدها، ولم يحن شيء بعد."
+      }
+    },
+    "letters": {
+      "title": "كل حرف بمخرجه",
+      "body": "الحروف مرتَّبة بحسب موضع نطقها في الفم، من أقصى الحلق إلى الشفتين.",
+      "open": "افتح الحروف",
+      "letterCount": "{count} حروف",
+      "noLetters": "لا ينفرد بهذا الموضع حرف.",
+      "unicode": "يونيكود {unicode}"
+    },
+    "region": {
+      "jawf": "الجوف",
+      "halq": "الحلق",
+      "lisan": "اللسان",
+      "shafatan": "الشفتان",
+      "khayshum": "الخيشوم"
+    },
+    "makhraj": {
+      "unknown": "موضع غير مسجَّل",
+      "jawf": "الجوف",
+      "halq": {
+        "aqsa": "أقصى الحلق",
+        "wasat": "وسط الحلق",
+        "adna": "أدنى الحلق"
+      },
+      "lisan": {
+        "aqsa_lahat": "أقصى اللسان مع اللهاة",
+        "aqsa_hanak": "أقصى اللسان مع الحنك",
+        "wasat": "وسط اللسان",
+        "haffah_adras": "حافة اللسان مع الأضراس",
+        "adna_haffah": "أدنى حافة اللسان",
+        "taraf_noon": "طرف اللسان فويق الثنايا",
+        "taraf_ra": "طرف اللسان مع ظهر اللثة",
+        "nita": "طرف اللسان مع النِّطع",
+        "safir": "طرف اللسان مع الصفير",
+        "lithah": "طرف اللسان مع اللثة"
+      },
+      "shafatan": {
+        "batn_shafah": "بطن الشفة مع أطراف الثنايا",
+        "shafatayn": "الشفتان معًا"
+      },
+      "khayshum": "الخيشوم"
+    },
+    "label": {
+      "letterHarakah": "{letter} مع {harakah}",
+      "letterForm": "{letter}، {form}"
+    },
+    "correction": {
+      "heading": "ما ينبغي ملاحظته",
+      "notice_the_dots": "يشترك الحرفان في الرسم ولا يفترقان إلا بالنقط، فانظر إلى النقط.",
+      "notice_the_shape": "انظر مرة أخرى في رسم الحرف.",
+      "notice_the_makhraj": "مخرجا الحرفين متقاربان، فأصغِ إلى الموضع.",
+      "notice_the_vowel": "الحرف صحيح، والحركة عليه ليست كذلك.",
+      "known_pair": "كثيرًا ما يُؤخذ أحد الحرفين مكان الآخر.",
+      "look_again": "انظر مرة أخرى.",
+      "production_needs_work": "أصغِ مرة أخرى إلى موضع النطق ثم أعِد المحاولة."
+    },
+    "confusion": {
+      "reason": {
+        "emphatic_counterpart": "أحدهما مُطبَق نظيرِه",
+        "interdental_and_sibilant": "أحدهما بين الأسنان والآخر من حروف الصفير",
+        "neighbouring_makhraj": "مخرجاهما متجاوران",
+        "same_letter_different_vowel": "الحرف نفسه بحركة أخرى",
+        "same_makhraj": "يشتركان في المخرج",
+        "same_skeleton_different_dots": "الرسم نفسه والنقط مختلفة",
+        "same_skeleton_dots_moved": "الرسم نفسه وقد انتقلت النقط",
+        "similar_mark": "العلامتان متشابهتان",
+        "similar_shape": "الرسمان متشابهان",
+        "throat_depth": "يفترقان في عمق الحلق"
+      }
+    },
+    "activity": {
+      "reason": {
+        "production_not_yet_observed": "لم يسمع أحد هذا، فلم يُسجَّل شيء.",
+        "production_observed": "سُجِّلت إجابة منطوقة.",
+        "recognition_matched_key": "طابقت الإجابة.",
+        "recognition_did_not_match_key": "لم تطابق الإجابة.",
+        "response_does_not_match_activity": "تلك الإجابة ليست لهذا السؤال."
+      }
+    },
+    "concept": {
+      "letter": {
+        "hamza": "الهمزة",
+        "alef": "الألف",
+        "beh": "الباء",
+        "teh": "التاء",
+        "theh": "الثاء",
+        "jeem": "الجيم",
+        "hah": "الحاء",
+        "khah": "الخاء",
+        "dal": "الدال",
+        "thal": "الذال",
+        "reh": "الراء",
+        "zain": "الزاي",
+        "seen": "السين",
+        "sheen": "الشين",
+        "sad": "الصاد",
+        "dad": "الضاد",
+        "tah": "الطاء",
+        "zah": "الظاء",
+        "ain": "العين",
+        "ghain": "الغين",
+        "feh": "الفاء",
+        "qaf": "القاف",
+        "kaf": "الكاف",
+        "lam": "اللام",
+        "meem": "الميم",
+        "noon": "النون",
+        "heh": "الهاء",
+        "waw": "الواو",
+        "yeh": "الياء"
+      },
+      "harakah": {
+        "fathah": "الفتحة",
+        "dammah": "الضمة",
+        "kasrah": "الكسرة"
+      },
+      "harakah_on_letter": {
+        "fathah": "حرف عليه فتحة",
+        "dammah": "حرف عليه ضمة",
+        "kasrah": "حرف تحته كسرة"
+      },
+      "form": {
+        "isolated": "منفردًا",
+        "initial": "في أول الكلمة",
+        "medial": "في وسط الكلمة",
+        "final": "في آخر الكلمة"
+      },
+      "sukun": "السكون",
+      "shaddah": "الشدة",
+      "tanwin": "التنوين",
+      "tanwin.fath": "تنوين الفتح",
+      "tanwin.damm": "تنوين الضم",
+      "tanwin.kasr": "تنوين الكسر",
+      "madd.tabii": "المد الطبيعي",
+      "madd.iwad": "مد العِوَض",
+      "madd.badal": "مد البدل",
+      "madd.silah": "مد الصلة",
+      "rule": {
+        "ghunnah": "الغُنّة",
+        "qalqalah": "القلقلة",
+        "noon_sakinah": {
+          "izhar": "الإظهار",
+          "idgham_bighunnah": "الإدغام بغُنّة",
+          "idgham_bila_ghunnah": "الإدغام بغير غُنّة",
+          "iqlab": "الإقلاب",
+          "ikhfa": "الإخفاء"
+        },
+        "meem_sakinah": {
+          "izhar_shafawi": "الإظهار الشفوي",
+          "ikhfa_shafawi": "الإخفاء الشفوي",
+          "idgham_mithlayn": "إدغام المثلين"
+        },
+        "reh": {
+          "tafkhim_tarqiq": "تفخيم الراء وترقيقها"
+        },
+        "lam": {
+          "jalalah": "لام لفظ الجلالة"
+        }
+      }
+    },
+    "a11y": {
+      "letterGlyph": "الحرف {label}",
+      "mouthDiagram": "رسم جانبي للفم يبيّن موضع نطق {label}",
+      "choiceGroup": "اختر صوت الحرف المعروض"
+    }
+  }
+}
