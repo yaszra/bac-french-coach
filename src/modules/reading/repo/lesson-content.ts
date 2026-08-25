@@ -143,6 +143,42 @@ function keep(ids: readonly ConceptId[]): readonly ConceptId[] {
   return ids.filter((id) => conceptById(id) !== null);
 }
 
+/**
+ * Add the foundations a lesson depends on but does not list.
+ *
+ * The lesson files teach `letter.alef.fathah` — a letter carrying a vowel — without
+ * separately listing `harakah.fathah`, the vowel itself, which the lattice makes a
+ * prerequisite. Left alone, that concept would never receive evidence, and every
+ * concept standing on it (sukūn, tanwīn, madd) would stay locked forever: a learner
+ * would reach lesson six and find a door that never opens.
+ *
+ * So a prerequisite that no lesson teaches is attached to the first lesson that needs
+ * it. Nothing is invented — these are concepts the lattice already contains, taught
+ * where the primer already teaches them.
+ */
+export function withPrerequisiteFoundations<T extends LessonSummary>(
+  lessons: readonly T[],
+): readonly T[] {
+  const taught = new Set<ConceptId>(lessons.flatMap((lesson) => lesson.conceptIds));
+
+  return [...lessons]
+    .sort((a, b) => a.order - b.order)
+    .map((lesson) => {
+      const added: ConceptId[] = [];
+      const queue = [...lesson.conceptIds];
+      while (queue.length > 0) {
+        const conceptId = queue.shift() as ConceptId;
+        for (const prerequisite of conceptById(conceptId)?.prerequisites ?? []) {
+          if (taught.has(prerequisite)) continue;
+          taught.add(prerequisite);
+          added.push(prerequisite);
+          queue.push(prerequisite);
+        }
+      }
+      return added.length === 0 ? lesson : { ...lesson, conceptIds: [...added, ...lesson.conceptIds] };
+    });
+}
+
 export interface QaidahLesson extends LessonSummary {
   /** Elements that named a concept this build does not have. Never hidden. */
   readonly unresolvedElements: number;
@@ -179,7 +215,7 @@ export function qaidahLessons(): readonly QaidahLesson[] {
     })
     .sort((a, b) => a.order - b.order);
 
-  lessonCache = Object.freeze(lessons);
+  lessonCache = Object.freeze(withPrerequisiteFoundations(lessons));
   return lessonCache;
 }
 
