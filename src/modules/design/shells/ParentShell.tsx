@@ -28,6 +28,16 @@ export type ParentShellProps = {
  * family module and its consent rules, never here.
  */
 export function ParentShell({ active, items, header, children }: ParentShellProps) {
+  /* The family's navigation is genuinely variable — a guardian who tutors has
+     a destination one who does not never sees — so the entries come from the
+     caller's items when it supplies any. `ShellNav` renders `destinations` and
+     reads `items` only for hrefs and badges, which is right for the learner
+     shell (it narrows the list by tier and must not be widened by a caller)
+     and silently wrong here: a tutoring entry was passed in and dropped. */
+  const destinations = items === undefined || items.length === 0
+    ? DESTINATIONS
+    : items.map((item) => item.id);
+
   return (
     <div className={styles.shell}>
       <div className={styles.main}>
@@ -35,7 +45,7 @@ export function ParentShell({ active, items, header, children }: ParentShellProp
         <div className={styles.content}>{children}</div>
       </div>
       <div className={styles.navArea}>
-        <ShellNav destinations={DESTINATIONS} active={active} items={items} variant="responsive" />
+        <ShellNav destinations={destinations} active={active} items={items} variant="responsive" />
       </div>
     </div>
   );
