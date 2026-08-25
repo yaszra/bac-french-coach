@@ -1,11 +1,14 @@
 name: CI
 
 on:
+  # Only trunk runs on push. Branch work is covered by its pull request, so a
+  # commit is not built twice — the concurrency group cannot collapse those two,
+  # because a push and a pull_request event carry different refs for the same
+  # commit.
   push:
-    branches: [main, "claude/**"]
+    branches: [main]
   pull_request:
 
-# A push and its pull request would otherwise run the same commit twice.
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true

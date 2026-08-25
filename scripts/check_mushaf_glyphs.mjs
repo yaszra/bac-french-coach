@@ -12,12 +12,36 @@
  *
  *   node scripts/check_mushaf_glyphs.mjs
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { chromium } from "playwright";
 
 const CORPUS = "content/quran/quran-uthmani.json";
 const FONT_CSS = "src/modules/design/tokens/fonts.css";
-const EXECUTABLE = process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium";
+/**
+ * Which Chromium to drive.
+ *
+ * On a CI runner, `playwright install` puts a matching build where Playwright
+ * finds it by itself, so the right answer is to say nothing. Some development
+ * images ship a Chromium at a fixed path that does not match the revision
+ * Playwright expects; there, an explicit path is the only thing that works.
+ *
+ * So: honour CHROMIUM_PATH when set, otherwise let Playwright choose, and fall
+ * back to a well-known path only if Playwright cannot find its own. Hardcoding
+ * the development path made this gate pass here and fail on every runner.
+ */
+const FALLBACK_EXECUTABLE = "/opt/pw-browsers/chromium";
+
+async function launchChromium() {
+  if (process.env.CHROMIUM_PATH) {
+    return chromium.launch({ executablePath: process.env.CHROMIUM_PATH });
+  }
+  try {
+    return await chromium.launch();
+  } catch (error) {
+    if (!existsSync(FALLBACK_EXECUTABLE)) throw error;
+    return chromium.launch({ executablePath: FALLBACK_EXECUTABLE });
+  }
+}
 
 async function main() {
   const verses = JSON.parse(readFileSync(CORPUS, "utf8"));
@@ -38,7 +62,7 @@ async function main() {
     import.meta.url,
   );
 
-  const browser = await chromium.launch({ executablePath: EXECUTABLE });
+  const browser = await launchChromium();
   const page = await browser.newPage();
   const woff2 = readFileSync(fontUrl).toString("base64");
 
