@@ -143,6 +143,16 @@ test.describe("the teacher console", () => {
     expect(recorded?.corrections).toEqual([
       { category: "hesitation", sura: 78, ayah: 1, wordIndex: 1 },
     ]);
+
+    /* And the student's Memory tab now shows the passage they were actually
+       heard on. It used to show 78:1–20 for everyone, whatever had been
+       verified, while the comment above it claimed otherwise. */
+    await page.goto(`/teacher/students/${LEARNER_ID}`);
+    await page.getByRole("tab", { name: "Memory" }).click();
+    // Five āyahs — 78:1–5, the scope of the request just verified — and not
+    // the twenty this page used to show every student regardless.
+    const panel = page.getByRole("tabpanel", { name: "Memory" });
+    await expect(panel.getByRole("img")).toHaveCount(5);
   });
 
   test("a verdict is recorded once, and the record says so", async ({ page, context }) => {

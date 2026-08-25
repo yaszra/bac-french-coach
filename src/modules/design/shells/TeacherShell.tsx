@@ -11,16 +11,16 @@ export type TeacherDestination =
   | "students"
   | "assign"
   | "verify"
-  | "reports"
-  | "tools";
+  | "khatma"
+  | "notifications";
 
 const DESTINATIONS: readonly TeacherDestination[] = [
   "triage",
   "students",
   "assign",
   "verify",
-  "reports",
-  "tools",
+  "khatma",
+  "notifications",
 ];
 
 /** Below this the sidebar becomes a rail on its own. */

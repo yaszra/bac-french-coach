@@ -25,8 +25,8 @@ const HREF: Readonly<Record<TeacherDestination, string>> = {
   students: "/teacher/students",
   assign: "/teacher/assign",
   verify: "/teacher/verify",
-  reports: "/teacher/khatma",
-  tools: "/teacher/notifications",
+  khatma: "/teacher/khatma",
+  notifications: "/teacher/notifications",
 };
 
 /**
@@ -38,7 +38,7 @@ function destinationFor(pathname: string): TeacherDestination {
   const match = (Object.keys(HREF) as TeacherDestination[]).find(
     (id) => id !== "triage" && pathname.startsWith(HREF[id]),
   );
-  if (pathname.startsWith("/teacher/reading-gate")) return "tools";
+  if (pathname.startsWith("/teacher/reading-gate")) return "notifications";
   return match ?? "triage";
 }
 

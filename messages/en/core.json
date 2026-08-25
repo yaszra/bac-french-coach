@@ -12,12 +12,12 @@
     "students": "Students",
     "assign": "Assign",
     "verify": "Verify",
-    "reports": "Reports",
-    "tools": "Tools",
     "triage": "Today · Triage",
     "children": "Children",
     "tonight": "Tonight",
-    "settings": "Settings"
+    "settings": "Settings",
+    "khatma": "Khatma",
+    "notifications": "Notifications"
   },
   "action": {
     "practiseJoin": "Hear the āyah before it, then ask for the next one",

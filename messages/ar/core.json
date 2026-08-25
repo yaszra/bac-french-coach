@@ -12,12 +12,12 @@
     "students": "الطلاب",
     "assign": "الإسناد",
     "verify": "التصديق",
-    "reports": "التقارير",
-    "tools": "الأدوات",
     "triage": "اليوم · الأولويات",
     "children": "الأبناء",
     "tonight": "الليلة",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "khatma": "الختمة",
+    "notifications": "التنبيهات"
   },
   "action": {
     "practiseJoin": "استمعا إلى الآية السابقة ثم اسأله عن التالية",

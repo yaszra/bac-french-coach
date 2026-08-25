@@ -118,6 +118,14 @@ export type RecordedVerdict = {
   readonly note: string | null;
   readonly decidedAt: Date;
   readonly decidedByName: string;
+  /**
+   * The passage the verdict was about, when the request recorded one.
+   *
+   * A teacher looking at a student wants to see the page they were last heard
+   * on, and that is knowable only from the request — so it travels with the
+   * verdict rather than being guessed downstream.
+   */
+  readonly scope: { readonly sura: number; readonly ayahFrom: number; readonly ayahTo: number } | null;
   /** How the evidence was obtained, when the request recorded it. */
   readonly evidenceKind: string | null;
 };
@@ -148,6 +156,17 @@ function correctionsOf(value: unknown): RecordedVerdict["corrections"] {
       },
     ];
   });
+}
+
+function scopeRangeOf(unitScope: unknown): RecordedVerdict["scope"] {
+  if (unitScope === null || typeof unitScope !== "object" || Array.isArray(unitScope)) return null;
+  const record = unitScope as Record<string, unknown>;
+  const { sura, ayahFrom, ayahTo } = record;
+  if (typeof sura !== "number" || typeof ayahFrom !== "number" || typeof ayahTo !== "number") {
+    return null;
+  }
+  if (ayahTo < ayahFrom) return null;
+  return { sura, ayahFrom, ayahTo };
 }
 
 function evidenceKindOf(unitScope: unknown): string | null {
@@ -193,6 +212,7 @@ export async function verdictHistory(
       note: row.note,
       decidedAt: row.decidedAt,
       decidedByName: names.get(row.decidedByUserId) ?? row.decidedByUserId,
+      scope: scopeRangeOf(row.request.unitScope),
       evidenceKind: evidenceKindOf(row.request.unitScope),
     }));
   });

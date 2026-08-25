@@ -54,9 +54,21 @@ export default async function StudentPage({
   const seams = weakJoins({ now, transitions, bodies, limit: 5 });
 
   /* The ink page shows the passage the most recent verdict was about, when
-     there is one. With no verdict there is nothing to show, and the tab says
-     so rather than picking an arbitrary page. */
-  const view = await mushafViewFor(actor.organizationId, 78, 1, 20, learnerId);
+     there is one — which is what this comment always claimed, while the code
+     under it asked for 78:1–20 whatever the student had been heard on. With no
+     verdict carrying a passage there is nothing to show, and the tab says so
+     rather than picking an arbitrary page. */
+  const lastHeard = verdicts.find((verdict) => verdict.scope !== null)?.scope ?? null;
+  const view =
+    lastHeard === null
+      ? { lines: [], page: null }
+      : await mushafViewFor(
+          actor.organizationId,
+          lastHeard.sura,
+          lastHeard.ayahFrom,
+          lastHeard.ayahTo,
+          learnerId,
+        );
 
   const unitsOf = (scope: unknown): number =>
     Array.isArray(scope)
