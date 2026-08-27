@@ -1,0 +1,203 @@
+<title>GSA Schedule</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nunito+Sans:wght@400;600;700;800&display=swap">
+<style>
+  :root{
+    --paper:#FBFAF7; --card:#FFFFFF; --ink:#17352B; --text:#3E4A45; --muted:#84908A;
+    --line:#E4E4DC; --green:#1F5C4D; --green-soft:#E8F0EC; --gold:#B8892E; --gold-soft:#F7EEDC;
+    --now:#1F5C4D;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#101714; --card:#18211D; --ink:#EDF2EF; --text:#C3CCC7; --muted:#7C8781;
+      --line:#27332D; --green:#7FBCA6; --green-soft:#1D2E27; --gold:#D9A94B; --gold-soft:#332A17;
+      --now:#7FBCA6;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#101714; --card:#18211D; --ink:#EDF2EF; --text:#C3CCC7; --muted:#7C8781;
+    --line:#27332D; --green:#7FBCA6; --green-soft:#1D2E27; --gold:#D9A94B; --gold-soft:#332A17;
+    --now:#7FBCA6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--text);font:400 16px/1.5 "Nunito Sans",system-ui,sans-serif;}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 56px;}
+  .eyebrow{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+  h1{font:400 32px/1.15 "Marcellus",Georgia,serif;color:var(--ink);margin:4px 0 2px;text-wrap:balance;}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 16px;}
+  .divisions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+  .divisions button{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;
+    padding:10px 8px;font:700 13px "Nunito Sans",sans-serif;cursor:pointer;text-align:center;}
+  .divisions button small{display:block;font-weight:600;color:var(--muted);font-size:11px;margin-top:2px;}
+  .divisions button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--paper);}
+  .divisions button[aria-pressed="true"] small{color:var(--paper);opacity:.75;}
+  .divisions button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  nav.days{display:flex;gap:6px;overflow-x:auto;padding:2px 0 14px;position:sticky;top:0;background:var(--paper);z-index:2;-webkit-overflow-scrolling:touch;}
+  nav.days button{flex:1 0 auto;border:1px solid var(--line);background:var(--card);color:var(--text);
+    border-radius:999px;padding:7px 14px;font:700 13px "Nunito Sans",sans-serif;cursor:pointer;}
+  nav.days button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+  nav.days button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  .sched{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .row{display:flex;gap:12px;padding:12px 14px;border-top:1px solid var(--line);align-items:baseline;}
+  .row:first-child{border-top:0;}
+  .row .time{flex:0 0 92px;font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;color:var(--muted);}
+  .row .what{font-weight:700;color:var(--ink);}
+  .row .note{font-size:13px;color:var(--muted);margin-top:1px;}
+  .row.sacred{background:var(--gold-soft);}
+  .row.sacred .what{color:var(--gold);}
+  .row.break .what{color:var(--muted);font-weight:600;}
+  .row.now{box-shadow:inset 3px 0 0 var(--now);background:var(--green-soft);}
+  .badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--green);background:var(--green-soft);border-radius:5px;padding:1px 7px;margin-left:8px;vertical-align:1px;}
+  .row.now .badge{background:var(--card);}
+  .fri{margin:12px 0 0;padding:12px 14px;background:var(--green-soft);border-radius:10px;font-size:13px;color:var(--text);}
+  .fri strong{color:var(--ink);}
+  h2.dayhead{font:400 22px "Marcellus",Georgia,serif;color:var(--ink);margin:4px 0 10px;}
+  footer{margin-top:26px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6;}
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Garden of the Sahaba Academy · 2026–2027</div>
+    <h1>Daily Schedule</h1>
+    <p class="sub">Boca Raton, Florida — choose your division, then the day.</p>
+  </header>
+
+  <div class="divisions" id="divs" role="group" aria-label="Division"></div>
+  <nav class="days" id="days" role="tablist" aria-label="Day of week"></nav>
+
+  <h2 class="dayhead" id="dayhead"></h2>
+  <section class="sched" id="sched" aria-live="polite"></section>
+  <div class="fri" id="frinote" hidden><strong>Friday:</strong> the schedule shortens for Jumuʿah — students in Grade 2 and above attend the khuṭbah and congregational ṣalāh in the prayer hall.</div>
+
+  <footer>
+    The day opens with Qur'anic recitation before it opens with a subject.<br>
+    Times shown are the working bell schedule; the front office confirms any changes.
+  </footer>
+</div>
+<script>
+const DIVISIONS = {
+  early: {label:"Early Learning", sub:"Pre-K 3 – Pre-K 4"},
+  elem:  {label:"Elementary", sub:"K – Grade 5"},
+  mid:   {label:"Middle School", sub:"Grades 6 – 8"},
+  high:  {label:"High School", sub:"Grades 9 – 11"}
+};
+function D(rows){ return rows.map(r => ({start:r[0], end:r[1], what:r[2], note:r[3]||"", kind:r[4]||""})); }
+const BASE = {
+  early: D([
+    ["8:00","8:20","Morning Circle & Duʿāʾ","Arrival, greeting, and the day's intention","sacred"],
+    ["8:20","9:00","Qur'an & Letters","Listening, short sūrahs, Arabic letter play"],
+    ["9:00","9:45","Centers","Individual and group work by developmental need"],
+    ["9:45","10:05","Snack","", "break"],
+    ["10:05","10:45","Language & Stories","English readiness through read-alouds"],
+    ["10:45","11:25","Outdoor Play","Gross-motor time","break"],
+    ["11:25","12:00","Numbers & Patterns","Hands-on early math"],
+    ["12:00","12:40","Lunch","", "break"],
+    ["12:40","1:20","Rest / Quiet Time","", "break"],
+    ["1:20","2:00","Islamic Studies","Loving Allah through creation, manners, songs"],
+    ["2:00","2:30","Art & Dismissal Prep",""]
+  ]),
+  elem: D([
+    ["7:55","8:15","Assembly — Qur'anic Recitation","The whole school opens the day with the Qur'an","sacred"],
+    ["8:15","9:05","Qur'an & Tajwīd","Memorisation; tajwīd from Grade 3"],
+    ["9:05","9:55","English Language Arts",""],
+    ["9:55","10:45","Mathematics","Grouped by ability, taught to the group's need"],
+    ["10:45","11:00","Recess","", "break"],
+    ["11:00","11:50","Science","The senses are a gift from Allah — and where method begins"],
+    ["11:50","12:30","Lunch","", "break"],
+    ["12:30","12:55","Ṣalāh al-Ẓuhr","Congregational, Grade 2 and above, in the prayer hall","sacred"],
+    ["12:55","1:45","Islamic Studies","Conduct, sīrah, and the meanings of Juzʾ 28–30"],
+    ["1:45","2:35","Arabic",""],
+    ["2:35","3:20","Social Studies / Specials","Fine arts carried inside the core subjects"]
+  ]),
+  mid: D([
+    ["7:55","8:15","Assembly — Qur'anic Recitation","","sacred"],
+    ["8:15","9:10","Period 1 — English Language Arts","English I credit available in Grade 8"],
+    ["9:10","10:05","Period 2 — Mathematics","Algebra I credit available in Grade 8"],
+    ["10:05","11:00","Period 3 — Science","Inquiry first: find the science before the keywords"],
+    ["11:00","11:15","Break","", "break"],
+    ["11:15","12:10","Period 4 — Qur'an & Tajwīd",""],
+    ["12:10","12:50","Lunch","", "break"],
+    ["12:50","1:15","Ṣalāh al-Ẓuhr","Congregational, in the prayer hall","sacred"],
+    ["1:15","2:10","Period 5 — Islamic Studies",""],
+    ["2:10","3:05","Period 6 — Social Studies","Primary sources include the āyāt themselves"],
+    ["3:05","3:45","Period 7 — Arabic / Electives","Newsletter, drama, and science-fair blocks rotate here"]
+  ]),
+  high: D([
+    ["7:55","8:15","Assembly — Qur'anic Recitation","","sacred"],
+    ["8:15","9:15","Period 1 — English",""],
+    ["9:15","10:15","Period 2 — Mathematics",""],
+    ["10:15","11:15","Period 3 — Science","Lab block on rotation"],
+    ["11:15","11:30","Break","", "break"],
+    ["11:30","12:30","Period 4 — Qur'an & Islamic Studies",""],
+    ["12:30","1:05","Lunch","", "break"],
+    ["1:05","1:30","Ṣalāh al-Ẓuhr","Congregational, in the prayer hall","sacred"],
+    ["1:30","2:30","Period 5 — Social Studies",""],
+    ["2:30","3:30","Period 6 — Arabic / Electives",""]
+  ])
+};
+const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday"];
+const KEY = "gsa-schedule-division";
+let div = "elem";
+try { div = localStorage.getItem(KEY) || "elem"; } catch(e){}
+if (!DIVISIONS[div]) div = "elem";
+const jsDay = new Date().getDay();
+const todayIdx = (jsDay >= 1 && jsDay <= 5) ? jsDay - 1 : 0;
+let day = DAYS[todayIdx];
+
+function fridaySchedule(rows){
+  const out = [];
+  for (const r of rows){
+    if (/Ẓuhr/.test(r.what)){
+      out.push({start:"12:50", end:"1:35", what:"Jumuʿah — Khuṭbah & Ṣalāh", note:"Grade 2 and above, in the prayer hall", kind:"sacred"});
+      break;
+    }
+    out.push(r);
+  }
+  out.push({start:"1:35", end:"2:00", what:"Homeroom & Dismissal", note:"Early dismissal on Fridays", kind:""});
+  return out;
+}
+function toMin(t){ let [h,m]=t.split(":").map(Number); if (h < 7) h += 12; return h*60+m; }
+
+const divsEl = document.getElementById("divs");
+Object.entries(DIVISIONS).forEach(([k,v])=>{
+  const b = document.createElement("button");
+  b.innerHTML = v.label + "<small>" + v.sub + "</small>";
+  b.addEventListener("click", ()=>{ div=k; try{localStorage.setItem(KEY,k);}catch(e){} render(); });
+  b.dataset.k = k;
+  divsEl.appendChild(b);
+});
+const daysEl = document.getElementById("days");
+DAYS.forEach(d=>{
+  const b = document.createElement("button");
+  b.textContent = d.slice(0,3);
+  b.setAttribute("role","tab");
+  b.setAttribute("aria-label", d);
+  b.addEventListener("click", ()=>{ day=d; render(); });
+  daysEl.appendChild(b);
+});
+
+function render(){
+  [...divsEl.children].forEach(b => b.setAttribute("aria-pressed", b.dataset.k===div ? "true":"false"));
+  [...daysEl.children].forEach((b,i)=> b.setAttribute("aria-selected", DAYS[i]===day ? "true":"false"));
+  const isFri = day==="Friday";
+  const rows = isFri && div!=="early" ? fridaySchedule(BASE[div]) : BASE[div];
+  document.getElementById("frinote").hidden = !(isFri && div!=="early");
+  const isToday = DAYS[todayIdx]===day && jsDay>=1 && jsDay<=5;
+  document.getElementById("dayhead").textContent = day + " · " + DIVISIONS[div].label;
+  const now = new Date().getHours()*60 + new Date().getMinutes();
+  const el = document.getElementById("sched");
+  el.innerHTML = "";
+  rows.forEach(r=>{
+    const live = isToday && now >= toMin(r.start) && now < toMin(r.end);
+    const rw = document.createElement("div");
+    rw.className = "row" + (r.kind?" "+r.kind:"") + (live?" now":"");
+    rw.innerHTML = '<div class="time">'+r.start+' – '+r.end+'</div>' +
+      '<div><span class="what">'+r.what+'</span>'+(live?'<span class="badge">Now</span>':'')+
+      (r.note?'<div class="note">'+r.note+'</div>':'')+'</div>';
+    el.appendChild(rw);
+  });
+}
+render();
+setInterval(render, 60000);
+</script>
