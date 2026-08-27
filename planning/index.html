@@ -1,0 +1,154 @@
+<title>Planning Bac de Français</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --paper:#FCFBF8; --card:#FFFFFF; --ink:#1E2536; --text:#3C445A; --muted:#8A90A3;
+    --line:#E4E2DB; --accent:#223A5E; --accent-soft:#EAEFF6; --today:#E8B931; --today-soft:#FBF3DC;
+    --done:#2F7D5C; --done-soft:#E5F1EB;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#12161F; --card:#1A202D; --ink:#F0F1F5; --text:#C6CAD6; --muted:#7E8496;
+      --line:#2A3140; --accent:#8FB0DC; --accent-soft:#22304A; --today:#E8B931; --today-soft:#39321C;
+      --done:#5BB08A; --done-soft:#1E3A2E;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12161F; --card:#1A202D; --ink:#F0F1F5; --text:#C6CAD6; --muted:#7E8496;
+    --line:#2A3140; --accent:#8FB0DC; --accent-soft:#22304A; --today:#E8B931; --today-soft:#39321C;
+    --done:#5BB08A; --done-soft:#1E3A2E;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--text);font:400 16px/1.55 "Public Sans",system-ui,sans-serif;}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 16px 56px;}
+  header h1{font:400 34px/1.1 "Instrument Serif",Georgia,serif;color:var(--ink);margin:4px 0 2px;text-wrap:balance;}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 18px;}
+  .progress{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:18px;}
+  .progress .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .progress strong{color:var(--ink);font-weight:600;}
+  .progress .pct{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700;}
+  .bar{height:6px;border-radius:3px;background:var(--accent-soft);margin-top:10px;overflow:hidden;}
+  .bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:3px;transition:width .35s ease;}
+  nav.days{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;position:sticky;top:0;background:var(--paper);z-index:2;-webkit-overflow-scrolling:touch;}
+  nav.days button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--text);
+    border-radius:999px;padding:8px 15px;font:600 14px "Public Sans",sans-serif;cursor:pointer;}
+  nav.days button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper);}
+  nav.days button.is-today:not([aria-selected="true"]){border-color:var(--today);}
+  nav.days button:focus-visible{outline:2px solid var(--today);outline-offset:2px;}
+  .todaytag{display:inline-block;background:var(--today-soft);color:var(--ink);border-radius:6px;
+    font-size:12px;font-weight:600;padding:2px 8px;margin-left:6px;vertical-align:2px;}
+  .session{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:14px;margin-bottom:10px;}
+  .session.done{background:var(--done-soft);border-color:transparent;}
+  .session input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--done);flex:0 0 auto;}
+  .session .t{font-weight:600;color:var(--ink);}
+  .session.done .t{text-decoration:line-through;color:var(--muted);}
+  .session .d{font-size:14px;color:var(--muted);margin-top:2px;}
+  .meta{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .tag{font-size:12px;font-weight:600;letter-spacing:.03em;border-radius:6px;padding:2px 8px;background:var(--accent-soft);color:var(--accent);}
+  .tag.time{background:transparent;border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums;}
+  .empty{color:var(--muted);text-align:center;padding:32px 0;}
+  footer{margin-top:28px;font-size:13px;color:var(--muted);text-align:center;}
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bac de français · Épreuves anticipées</div>
+    <h1>Planning de révision</h1>
+    <p class="sub">Coche chaque séance terminée — ta progression est enregistrée sur ce téléphone.</p>
+  </header>
+
+  <div class="progress">
+    <div class="row"><strong>Cette semaine</strong><span class="pct" id="pct">0&nbsp;%</span></div>
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+
+  <nav class="days" id="days" role="tablist" aria-label="Jours de la semaine"></nav>
+  <section id="list" aria-live="polite"></section>
+
+  <footer>Écrit : commentaire &amp; dissertation · Oral : explication linéaire &amp; entretien</footer>
+</div>
+<script>
+const PLAN = {
+  "Lundi": [
+    {t:"Explication linéaire — texte 1 de ta liste", d:"Relis le texte à voix haute, refais le plan de l'explication en 20 min.", tag:"Oral", time:"45 min"},
+    {t:"Méthode du commentaire : l'introduction", d:"Rédige 2 introductions complètes sur des sujets déjà tombés.", tag:"Écrit", time:"40 min"}
+  ],
+  "Mardi": [
+    {t:"Dissertation : analyse de sujet", d:"3 sujets sur ton œuvre au programme — problématique + plan détaillé, sans rédiger.", tag:"Écrit", time:"50 min"},
+    {t:"Fiche de lecture — œuvre choisie pour l'entretien", d:"Complète ta fiche : thèmes, passages clés, raisons de ton choix.", tag:"Oral", time:"30 min"}
+  ],
+  "Mercredi": [
+    {t:"Explication linéaire — texte 2 de ta liste", d:"Chronomètre-toi : 30 min de préparation, 10 min de passage à voix haute.", tag:"Oral", time:"45 min"},
+    {t:"Grammaire : la question de l'oral", d:"Négation, interrogation, subordonnées — 10 phrases à analyser.", tag:"Grammaire", time:"25 min"}
+  ],
+  "Jeudi": [
+    {t:"Commentaire : un paragraphe parfait", d:"Choisis un extrait, rédige un paragraphe complet : idée, citation, analyse.", tag:"Écrit", time:"40 min"},
+    {t:"Culture littéraire : le parcours associé", d:"Revois les repères du parcours (mouvements, auteurs, contexte).", tag:"Lecture", time:"30 min"}
+  ],
+  "Vendredi": [
+    {t:"Oral blanc : un texte au hasard", d:"Tire un texte de ta liste au sort et passe dans les conditions réelles.", tag:"Oral", time:"50 min"},
+    {t:"Citations à mémoriser", d:"Apprends 5 citations réutilisables en dissertation, une par objet d'étude.", tag:"Écrit", time:"20 min"}
+  ],
+  "Samedi": [
+    {t:"Sujet complet en temps limité", d:"Alterne chaque semaine : commentaire ou dissertation, en 4 h réelles.", tag:"Écrit", time:"4 h"},
+  ],
+  "Dimanche": [
+    {t:"Bilan de la semaine", d:"Reprends ce qui a coincé, replanifie les séances non faites.", tag:"Méthode", time:"20 min"},
+    {t:"Lecture plaisir liée au programme", d:"Un chapitre de l'œuvre au programme ou du parcours associé.", tag:"Lecture", time:"30 min"}
+  ]
+};
+const DAYS = Object.keys(PLAN);
+const KEY = "bac-francais-planning-v1";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e) { state = {}; }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+const todayIdx = (new Date().getDay() + 6) % 7;
+let current = DAYS[todayIdx];
+
+const daysEl = document.getElementById("days");
+DAYS.forEach(day => {
+  const b = document.createElement("button");
+  b.textContent = day;
+  b.setAttribute("role","tab");
+  if (day === DAYS[todayIdx]) b.classList.add("is-today");
+  b.addEventListener("click", () => { current = day; render(); });
+  daysEl.appendChild(b);
+});
+
+function idFor(day,i){ return day + "-" + i; }
+function render(){
+  [...daysEl.children].forEach((b,i)=> b.setAttribute("aria-selected", DAYS[i]===current ? "true":"false"));
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  const heading = document.createElement("h2");
+  heading.style.cssText = "font:400 24px 'Instrument Serif',Georgia,serif;color:var(--ink);margin:6px 0 12px;";
+  heading.innerHTML = current + (DAYS.indexOf(current)===todayIdx ? ' <span class="todaytag">Aujourd’hui</span>' : "");
+  list.appendChild(heading);
+  const sessions = PLAN[current] || [];
+  if (!sessions.length){ list.insertAdjacentHTML("beforeend",'<p class="empty">Repos !</p>'); }
+  sessions.forEach((s,i)=>{
+    const id = idFor(current,i);
+    const done = !!state[id];
+    const el = document.createElement("label");
+    el.className = "session" + (done ? " done":"");
+    el.innerHTML =
+      '<input type="checkbox" '+(done?"checked":"")+' aria-label="Séance terminée">' +
+      '<div><div class="t">'+s.t+'</div><div class="d">'+s.d+'</div>' +
+      '<div class="meta"><span class="tag">'+s.tag+'</span><span class="tag time">'+s.time+'</span></div></div>';
+    el.querySelector("input").addEventListener("change", e=>{
+      state[id] = e.target.checked; if(!e.target.checked) delete state[id];
+      save(); render();
+    });
+    list.appendChild(el);
+  });
+  let total=0, done=0;
+  DAYS.forEach(d => (PLAN[d]||[]).forEach((s,i)=>{ total++; if(state[idFor(d,i)]) done++; }));
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById("pct").textContent = pct + " %";
+  document.getElementById("bar").style.width = pct + "%";
+}
+render();
+</script>
